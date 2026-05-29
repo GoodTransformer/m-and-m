@@ -60,12 +60,12 @@ strong {
   font-weight: 600;
 }
 
-ul,
-ol {
+/* Prose lists only. Scoped to .prose-list so the spacing never leaks into UI
+   lists (nav, timeline, quick actions), which manage their own layout. */
+.prose-list {
   padding-left: 1.1em;
 }
-
-li + li {
+.prose-list li + li {
   margin-top: 0.35em;
 }
 
