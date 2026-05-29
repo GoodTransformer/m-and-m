@@ -20,7 +20,7 @@ export const en: Strings = {
     questions: 'Questions',
     gifts: 'A Note on Gifts',
     story: 'Our Story',
-    today: 'The Essentials',
+    today: 'Essentials',
     menu: 'Menu',
     close: 'Close',
   },
@@ -45,7 +45,7 @@ export const en: Strings = {
     venues: 'The Venues',
     travel: 'Travel & Stay',
     questions: 'Questions',
-    today: 'The Essentials',
+    today: 'Essentials',
   },
 
   home: {
@@ -94,19 +94,19 @@ export const en: Strings = {
       'One afternoon and evening, in two beautiful places. Times are a guide — come a little early, and let the rest carry you.',
     events: [
       {
-        time: '1:30 pm',
+        time: '2:30 pm',
         title: 'Guests arrive',
         venue: 'Magdalen College, Oxford',
         note: 'Through the Porters’ Lodge on the High Street.',
       },
       {
-        time: '2:00 pm',
+        time: '3:00 pm',
         title: 'The ceremony',
         venue: 'Magdalen College Chapel',
-        note: 'Please be seated a little before two.',
+        note: 'Please be seated a little before three.',
       },
       {
-        time: '3:00 pm',
+        time: '4:00 pm',
         title: 'Drinks in the cloisters',
         venue: 'Magdalen College',
         note: 'Champagne, and the long light of afternoon.',
@@ -216,10 +216,6 @@ export const en: Strings = {
         a: 'Black tie, worn happily. Candlelight does the rest. If black tie is not for you, a dark suit or an evening dress will be perfectly at home.',
       },
       {
-        q: 'Can I bring children?',
-        a: 'We love them dearly, but this is an evening for grown-ups. Your invitation will name everyone we are expecting, so you can plan with ease.',
-      },
-      {
         q: 'How do we reply?',
         a: 'Everything you need to reply is on your invitation. (If you cannot find it, send us a note and we will point the way.)',
       },
@@ -233,7 +229,7 @@ export const en: Strings = {
       },
       {
         q: 'When should I arrive?',
-        a: 'A little before two at Magdalen, so you are seated in good time. The chapel doors close for the ceremony, and we would hate for you to miss it.',
+        a: 'A little before three at Magdalen, so you are seated in good time. The chapel doors close for the ceremony, and we would hate for you to miss it.',
       },
       {
         q: 'Is there a colour to avoid?',
@@ -241,7 +237,7 @@ export const en: Strings = {
       },
       {
         q: 'Can I take photographs?',
-        a: 'During the ceremony, please be fully present with us — no phones. Afterward, photograph everything; we would love to see the evening through your eyes.',
+        a: 'Of course — we simply ask that you keep it subtle during the ceremony, so the moment stays unhurried. Afterwards, photograph as much as you like; we would love to see the evening through your eyes.',
       },
     ],
     note: 'Still wondering about something? Write to us — the address is on your invitation.',
@@ -267,10 +263,10 @@ export const en: Strings = {
   },
 
   today: {
-    label: 'The Essentials',
-    title: 'The essentials',
+    label: 'Essentials',
+    title: 'For the day',
     intro: 'Everything you need, in one place. Keep this open in your pocket.',
-    ceremonyTime: '2:00 pm',
+    ceremonyTime: '3:00 pm',
     receptionTime: '6:30 pm',
     ceremonyLabel: 'The ceremony',
     receptionLabel: 'The reception',

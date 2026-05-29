@@ -26,7 +26,7 @@ const places = [
 
 <BaseLayout locale={locale} path="/today" title={t.nav.today}>
   <Chapter label={t.today.label} title={t.today.title} headingLevel="h1" center id="today">
-    <p class="lead center reveal today__intro">{t.today.intro}</p>
+    <p class="lead reveal today__intro">{t.today.intro}</p>
 
     <div class="today-card reveal">
       <p class="today-card__date">{dateLine}</p>
@@ -106,6 +106,8 @@ const places = [
   .today__intro {
     margin-bottom: clamp(2rem, 5vw, 3rem);
     margin-inline: auto;
+    max-width: 34rem;
+    text-align: center;
   }
 
   .today-card {

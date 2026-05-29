@@ -7,14 +7,14 @@ export interface NavItem {
   label: string;
 }
 
-/** Primary navigation (masthead) — compact labels, kept to one elegant line. */
+/** Primary navigation (masthead) — compact labels, kept to one elegant line.
+    Questions intentionally omitted; it lives in the footer. */
 export function mainNav(locale: Locale): NavItem[] {
   const t = getStrings(locale).nav;
   const entries: Array<[string, string]> = [
     ['/the-day', t.weekendShort],
     ['/venues', t.venues],
     ['/travel', t.travelShort],
-    ['/questions', t.questions],
     ['/today', t.today],
   ];
   return entries.map(([path, label]) => ({ path, href: localePath(path, locale), label }));

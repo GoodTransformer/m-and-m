@@ -19,7 +19,7 @@ export const es: Strings = {
     questions: 'Preguntas',
     gifts: 'Sobre los regalos',
     story: 'Nuestra historia',
-    today: 'Lo esencial',
+    today: 'Esencial',
     menu: 'Menú',
     close: 'Cerrar',
   },
@@ -45,7 +45,7 @@ export const es: Strings = {
     venues: 'Los lugares',
     travel: 'Cómo llegar',
     questions: 'Preguntas',
-    today: 'Lo esencial',
+    today: 'Esencial',
   },
 
   home: {
@@ -94,19 +94,19 @@ export const es: Strings = {
       'Una tarde y una noche, en dos lugares hermosos. Los horarios son orientativos: llegue con tiempo y déjese llevar.',
     events: [
       {
-        time: '13:30',
+        time: '14:30',
         title: 'Llegada de los invitados',
         venue: 'Magdalen College, Oxford',
         note: 'Por la conserjería (Porters’ Lodge), en la High Street.',
       },
       {
-        time: '14:00',
+        time: '15:00',
         title: 'La ceremonia',
         venue: 'Capilla de Magdalen College',
-        note: 'Tomen asiento un poco antes de las dos.',
+        note: 'Tomen asiento un poco antes de las tres.',
       },
       {
-        time: '15:00',
+        time: '16:00',
         title: 'Copas en el claustro',
         venue: 'Magdalen College',
         note: 'Champán y la luz larga de la tarde.',
@@ -216,10 +216,6 @@ export const es: Strings = {
         a: 'Etiqueta (black tie), de buena gana; las velas hacen el resto. Si la etiqueta no es lo suyo, un traje oscuro o un vestido de noche encajarán a la perfección.',
       },
       {
-        q: '¿Puedo llevar a los niños?',
-        a: 'Los queremos mucho, pero es una velada para adultos. Su invitación nombrará a quienes esperamos, para que puedan planificar con calma.',
-      },
-      {
         q: '¿Cómo confirmamos?',
         a: 'Todo lo necesario para responder está en su invitación. (Si no lo encuentran, escríbannos y les indicaremos.)',
       },
@@ -233,7 +229,7 @@ export const es: Strings = {
       },
       {
         q: '¿Cuándo debo llegar?',
-        a: 'Un poco antes de las dos en Magdalen, para sentarse con tiempo. Las puertas de la capilla se cierran para la ceremonia y no querríamos que se la perdieran.',
+        a: 'Un poco antes de las tres en Magdalen, para sentarse con tiempo. Las puertas de la capilla se cierran para la ceremonia y no querríamos que se la perdieran.',
       },
       {
         q: '¿Hay algún color que evitar?',
@@ -241,7 +237,7 @@ export const es: Strings = {
       },
       {
         q: '¿Puedo hacer fotos?',
-        a: 'Durante la ceremonia, acompáñennos de verdad: sin teléfonos. Después, fotografíen todo; nos encantaría ver la velada con sus ojos.',
+        a: 'Por supuesto — solo pedimos discreción durante la ceremonia, para que el momento transcurra sin prisa. Después, fotografíen cuanto quieran; nos encantaría ver la velada con sus ojos.',
       },
     ],
     note: '¿Sigue con alguna duda? Escríbannos: la dirección está en su invitación.',
@@ -267,10 +263,10 @@ export const es: Strings = {
   },
 
   today: {
-    label: 'Lo esencial',
-    title: 'Lo esencial',
+    label: 'Esencial',
+    title: 'Para el día',
     intro: 'Todo lo que necesita, en un solo lugar. Llévelo en el bolsillo.',
-    ceremonyTime: '14:00',
+    ceremonyTime: '15:00',
     receptionTime: '18:30',
     ceremonyLabel: 'La ceremonia',
     receptionLabel: 'La celebración',
