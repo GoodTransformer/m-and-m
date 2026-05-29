@@ -71,7 +71,9 @@ const venueRoles: Record<string, string> = {
     <div class="interlude reveal">
       <h2 class="interlude__title">{t.home.weekend.title}</h2>
       <p class="interlude__intro lead">{t.home.weekend.intro}</p>
-      <Rule ornament tone="deep" class="interlude__rule" />
+      <div class="interlude__rule">
+        <Rule ornament tone="deep" />
+      </div>
       <Button href={localePath('/the-day', locale)} variant="ghost" class="interlude__cta">
         {t.home.weekend.cta}
       </Button>
@@ -185,7 +187,8 @@ const venueRoles: Record<string, string> = {
     max-width: 34ch;
   }
   .interlude__rule {
-    margin: clamp(1.75rem, 4vw, 2.5rem) auto;
+    /* extra breathing room above (copy → rule) and below (rule → button) */
+    margin: clamp(2.75rem, 6vw, 4rem) auto clamp(2.5rem, 5vw, 3.25rem);
     max-width: 8rem;
   }
 

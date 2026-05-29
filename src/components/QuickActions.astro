@@ -14,14 +14,22 @@ interface Props {
 const { items, ariaLabel, class: cls = '' } = Astro.props;
 ---
 
-<nav class:list={['quick', cls]} aria-label={ariaLabel}>
+<nav class:list={['quick', cls]} aria-label={ariaLabel} style={`--quick-cols:${items.length}`}>
   <ul class="quick__list">
     {
       items.map((item) => (
         <li class="quick__item">
           <a class="quick__link" href={item.href}>
             <span class="quick__label">{item.label}</span>
-            <span class="quick__arrow" aria-hidden="true">→</span>
+            <svg
+              class="quick__arrow"
+              viewBox="0 0 28 10"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <line x1="0.5" y1="5" x2="23" y2="5" />
+              <polyline points="19,1 23,5 19,9" />
+            </svg>
           </a>
         </li>
       ))
@@ -66,10 +74,19 @@ const { items, ariaLabel, class: cls = '' } = Astro.props;
     font-weight: 450;
     line-height: 1.1;
   }
+  /* Refined hairline arrow — thin, brass, lengthens slightly on hover. */
   .quick__arrow {
+    width: 28px;
+    height: 10px;
     color: var(--oxidised-bronze);
-    transition: transform 0.3s var(--ease-soft), color 0.3s var(--ease-soft);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
     flex: none;
+    overflow: visible;
+    transition: color 0.3s var(--ease-soft), transform 0.3s var(--ease-soft);
   }
   @media (hover: hover) {
     .quick__link:hover {
@@ -78,8 +95,8 @@ const { items, ariaLabel, class: cls = '' } = Astro.props;
       transform: translateY(-2px);
     }
     .quick__link:hover .quick__arrow {
-      transform: translateX(3px);
       color: var(--accent);
+      transform: translateX(4px);
     }
   }
 

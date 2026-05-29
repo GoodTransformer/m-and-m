@@ -257,9 +257,12 @@ export const en: Strings = {
     label: 'Our Story',
     title: 'A few words',
     body: [
-      'We met one ordinary evening that turned out to be anything but, and have been writing the same long, happy chapter ever since.',
-      'Oxford is where much of it was written, so it felt right to begin the next part here — among old stone, good friends, and a great deal of candlelight.',
+      'We met in Norwich, and found before long that we had wandered the same imagined worlds for years — a shared love of literature and fantasy, and a fond, faintly competitive devotion to Terry Pratchett.',
+      'Our families spoke that same language of books and the worlds folded inside them; what began as common ground has become the long, happy chapter we have been writing ever since.',
+      'Michael spent his university years at Magdalen, so to be married there is a quiet kind of full circle — old stone, good friends, and a great deal of candlelight.',
+      'We look forward, more than we can say, to your witnessing the beginning of our new story together.',
     ],
+    caption: 'A tale of our own — bells, books, and a little magic.',
   },
 
   today: {

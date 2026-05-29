@@ -1,9 +1,8 @@
 ---
-import { type Locale } from '../../lib/i18n';
+import { type Locale, asset } from '../../lib/i18n';
 import { getStrings } from '../../i18n';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Chapter from '../Chapter.astro';
-import ImagePlaceholder from '../ImagePlaceholder.astro';
 
 interface Props {
   locale: Locale;
@@ -15,9 +14,15 @@ const t = getStrings(locale);
 <BaseLayout locale={locale} path="/our-story" title={t.nav.story}>
   <Chapter label={t.story.label} title={t.story.title} headingLevel="h1" center id="story">
     <div class="story">
-      <div class="story__media reveal">
-        <ImagePlaceholder ratio="4/5" label="Mari & Michael, a portrait" plate="III" />
-      </div>
+      <figure class="story__media reveal">
+        <img
+          src={asset('images/our-story.jpg')}
+          alt="A storybook cover, “Bells Bells!”, with Mari & Michael drawn among bell-ringers, wizards and a dragon above an Oxford square"
+          loading="eager"
+          decoding="async"
+        />
+        <figcaption>{t.story.caption}</figcaption>
+      </figure>
       <div class="story__prose reveal">
         {t.story.body.map((p, i) => <p class={i === 0 ? 'dropcap' : undefined}>{p}</p>)}
       </div>
@@ -35,8 +40,26 @@ const t = getStrings(locale);
     margin-inline: auto;
   }
   .story__media {
-    max-width: 18rem;
+    margin: 0;
+    max-width: 22rem;
     margin-inline: auto;
+  }
+  .story__media img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--bg-card-edge);
+    background: var(--bg-card);
+    box-shadow: 0 1.25rem 2.5rem -1.25rem rgba(0, 0, 0, 0.5);
+  }
+  .story__media figcaption {
+    margin-top: 0.85rem;
+    font-size: var(--fs-fine, 0.8rem);
+    font-style: italic;
+    text-align: center;
+    color: var(--ink-soft, inherit);
+    opacity: 0.8;
   }
   .story__prose p {
     font-size: var(--fs-lead);

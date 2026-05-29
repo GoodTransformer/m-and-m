@@ -124,6 +124,7 @@ export interface Strings {
     label: string;
     title: string;
     body: string[];
+    caption: string;
   };
 
   today: {
