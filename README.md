@@ -55,7 +55,7 @@ desktop crops; prefer AVIF/WebP; keep the same aspect ratio).
 
 Placeholders currently in the site — replace before sharing widely:
 
-- [ ] **Wedding date** (using *Saturday, 12 September 2026*) — `data/site.ts`
+- [x] **Wedding date** — Wednesday, 23 September 2026 (confirmed; midweek, so no "weekend" copy)
 - [ ] **Ceremony & reception times** (2:00 pm / 6:30 pm) — `i18n/*.ts` (`weekend`, `today`)
 - [ ] **Running order** of the day — `i18n/*.ts` (`weekend.events`)
 - [ ] **Dress code** wording (currently *Black tie*) — `i18n/*.ts`

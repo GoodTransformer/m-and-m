@@ -11,15 +11,15 @@ export const es: Strings = {
 
   nav: {
     home: 'Bienvenida',
-    weekend: 'El fin de semana',
-    weekendShort: 'Fin de semana',
+    weekend: 'El día',
+    weekendShort: 'El día',
     venues: 'Lugares',
     travel: 'Cómo llegar',
     travelShort: 'Cómo llegar',
     questions: 'Preguntas',
     gifts: 'Sobre los regalos',
     story: 'Nuestra historia',
-    today: 'El día',
+    today: 'Ese día',
     menu: 'Menú',
     close: 'Cerrar',
   },
@@ -34,14 +34,14 @@ export const es: Strings = {
   hero: {
     eyebrow: 'Una invitación',
     invitation:
-      'Acompáñennos en Oxford y Bicester para un fin de semana de boda a la luz de las velas.',
+      'Acompáñennos en Oxford y Bicester para una boda de septiembre a la luz de las velas.',
     venueLine: 'Magdalen College, Oxford · Weston Manor, Bicester',
-    scrollHint: 'El fin de semana',
+    scrollHint: 'El día',
   },
 
   quick: {
     title: 'Encuentre su camino',
-    weekend: 'El fin de semana',
+    weekend: 'El día',
     venues: 'Los lugares',
     travel: 'Cómo llegar',
     questions: 'Preguntas',
@@ -51,18 +51,18 @@ export const es: Strings = {
   home: {
     welcome: {
       label: 'Bienvenida',
-      title: 'Un fin de semana a la luz de las velas',
+      title: 'Una velada a la luz de las velas',
       body: [
         'Reuniremos a las personas que queremos en Oxford y, un poco más al norte, en Weston Manor, para una larga velada de velas, cena y baile.',
         'Aquí encontrará todo lo necesario: cuándo llegar, adónde ir y cómo dar con nosotros. Léalo con calma; el día sabrá esperar.',
       ],
     },
     weekend: {
-      label: 'El fin de semana',
+      label: 'El día',
       title: 'Dos lugares, una velada',
       intro:
         'La ceremonia en Magdalen y, después, cena y baile en Weston Manor. Así transcurre el día, hora a hora.',
-      cta: 'Ver el fin de semana',
+      cta: 'Ver el día',
     },
     venues: {
       label: 'Los lugares',
@@ -88,7 +88,7 @@ export const es: Strings = {
   },
 
   weekend: {
-    label: 'El fin de semana',
+    label: 'El día',
     title: 'Cómo transcurre el día',
     intro:
       'Una tarde y una noche, en dos lugares hermosos. Los horarios son orientativos: llegue con tiempo y déjese llevar.',
@@ -179,7 +179,7 @@ export const es: Strings = {
       },
       {
         title: 'Entre los dos',
-        body: 'Tras las copas en Magdalen iremos hacia el norte, a Weston Manor: unos veinticinco minutos. Los detalles del transporte se confirmarán más cerca del día.',
+        body: 'Tras las copas en Magdalen iremos hacia el norte, a Weston Manor: unos veinticinco minutos, algo más en la hora punta de la tarde. Los detalles del transporte se confirmarán más cerca del día.',
       },
     ],
     stayTitle: 'Dónde dormir',

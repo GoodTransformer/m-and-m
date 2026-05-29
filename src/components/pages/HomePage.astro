@@ -18,7 +18,7 @@ const { locale } = Astro.props;
 const t = getStrings(locale);
 
 const quickItems = [
-  { href: localePath('/the-weekend', locale), label: t.quick.weekend },
+  { href: localePath('/the-day', locale), label: t.quick.weekend },
   { href: localePath('/venues', locale), label: t.quick.venues },
   { href: localePath('/travel', locale), label: t.quick.travel },
   { href: localePath('/questions', locale), label: t.quick.questions },
@@ -61,7 +61,7 @@ const venueRoles: Record<string, string> = {
     </div>
   </Chapter>
 
-  <!-- II · The Weekend — dramatic dark interlude -->
+  <!-- II · The Day — dramatic dark interlude -->
   <Chapter
     label={t.home.weekend.label}
     numeral="II"
@@ -73,7 +73,7 @@ const venueRoles: Record<string, string> = {
       <h2 class="interlude__title">{t.home.weekend.title}</h2>
       <p class="interlude__intro lead">{t.home.weekend.intro}</p>
       <Rule ornament tone="deep" class="interlude__rule" />
-      <Button href={localePath('/the-weekend', locale)} variant="ghost" class="interlude__cta">
+      <Button href={localePath('/the-day', locale)} variant="ghost" class="interlude__cta">
         {t.home.weekend.cta}
       </Button>
     </div>

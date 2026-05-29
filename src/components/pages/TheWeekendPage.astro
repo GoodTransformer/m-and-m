@@ -12,7 +12,7 @@ const { locale } = Astro.props;
 const t = getStrings(locale);
 ---
 
-<BaseLayout locale={locale} path="/the-weekend" title={t.nav.weekend}>
+<BaseLayout locale={locale} path="/the-day" title={t.nav.weekend}>
   <Chapter
     label={t.weekend.label}
     numeral="II"

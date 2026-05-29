@@ -24,8 +24,7 @@ export interface Venue {
 
 export const SITE = {
   couple: { a: 'Mari', b: 'Michael', monogram: 'M & M' },
-  /** 23 September. YEAR (2026) UNCONFIRMED — 23 Sep 2026 is a Wednesday;
-      23 Sep is a Saturday in 2028. Confirm the year with the couple. */
+  /** Confirmed: Wednesday, 23 September 2026 (a midweek wedding — no "weekend" copy). */
   date: '2026-09-23',
   placeLine: 'Oxford & Bicester',
   /** Quiet sticky utility bar on mobile — switch on in the final weeks. */

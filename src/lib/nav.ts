@@ -11,7 +11,7 @@ export interface NavItem {
 export function mainNav(locale: Locale): NavItem[] {
   const t = getStrings(locale).nav;
   const entries: Array<[string, string]> = [
-    ['/the-weekend', t.weekendShort],
+    ['/the-day', t.weekendShort],
     ['/venues', t.venues],
     ['/travel', t.travelShort],
     ['/questions', t.questions],
@@ -25,7 +25,7 @@ export function footerNav(locale: Locale): NavItem[] {
   const t = getStrings(locale).nav;
   const entries: Array<[string, string]> = [
     ['/', t.home],
-    ['/the-weekend', t.weekend],
+    ['/the-day', t.weekend],
     ['/venues', t.venues],
     ['/travel', t.travel],
     ['/questions', t.questions],

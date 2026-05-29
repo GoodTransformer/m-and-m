@@ -12,8 +12,8 @@ export const en: Strings = {
 
   nav: {
     home: 'Welcome',
-    weekend: 'The Weekend',
-    weekendShort: 'The Weekend',
+    weekend: 'The Day',
+    weekendShort: 'The Day',
     venues: 'Venues',
     travel: 'Travel & Stay',
     travelShort: 'Travel',
@@ -34,14 +34,14 @@ export const en: Strings = {
 
   hero: {
     eyebrow: 'An invitation',
-    invitation: 'Please join us in Oxford and Bicester for a candlelit wedding weekend.',
+    invitation: 'Please join us in Oxford and Bicester for a candlelit September wedding.',
     venueLine: 'Magdalen College, Oxford · Weston Manor, Bicester',
-    scrollHint: 'The weekend',
+    scrollHint: 'The day',
   },
 
   quick: {
     title: 'Find your way',
-    weekend: 'The Weekend',
+    weekend: 'The Day',
     venues: 'The Venues',
     travel: 'Travel & Stay',
     questions: 'Questions',
@@ -51,18 +51,18 @@ export const en: Strings = {
   home: {
     welcome: {
       label: 'Welcome',
-      title: 'A candlelit weekend',
+      title: 'A candlelit evening',
       body: [
         'We are gathering the people we love in Oxford, and then a little way north at Weston Manor, for one long evening of candlelight, dinner and dancing.',
         'Everything you need is here — when to arrive, where to go, and how to find us. Read it at your leisure; the day will keep.',
       ],
     },
     weekend: {
-      label: 'The Weekend',
+      label: 'The Day',
       title: 'Two places, one evening',
       intro:
         'The ceremony at Magdalen, then dinner and dancing at Weston Manor. Here is how the day unfolds, hour by hour.',
-      cta: 'See the weekend',
+      cta: 'See the day',
     },
     venues: {
       label: 'The Venues',
@@ -88,7 +88,7 @@ export const en: Strings = {
   },
 
   weekend: {
-    label: 'The Weekend',
+    label: 'The Day',
     title: 'How the day unfolds',
     intro:
       'One afternoon and evening, in two beautiful places. Times are a guide — come a little early, and let the rest carry you.',
@@ -179,7 +179,7 @@ export const en: Strings = {
       },
       {
         title: 'Between the two',
-        body: 'After drinks at Magdalen we will make our way north to Weston Manor — roughly twenty-five minutes. Final transport details will be confirmed closer to the day.',
+        body: 'After drinks at Magdalen we make our way north to Weston Manor — roughly twenty-five minutes, a little more at the midweek evening rush. Final transport details will be confirmed closer to the day.',
       },
     ],
     stayTitle: 'Where to stay',
