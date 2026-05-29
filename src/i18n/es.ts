@@ -12,8 +12,10 @@ export const es: Strings = {
   nav: {
     home: 'Bienvenida',
     weekend: 'El fin de semana',
+    weekendShort: 'Fin de semana',
     venues: 'Lugares',
     travel: 'Cómo llegar',
+    travelShort: 'Cómo llegar',
     questions: 'Preguntas',
     gifts: 'Sobre los regalos',
     story: 'Nuestra historia',
@@ -113,7 +115,7 @@ export const es: Strings = {
         time: '17:00',
         title: 'Hacia Weston Manor',
         venue: 'Oxford → Bicester',
-        note: 'Unos cuarenta minutos por carretera.',
+        note: 'Unos veinticinco minutos por carretera.',
       },
       {
         time: '18:30',
@@ -141,7 +143,7 @@ export const es: Strings = {
     label: 'Los lugares',
     title: 'Dos lugares por descubrir',
     intro:
-      'Nos casamos en Oxford y celebramos cerca de Bicester. Cada ficha trae la dirección, un mapa al instante y un cuadro de what3words para la puerta exacta.',
+      'Nos casamos en Oxford y celebramos cerca de Bicester. Cada ficha trae la dirección, un mapa al instante y cómo llegar a la puerta exacta.',
     roleCeremony: 'La ceremonia',
     roleReception: 'La celebración',
     arrivalLabel: 'Llegada',
@@ -151,13 +153,13 @@ export const es: Strings = {
       blurb:
         'Una capilla de piedra y velas en la High Street, donde el parque de los ciervos se encuentra con el río. Aquí nos casaremos, entre los claustros, al caer la tarde.',
       arrival: 'Entren por la conserjería (Porters’ Lodge), en la High Street; alguien les indicará.',
-      parking: 'El College no tiene aparcamiento: usen el park-and-ride de Oxford o un taxi.',
+      parking: 'El College no tiene aparcamiento: usen el Park & Ride de Oxford (Thornhill es el más cercano) o un taxi.',
     },
     weston: {
       blurb:
         'Un señorío con paneles de madera al norte de Oxford, cálido y de luz tenue, con mesas largas y viejos jardines. La cena y el baile nos llevarán entrada la noche.',
-      arrival: 'La entrada está en Northampton Road; sigan las indicaciones por la verja hasta la casa.',
-      parking: 'Hay amplio aparcamiento, y los coches pueden quedarse durante la noche con cuidado.',
+      arrival: 'La entrada está en Northampton Road, a dos millas de la salida 9 de la M40; sigan las indicaciones hasta la casa.',
+      parking: 'Hay aparcamiento propio en el señorío.',
     },
   },
 
@@ -165,19 +167,19 @@ export const es: Strings = {
     label: 'Cómo llegar',
     title: 'Llegar, y descansar',
     intro:
-      'Oxford y Weston-on-the-Green distan unos cuarenta minutos. Esta es la forma más sencilla de llegar a cada uno, y algunos buenos lugares donde descansar.',
+      'Oxford y Weston-on-the-Green distan unos veinticinco minutos, unas siete millas. Esta es la forma más sencilla de llegar a cada uno, y algunos buenos lugares donde descansar.',
     sections: [
       {
         title: 'En coche',
-        body: 'Ambos lugares son fáciles por carretera. Weston Manor está a dos millas de la salida 9 de la M40, junto a la A34. Para Magdalen, el park-and-ride de Oxford evita el tráfico.',
+        body: 'Ambos lugares son fáciles por carretera. Weston Manor está a dos millas de la salida 9 de la M40, junto a la A34. Magdalen no tiene aparcamiento: el Park & Ride de Oxford (Thornhill es el más cercano) evita el tráfico.',
       },
       {
         title: 'En tren',
-        body: 'La estación de Oxford tiene buenas conexiones desde Londres (Paddington y Marylebone), a diez minutos de Magdalen en taxi. Bicester es la parada más cercana a Weston Manor.',
+        body: 'La estación de Oxford tiene buenas conexiones desde Londres (Paddington y Marylebone), a diez minutos de Magdalen en taxi. Bicester Village es la parada más cercana a Weston Manor.',
       },
       {
         title: 'Entre los dos',
-        body: 'Tras las copas en Magdalen iremos hacia el norte, a Weston Manor: unos cuarenta minutos. Los detalles del transporte se confirmarán más cerca del día.',
+        body: 'Tras las copas en Magdalen iremos hacia el norte, a Weston Manor: unos veinticinco minutos. Los detalles del transporte se confirmarán más cerca del día.',
       },
     ],
     stayTitle: 'Dónde dormir',
@@ -223,7 +225,7 @@ export const es: Strings = {
       },
       {
         q: '¿Dónde aparco?',
-        a: 'En Magdalen no hay aparcamiento: usen el park-and-ride de Oxford o un taxi. Weston Manor tiene espacio de sobra, y los coches pueden quedarse de noche.',
+        a: 'En Magdalen no hay aparcamiento: usen el Park & Ride de Oxford (Thornhill es el más cercano) o un taxi. Weston Manor tiene aparcamiento propio.',
       },
       {
         q: '¿Hará frío?',

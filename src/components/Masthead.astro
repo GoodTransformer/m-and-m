@@ -132,14 +132,15 @@ const homeHref = localePath('/', locale);
   }
   .site-nav__link {
     font-family: var(--font-body);
-    font-size: 0.84rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     text-decoration: none;
     color: var(--text);
     padding-block: 0.4rem;
     white-space: nowrap;
+    position: relative;
     transition: color 0.25s var(--ease-soft);
   }
   .site-nav__link:hover {
@@ -147,7 +148,16 @@ const homeHref = localePath('/', locale);
   }
   .site-nav__link[aria-current='page'] {
     color: var(--accent);
-    border-bottom: 1px solid var(--accent);
+  }
+  /* underline that doesn't affect line height/alignment */
+  .site-nav__link[aria-current='page']::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.05rem;
+    height: 1px;
+    background: var(--accent);
   }
 
   .menu-btn {
@@ -157,8 +167,8 @@ const homeHref = localePath('/', locale);
     display: none;
   }
 
-  /* ---- Mobile ---- */
-  @media (max-width: 47.99rem) {
+  /* ---- Mobile & small laptop: use the overlay menu instead of a cramped bar ---- */
+  @media (max-width: 59.99rem) {
     .menu-btn {
       display: inline-flex;
       align-items: center;

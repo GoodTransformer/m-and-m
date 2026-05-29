@@ -7,8 +7,10 @@
 export interface NavStrings {
   home: string;
   weekend: string;
+  weekendShort: string; // compact label for the masthead bar
   venues: string;
   travel: string;
+  travelShort: string; // compact label for the masthead bar
   questions: string;
   gifts: string;
   story: string;

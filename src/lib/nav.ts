@@ -7,15 +7,14 @@ export interface NavItem {
   label: string;
 }
 
-/** Primary navigation (masthead). */
+/** Primary navigation (masthead) — compact labels, kept to one elegant line. */
 export function mainNav(locale: Locale): NavItem[] {
   const t = getStrings(locale).nav;
   const entries: Array<[string, string]> = [
-    ['/the-weekend', t.weekend],
+    ['/the-weekend', t.weekendShort],
     ['/venues', t.venues],
-    ['/travel', t.travel],
+    ['/travel', t.travelShort],
     ['/questions', t.questions],
-    ['/gifts', t.gifts],
     ['/today', t.today],
   ];
   return entries.map(([path, label]) => ({ path, href: localePath(path, locale), label }));

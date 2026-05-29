@@ -13,8 +13,10 @@ export const en: Strings = {
   nav: {
     home: 'Welcome',
     weekend: 'The Weekend',
+    weekendShort: 'The Weekend',
     venues: 'Venues',
     travel: 'Travel & Stay',
+    travelShort: 'Travel',
     questions: 'Questions',
     gifts: 'A Note on Gifts',
     story: 'Our Story',
@@ -113,7 +115,7 @@ export const en: Strings = {
         time: '5:00 pm',
         title: 'Onward to Weston Manor',
         venue: 'Oxford → Bicester',
-        note: 'Around forty minutes by road.',
+        note: 'About twenty-five minutes by road.',
       },
       {
         time: '6:30 pm',
@@ -141,7 +143,7 @@ export const en: Strings = {
     label: 'The Venues',
     title: 'Two places to find',
     intro:
-      'We marry in Oxford and celebrate near Bicester. Each card has the address, a one-tap map, and a what3words square for the exact door.',
+      'We marry in Oxford and celebrate near Bicester. Each card has the address, a one-tap map, and directions to the exact door.',
     roleCeremony: 'The ceremony',
     roleReception: 'The reception',
     arrivalLabel: 'Arrival',
@@ -151,13 +153,13 @@ export const en: Strings = {
       blurb:
         'A chapel of stone and candlelight on the High Street, where the deer park meets the river. We will marry here, among the cloisters, in the late afternoon.',
       arrival: 'Enter through the Porters’ Lodge on the High Street; someone will point the way.',
-      parking: 'There is no parking at the College — please use the Oxford park-and-ride or a taxi.',
+      parking: 'There is no parking at the College — use the Oxford Park & Ride (Thornhill is closest) or a taxi.',
     },
     weston: {
       blurb:
         'A panelled manor a little north of Oxford, warm and low-lit, with long tables and old gardens. Dinner and dancing will carry us well into the night.',
-      arrival: 'The drive is off Northampton Road; follow signs through the gates to the house.',
-      parking: 'There is ample parking on site, and cars may be left overnight with care.',
+      arrival: 'The drive is off Northampton Road, two miles from M40 Junction 9; follow signs to the house.',
+      parking: 'There is parking on site at the manor.',
     },
   },
 
@@ -165,19 +167,19 @@ export const en: Strings = {
     label: 'Travel & Stay',
     title: 'Getting there, and resting',
     intro:
-      'Oxford and Weston-on-the-Green sit about forty minutes apart. Here is the simplest way to each, and a few good places to rest.',
+      'Oxford and Weston-on-the-Green sit about twenty-five minutes apart, some seven miles. Here is the simplest way to each, and a few good places to rest.',
     sections: [
       {
         title: 'By car',
-        body: 'Both places are easy by road. Weston Manor is two miles from Junction 9 of the M40, off the A34. For Magdalen, the Oxford park-and-ride spares the city traffic.',
+        body: 'Both places are easy by road. Weston Manor is two miles from Junction 9 of the M40, off the A34. Magdalen has no parking — the Oxford Park & Ride (Thornhill is closest) spares the city traffic.',
       },
       {
         title: 'By train',
-        body: 'Oxford station is well served from London Paddington and Marylebone, ten minutes from Magdalen by taxi. Bicester is the nearest stop for Weston Manor.',
+        body: 'Oxford station is well served from London Paddington and Marylebone, ten minutes from Magdalen by taxi. Bicester Village is the nearest stop for Weston Manor.',
       },
       {
         title: 'Between the two',
-        body: 'After drinks at Magdalen we will make our way north to Weston Manor — roughly forty minutes. Final transport details will be confirmed closer to the day.',
+        body: 'After drinks at Magdalen we will make our way north to Weston Manor — roughly twenty-five minutes. Final transport details will be confirmed closer to the day.',
       },
     ],
     stayTitle: 'Where to stay',
@@ -223,7 +225,7 @@ export const en: Strings = {
       },
       {
         q: 'Where do I park?',
-        a: 'There is no parking at Magdalen — use the Oxford park-and-ride or a taxi. Weston Manor has plenty of space, and cars may stay overnight.',
+        a: 'There is no parking at Magdalen — use the Oxford Park & Ride (Thornhill is closest) or a taxi. Weston Manor has parking on site.',
       },
       {
         q: 'Will it be cold?',

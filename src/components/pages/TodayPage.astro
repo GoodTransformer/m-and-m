@@ -3,7 +3,7 @@ import { type Locale } from '../../lib/i18n';
 import { getStrings } from '../../i18n';
 import { venueById, ON_DAY_CONTACT, TAXIS, SITE } from '../../data/site';
 import { formatDateLong, capitalise } from '../../lib/format';
-import { googleDirections, what3wordsUrl, what3wordsDisplay } from '../../lib/maps';
+import { googleDirections, what3wordsUrl } from '../../lib/maps';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Chapter from '../Chapter.astro';
 
@@ -43,20 +43,23 @@ const places = [
             <div class="row__actions">
               <a
                 class="row__btn"
-                href={googleDirections(p.venue.coords)}
+                href={googleDirections(`${p.venue.name}, ${p.venue.postcode}`)}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 {t.ui.directions} <span aria-hidden="true">↗</span>
               </a>
-              <a
-                class="row__w3w"
-                href={what3wordsUrl(p.venue.what3words)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span class="row__slashes" aria-hidden="true">///</span>{p.venue.what3words}
-              </a>
+              {p.venue.what3words && (
+                <a
+                  class="row__w3w"
+                  href={what3wordsUrl(p.venue.what3words)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span class="row__slashes" aria-hidden="true">///</span>
+                  {p.venue.what3words}
+                </a>
+              )}
             </div>
           </section>
         ))

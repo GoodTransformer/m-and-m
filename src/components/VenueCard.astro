@@ -1,6 +1,6 @@
 ---
 import type { Venue } from '../data/site';
-import { googleDirections, appleMaps, what3wordsUrl, what3wordsDisplay } from '../lib/maps';
+import { googleDirections, appleMaps, what3wordsUrl } from '../lib/maps';
 import ImagePlaceholder from './ImagePlaceholder.astro';
 import Button from './Button.astro';
 
@@ -30,6 +30,8 @@ const {
   plate,
   flip = false,
 } = Astro.props;
+
+const dest = `${venue.name}, ${venue.postcode}`;
 ---
 
 <article class:list={['venue', flip && 'venue--flip', 'reveal']}>
@@ -61,21 +63,21 @@ const {
     </dl>
 
     <div class="venue__actions">
-      <Button href={googleDirections(venue.coords)} external variant="primary">{ui.directions}</Button>
-      <Button href={appleMaps(venue.coords, venue.name)} external variant="quiet">{ui.appleMaps}</Button>
+      <Button href={googleDirections(dest)} external variant="primary">{ui.directions}</Button>
+      <Button href={appleMaps(dest)} external variant="quiet">{ui.appleMaps}</Button>
     </div>
 
-    <a
-      class="w3w"
-      href={what3wordsUrl(venue.what3words)}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      <span class="w3w__label">{ui.what3words}</span>
-      <span class="w3w__addr">
-        <span class="w3w__slashes" aria-hidden="true">///</span>{venue.what3words}
-      </span>
-    </a>
+    {
+      venue.what3words && (
+        <a class="w3w" href={what3wordsUrl(venue.what3words)} target="_blank" rel="noopener noreferrer">
+          <span class="w3w__label">{ui.what3words}</span>
+          <span class="w3w__addr">
+            <span class="w3w__slashes" aria-hidden="true">///</span>
+            {venue.what3words}
+          </span>
+        </a>
+      )
+    }
   </div>
 </article>
 

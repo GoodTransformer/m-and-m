@@ -22,8 +22,9 @@ export interface Venue {
 
 export const SITE = {
   couple: { a: 'Mari', b: 'Michael', monogram: 'M & M' },
-  /** PLACEHOLDER date — a candlelit early-autumn Saturday. Confirm. */
-  date: '2026-09-12',
+  /** 23 September. YEAR (2026) UNCONFIRMED — 23 Sep 2026 is a Wednesday;
+      23 Sep is a Saturday in 2028. Confirm the year with the couple. */
+  date: '2026-09-23',
   placeLine: 'Oxford & Bicester',
   /** Quiet sticky utility bar on mobile — switch on in the final weeks. */
   showUtilityBar: false,
@@ -38,7 +39,7 @@ export const VENUES: Venue[] = [
     addressLines: ['Magdalen College', 'High Street'],
     postcode: 'Oxford OX1 4AU',
     coords: { lat: 51.7519, lng: -1.2464 }, // approx — confirm entrance
-    what3words: 'spells.tested.behave', // PLACEHOLDER — confirm
+    what3words: '', // not published by the college — confirm the Porters' Lodge square
   },
   {
     id: 'weston-manor',
@@ -48,7 +49,7 @@ export const VENUES: Venue[] = [
     addressLines: ['Weston Manor', 'Northampton Road', 'Weston-on-the-Green'],
     postcode: 'Bicester OX25 3QL',
     coords: { lat: 51.8966, lng: -1.2299 }, // approx — confirm entrance
-    what3words: 'manor.candle.evening', // PLACEHOLDER — confirm
+    what3words: 'luxury.royal.executive', // official, from themanorweston.com/contact
     tel: '+441869350621',
   },
 ];

@@ -8,19 +8,18 @@ export interface LatLng {
   lng: number;
 }
 
-/** Universal Google Maps directions link to a destination. Opens the app where installed. */
-export function googleDirections({ lat, lng }: LatLng): string {
-  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+/**
+ * Universal Google Maps directions link. `query` should be a precise place
+ * string (e.g. "Weston Manor, Bicester OX25 3QL") so Maps resolves the exact
+ * business rather than an approximate coordinate. Cross-platform, no API key.
+ */
+export function googleDirections(query: string): string {
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
 }
 
-/** Universal Google Maps "drop a pin / search" link. */
-export function googlePlace({ lat, lng }: LatLng): string {
-  return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-}
-
-/** Apple Maps link (nice for iOS guests). */
-export function appleMaps({ lat, lng }: LatLng, name: string): string {
-  return `https://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(name)}`;
+/** Apple Maps search link (nice for iOS guests). */
+export function appleMaps(query: string): string {
+  return `https://maps.apple.com/?q=${encodeURIComponent(query)}`;
 }
 
 /** what3words destination URL. `words` is a dotted triple, e.g. "filled.count.soap". */

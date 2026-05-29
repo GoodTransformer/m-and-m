@@ -8,11 +8,14 @@ const INTL_LOCALE: Record<Locale, string> = {
   es: 'es-ES',
 };
 
-/** "Saturday, 12 September 2026" / "sábado, 12 de septiembre de 2026" */
+/**
+ * "23 September 2026" / "23 de septiembre de 2026".
+ * Weekday is intentionally omitted until the wedding year (and therefore the
+ * weekday) is confirmed — see README "Details to confirm".
+ */
 export function formatDateLong(iso: string, locale: Locale): string {
   const d = new Date(`${iso}T12:00:00`);
   return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
-    weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
