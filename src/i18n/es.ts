@@ -258,7 +258,6 @@ export const es: Strings = {
     title: 'Unas palabras',
     body: [
       'Nos conocimos en Norwich y pronto descubrimos que llevábamos años recorriendo los mismos mundos imaginarios: un amor compartido por la literatura y la fantasía, y una devoción tierna, y algo competitiva, por Terry Pratchett.',
-      'Nuestras familias hablaban ese mismo idioma de libros y de los mundos que guardan dentro; lo que empezó como un terreno común se ha vuelto el capítulo largo y feliz que escribimos desde entonces.',
       'Michael pasó sus años de universidad en Magdalen, así que casarnos allí es una especie de círculo que se cierra: piedra antigua, buenos amigos y mucha luz de velas.',
       'Esperamos, más de lo que podemos decir, que nos acompañen para presenciar el comienzo de nuestra nueva historia juntos.',
     ],
