@@ -1,0 +1,47 @@
+---
+// A real photograph, framed to match the site's "plate" aesthetic. Holds its
+// aspect ratio (zero layout shift), covers, and lazy-loads by default. No colour
+// treatment — the photo shows as-is.
+import { asset } from '../lib/i18n';
+
+interface Props {
+  src: string; // public-relative, e.g. "images/magdalen.jpg"
+  alt: string;
+  width: number;
+  height: number;
+  ratio?: string;
+  eager?: boolean;
+  class?: string;
+}
+const { src, alt, width, height, ratio = '3/2', eager = false, class: cls = '' } = Astro.props;
+---
+
+<figure class:list={['frame', cls]} style={`--ratio:${ratio}`}>
+  <img
+    src={asset(src)}
+    alt={alt}
+    width={width}
+    height={height}
+    loading={eager ? 'eager' : 'lazy'}
+    decoding="async"
+  />
+</figure>
+
+<style>
+  .frame {
+    margin: 0;
+    width: 100%;
+    aspect-ratio: var(--ratio);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg-card);
+    border: 1px solid var(--bg-card-edge);
+  }
+  .frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+</style>

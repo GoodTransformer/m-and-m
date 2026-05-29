@@ -18,6 +18,8 @@ export interface Venue {
   /** Dotted what3words triple, e.g. "filled.count.soap". PLACEHOLDER — confirm the square at each entrance. */
   what3words: string;
   tel?: string;
+  /** Official venue photograph (public-relative path). */
+  image?: { src: string; alt: string; width: number; height: number };
 }
 
 export const SITE = {
@@ -40,6 +42,12 @@ export const VENUES: Venue[] = [
     postcode: 'Oxford OX1 4AU',
     coords: { lat: 51.7519, lng: -1.2464 }, // approx — confirm entrance
     what3words: '', // not published by the college — confirm the Porters' Lodge square
+    image: {
+      src: 'images/magdalen.jpg',
+      alt: 'Magdalen College tower seen through a stone window, Oxford',
+      width: 1600,
+      height: 800,
+    },
   },
   {
     id: 'weston-manor',
@@ -51,6 +59,12 @@ export const VENUES: Venue[] = [
     coords: { lat: 51.8966, lng: -1.2299 }, // approx — confirm entrance
     what3words: 'luxury.royal.executive', // official, from themanorweston.com/contact
     tel: '+441869350621',
+    image: {
+      src: 'images/weston-manor.jpg',
+      alt: 'The honey-stone front of Weston Manor',
+      width: 1440,
+      height: 700,
+    },
   },
 ];
 

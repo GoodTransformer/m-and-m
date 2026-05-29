@@ -65,8 +65,20 @@ Placeholders currently in the site — replace before sharing widely:
 - [ ] **Accommodation** recommendations — `i18n/*.ts` (`travel.stays`; add `url` to link out)
 - [ ] **Gifts** wording / any fund link — `i18n/*.ts` (`gifts`)
 - [ ] **Our Story** copy — `i18n/*.ts` (`story`)
-- [ ] **Real photographs** — replace `ImagePlaceholder`s
+- [ ] **Photographs** — venue shots are the venues' *own* official images, used for the
+      preview (see Image credits). Ideally replace with the couple's own photos, or
+      confirm permission, before any public/printed use. `Our Story` portrait is still a placeholder.
 - [ ] Verify venue **coordinates** (entrances) — `data/site.ts`
+
+## Image credits
+
+Venue photographs are the venues' own promotional images, used here for the private
+preview. Replace with licensed or couple-owned photos before wider use.
+- **Magdalen College** (`public/images/magdalen.jpg`) — magd.ox.ac.uk (© John Cairns).
+- **Weston Manor** (`public/images/weston-manor.jpg`, `weston-garden.webp`) — themanorweston.com.
+
+Regenerate the social-share card after changing the date/photos:
+`Google Chrome --headless --screenshot=public/og.png --window-size=1200,630 scripts/og.html`
 
 > **RSVP** is intentionally not on this site — the couple use a separate RSVP
 > system. (If you ever want a discreet outbound "RSVP" link to it, it can be

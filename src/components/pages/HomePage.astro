@@ -9,7 +9,7 @@ import QuickActions from '../QuickActions.astro';
 import Card from '../Card.astro';
 import Button from '../Button.astro';
 import Rule from '../Rule.astro';
-import ImagePlaceholder from '../ImagePlaceholder.astro';
+import Frame from '../Frame.astro';
 
 interface Props {
   locale: Locale;
@@ -50,10 +50,12 @@ const venueRoles: Record<string, string> = {
         {t.home.welcome.body.map((p) => <p class="welcome__p">{p}</p>)}
       </div>
       <div class="welcome__media reveal">
-        <ImagePlaceholder
-          ratio="4/5"
-          label="Magdalen cloisters, late afternoon light"
-          plate="I"
+        <Frame
+          src="images/magdalen.jpg"
+          alt="Magdalen College, Oxford"
+          width={1600}
+          height={800}
+          ratio="3/2"
         />
       </div>
     </div>
@@ -98,7 +100,13 @@ const venueRoles: Record<string, string> = {
   <Chapter label={t.home.travel.label} numeral="IV" id="travel-preview">
     <div class="split">
       <div class="split__media reveal">
-        <ImagePlaceholder ratio="3/2" label="The road north to Weston Manor" plate="II" />
+        <Frame
+          src="images/weston-garden.webp"
+          alt="Weston Manor across its gardens"
+          width={800}
+          height={534}
+          ratio="3/2"
+        />
       </div>
       <div class="split__text reveal">
         <h2>{t.home.travel.title}</h2>
@@ -151,7 +159,7 @@ const venueRoles: Record<string, string> = {
     max-width: 46ch;
   }
   .welcome__media {
-    max-width: 22rem;
+    max-width: none;
     margin-inline: auto;
   }
   @media (min-width: 48rem) {

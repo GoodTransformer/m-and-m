@@ -2,6 +2,7 @@
 import type { Venue } from '../data/site';
 import { googleDirections, appleMaps, what3wordsUrl } from '../lib/maps';
 import ImagePlaceholder from './ImagePlaceholder.astro';
+import Frame from './Frame.astro';
 import Button from './Button.astro';
 
 interface Props {
@@ -36,7 +37,19 @@ const dest = `${venue.name}, ${venue.postcode}`;
 
 <article class:list={['venue', flip && 'venue--flip', 'reveal']}>
   <div class="venue__media">
-    <ImagePlaceholder ratio="4/5" label={`${venue.name} — ${plate}`} plate={flip ? 'II' : 'I'} />
+    {
+      venue.image ? (
+        <Frame
+          src={venue.image.src}
+          alt={venue.image.alt}
+          width={venue.image.width}
+          height={venue.image.height}
+          ratio="3/2"
+        />
+      ) : (
+        <ImagePlaceholder ratio="4/5" label={`${venue.name} — ${plate}`} plate={flip ? 'II' : 'I'} />
+      )
+    }
   </div>
 
   <div class="venue__body">
@@ -87,7 +100,7 @@ const dest = `${venue.name}, ${venue.postcode}`;
     gap: clamp(1.5rem, 4vw, 2.5rem);
   }
   .venue__media {
-    max-width: 22rem;
+    max-width: none;
   }
   .venue__name {
     font-size: clamp(1.6rem, 4vw, 2.25rem);
