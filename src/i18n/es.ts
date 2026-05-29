@@ -175,7 +175,7 @@ export const es: Strings = {
       },
       {
         title: 'En tren',
-        body: 'La estación de Oxford tiene buenas conexiones desde Londres (Paddington y Marylebone), a diez minutos de Magdalen en taxi. Bicester Village es la parada más cercana a Weston Manor.',
+        body: 'La estación de Oxford tiene buenas conexiones desde Londres (Paddington y Marylebone): alrededor de una hora desde la capital y a diez minutos de Magdalen en taxi. Para Weston Manor, Bicester Village es la parada más cercana, con servicios frecuentes desde London Marylebone.',
       },
       {
         title: 'Entre los dos',

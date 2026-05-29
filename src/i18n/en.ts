@@ -175,7 +175,7 @@ export const en: Strings = {
       },
       {
         title: 'By train',
-        body: 'Oxford station is well served from London Paddington and Marylebone, ten minutes from Magdalen by taxi. Bicester Village is the nearest stop for Weston Manor.',
+        body: 'Oxford station is well served from London Paddington and Marylebone — about an hour from the capital, ten minutes from Magdalen by taxi. For Weston Manor, Bicester Village is the nearest stop, with regular services from London Marylebone.',
       },
       {
         title: 'Between the two',
