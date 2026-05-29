@@ -1,0 +1,107 @@
+---
+import { type Locale } from '../../lib/i18n';
+import { getStrings } from '../../i18n';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Chapter from '../Chapter.astro';
+import Card from '../Card.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = getStrings(locale);
+---
+
+<BaseLayout locale={locale} path="/travel" title={t.nav.travel}>
+  <Chapter
+    label={t.travel.label}
+    numeral="IV"
+    title={t.travel.title}
+    headingLevel="h1"
+    id="travel"
+  >
+    <p class="lead measure reveal travel__intro">{t.travel.intro}</p>
+
+    <div class="travel__grid">
+      {
+        t.travel.sections.map((s) => (
+          <div class="travel__sec reveal">
+            <h2 class="h3 travel__sec-title">{s.title}</h2>
+            <p>{s.body}</p>
+          </div>
+        ))
+      }
+    </div>
+  </Chapter>
+
+  <Chapter title={t.travel.stayTitle} variant="alt" id="stay">
+    <p class="lead measure reveal stay__intro">{t.travel.stayIntro}</p>
+
+    <div class="stay__grid">
+      {
+        t.travel.stays.map((s) => (
+          <Card class="stay reveal">
+            <p class="chapter-label">{s.distance}</p>
+            <h3 class="stay__name">{s.name}</h3>
+            <p class="muted stay__note">{s.note}</p>
+            {s.url && (
+              <a class="stay__link" href={s.url} target="_blank" rel="noopener noreferrer">
+                {t.ui.readMore} <span aria-hidden="true">↗</span>
+              </a>
+            )}
+          </Card>
+        ))
+      }
+    </div>
+  </Chapter>
+</BaseLayout>
+
+<style>
+  .travel__intro,
+  .stay__intro {
+    margin-bottom: clamp(2.25rem, 6vw, 3.5rem);
+  }
+
+  .travel__grid {
+    display: grid;
+    gap: clamp(1.75rem, 4vw, 2.5rem);
+  }
+  .travel__sec-title {
+    margin-bottom: 0.6rem;
+    color: var(--text-display);
+  }
+  .travel__sec p {
+    max-width: 42ch;
+  }
+
+  .stay__grid {
+    display: grid;
+    gap: clamp(1rem, 3vw, 1.5rem);
+  }
+  .stay__name {
+    margin-top: 0.4rem;
+    font-size: clamp(1.3rem, 3vw, 1.6rem);
+  }
+  .stay__note {
+    margin-top: 0.5rem;
+  }
+  .stay__link {
+    display: inline-block;
+    margin-top: 0.9rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--accent);
+  }
+
+  @media (min-width: 48rem) {
+    .travel__grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(2rem, 4vw, 3rem);
+    }
+    .stay__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

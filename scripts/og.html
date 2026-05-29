@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=EB+Garamond:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * { margin: 0; box-sizing: border-box; }
+      html, body { width: 1200px; height: 630px; }
+      body {
+        background: #f2e8d8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'EB Garamond', Georgia, serif;
+        color: #24140f;
+      }
+      .frame {
+        position: absolute;
+        inset: 28px;
+        border: 2px solid #a47a48;
+      }
+      .card { text-align: center; padding: 0 60px; }
+      .eyebrow {
+        font-size: 28px;
+        letter-spacing: 0.34em;
+        text-transform: uppercase;
+        color: #6c4f36;
+        font-weight: 600;
+        margin-bottom: 30px;
+        padding-left: 0.34em;
+      }
+      .names {
+        font-family: 'Fraunces', Georgia, serif;
+        font-weight: 500;
+        font-size: 124px;
+        line-height: 1;
+        color: #2b1b14;
+      }
+      .names .amp { font-style: italic; font-weight: 400; color: #6c4f36; }
+      .date {
+        font-family: 'Fraunces', Georgia, serif;
+        font-style: italic;
+        font-weight: 400;
+        font-size: 42px;
+        margin-top: 30px;
+      }
+      .venues {
+        font-size: 24px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #6c4f36;
+        margin-top: 34px;
+        padding-left: 0.18em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame"></div>
+    <div class="card">
+      <div class="eyebrow">An Invitation</div>
+      <div class="names">Mari <span class="amp">&amp;</span> Michael</div>
+      <div class="date">Saturday, 12 September 2026</div>
+      <div class="venues">Magdalen College, Oxford · Weston Manor, Bicester</div>
+    </div>
+  </body>
+</html>

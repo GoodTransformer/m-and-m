@@ -1,0 +1,216 @@
+---
+import { type Locale } from '../../lib/i18n';
+import { getStrings } from '../../i18n';
+import { venueById, ON_DAY_CONTACT, TAXIS, SITE } from '../../data/site';
+import { formatDateLong, capitalise } from '../../lib/format';
+import { googleDirections, what3wordsUrl, what3wordsDisplay } from '../../lib/maps';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Chapter from '../Chapter.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = getStrings(locale);
+
+const magdalen = venueById('magdalen')!;
+const weston = venueById('weston-manor')!;
+const dateLine = capitalise(formatDateLong(SITE.date, locale));
+const telHref = (n: string) => `tel:${n.replace(/\s+/g, '')}`;
+
+const places = [
+  { label: t.today.ceremonyLabel, time: t.today.ceremonyTime, venue: magdalen },
+  { label: t.today.receptionLabel, time: t.today.receptionTime, venue: weston },
+];
+---
+
+<BaseLayout locale={locale} path="/today" title={t.nav.today}>
+  <Chapter label={t.today.label} title={t.today.title} headingLevel="h1" center id="today">
+    <p class="lead center reveal today__intro">{t.today.intro}</p>
+
+    <div class="today-card reveal">
+      <p class="today-card__date">{dateLine}</p>
+
+      {
+        places.map((p) => (
+          <section class="row">
+            <p class="chapter-label">{p.label}</p>
+            <p class="row__time">{p.time}</p>
+            <p class="row__venue">{p.venue.name}</p>
+            <p class="row__addr muted">
+              {p.venue.addressLines.join(', ')}, {p.venue.postcode}
+            </p>
+            <div class="row__actions">
+              <a
+                class="row__btn"
+                href={googleDirections(p.venue.coords)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t.ui.directions} <span aria-hidden="true">↗</span>
+              </a>
+              <a
+                class="row__w3w"
+                href={what3wordsUrl(p.venue.what3words)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span class="row__slashes" aria-hidden="true">///</span>{p.venue.what3words}
+              </a>
+            </div>
+          </section>
+        ))
+      }
+
+      <section class="row">
+        <p class="chapter-label">{t.today.dressLabel}</p>
+        <p class="row__plain">{t.today.dress}</p>
+      </section>
+
+      <section class="row">
+        <p class="chapter-label">{t.today.contactLabel}</p>
+        <p class="row__plain">
+          <a class="row__tel" href={telHref(ON_DAY_CONTACT.tel)}>{ON_DAY_CONTACT.name}</a>
+        </p>
+      </section>
+
+      <section class="row">
+        <p class="chapter-label">{t.today.taxisLabel}</p>
+        <ul class="row__list">
+          {
+            TAXIS.map((taxi) => (
+              <li>
+                <a class="row__tel" href={telHref(taxi.tel)}>
+                  {taxi.name} <span class="muted">· {taxi.tel}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="row">
+        <p class="chapter-label">{t.today.weatherLabel}</p>
+        <p class="row__plain">{t.today.weather}</p>
+      </section>
+
+      <p class="today-card__closing">{t.today.closing}</p>
+    </div>
+  </Chapter>
+</BaseLayout>
+
+<style>
+  .today__intro {
+    margin-bottom: clamp(2rem, 5vw, 3rem);
+    margin-inline: auto;
+  }
+
+  .today-card {
+    max-width: 34rem;
+    margin-inline: auto;
+    text-align: left;
+    background: var(--bg-card);
+    border: 1px solid var(--bg-card-edge);
+    border-radius: var(--radius-lg);
+    padding: clamp(1.5rem, 5vw, 2.5rem);
+    box-shadow: var(--shadow-soft);
+  }
+  .today-card__date {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.3rem, 4vw, 1.7rem);
+    text-align: center;
+    color: var(--text-display);
+    padding-bottom: clamp(1.25rem, 4vw, 1.75rem);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .row {
+    padding-block: clamp(1rem, 3.5vw, 1.4rem);
+    border-bottom: 1px solid var(--rule);
+  }
+  .row .chapter-label {
+    margin-bottom: 0.5rem;
+  }
+  .row__time {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 460;
+    color: var(--accent-wine);
+    line-height: 1;
+  }
+  .row__venue {
+    margin-top: 0.35rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  .row__addr {
+    margin-top: 0.2rem;
+    font-size: 0.92rem;
+  }
+  .row__plain {
+    font-size: 1.05rem;
+  }
+
+  .row__actions {
+    margin-top: 0.85rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+  }
+  .row__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--accent-text);
+    background: var(--accent);
+    padding: 0.55rem 1rem;
+    border-radius: var(--radius);
+  }
+  .row__btn:hover {
+    background: var(--accent-hover);
+  }
+  .row__w3w {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    text-decoration: none;
+    color: var(--text);
+  }
+  .row__slashes {
+    color: var(--oxblood);
+    font-weight: 600;
+  }
+  .row__w3w:hover {
+    color: var(--accent);
+  }
+
+  .row__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+  .row__tel {
+    text-decoration: none;
+    color: var(--text);
+    font-size: 1.02rem;
+  }
+  .row__tel:hover {
+    color: var(--accent);
+  }
+
+  .today-card__closing {
+    margin-top: clamp(1.25rem, 4vw, 1.75rem);
+    text-align: center;
+    font-family: var(--font-display);
+    font-style: italic;
+    color: var(--text-muted);
+  }
+</style>

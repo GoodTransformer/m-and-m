@@ -1,0 +1,122 @@
+---
+import { type Locale } from '../lib/i18n';
+import { getStrings } from '../i18n';
+import { footerNav } from '../lib/nav';
+import { SITE } from '../data/site';
+import { formatDateLong, capitalise } from '../lib/format';
+import LanguageToggle from './LanguageToggle.astro';
+import Rule from './Rule.astro';
+
+interface Props {
+  locale: Locale;
+  path: string;
+}
+const { locale, path } = Astro.props;
+const t = getStrings(locale);
+const nav = footerNav(locale);
+const dateLine = capitalise(formatDateLong(SITE.date, locale));
+---
+
+<footer class="footer">
+  <div class="container">
+    <Rule ornament class="footer__rule" />
+
+    <p class="footer__mono">Mari <span class="amp">&amp;</span> Michael</p>
+    <p class="footer__date muted">{dateLine} · {SITE.placeLine}</p>
+
+    <nav class="footer__nav" aria-label="Footer">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} aria-current={path === item.path ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="footer__meta">
+      <LanguageToggle locale={locale} path={path} />
+      <a class="footer__top" href="#top">{t.footer.backToTop} ↑</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    flex: none;
+    padding-block: clamp(3rem, 7vw, 5rem) clamp(2rem, 5vw, 3rem);
+    text-align: center;
+  }
+  .footer__rule {
+    margin-bottom: clamp(2rem, 5vw, 3rem);
+  }
+  .footer__mono {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 4vw, 2.1rem);
+    font-weight: 440;
+    color: var(--text-display);
+  }
+  .footer__mono .amp {
+    color: var(--oxidised-bronze);
+    font-style: italic;
+  }
+  .footer__date {
+    margin-top: 0.5rem;
+    font-size: 0.92rem;
+    letter-spacing: 0.02em;
+  }
+
+  .footer__nav {
+    margin-top: clamp(1.75rem, 4vw, 2.5rem);
+  }
+  .footer__nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
+  }
+  .footer__nav a {
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--text-muted);
+    transition: color 0.25s var(--ease-soft);
+  }
+  .footer__nav a:hover,
+  .footer__nav a[aria-current='page'] {
+    color: var(--accent);
+  }
+
+  .footer__meta {
+    margin-top: clamp(2rem, 5vw, 3rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .footer__top {
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--text-muted);
+  }
+  .footer__top:hover {
+    color: var(--accent);
+  }
+
+  @media (min-width: 48rem) {
+    .footer__meta {
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  }
+</style>

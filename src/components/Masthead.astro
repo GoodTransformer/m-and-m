@@ -1,0 +1,261 @@
+---
+import { localePath, type Locale } from '../lib/i18n';
+import { getStrings } from '../i18n';
+import { mainNav } from '../lib/nav';
+import LanguageToggle from './LanguageToggle.astro';
+
+interface Props {
+  locale: Locale;
+  path: string;
+}
+const { locale, path } = Astro.props;
+const t = getStrings(locale);
+const nav = mainNav(locale);
+const homeHref = localePath('/', locale);
+---
+
+<header class="masthead" id="top">
+  <div class="masthead__bar container">
+    <a class="wordmark" href={homeHref} aria-label={`Mari & Michael — ${t.nav.home}`}>
+      Mari <span class="amp">&amp;</span> Michael
+    </a>
+
+    <div class="masthead__right">
+      <nav id="site-nav" class="site-nav" data-open="false" aria-label="Primary">
+        <ul class="site-nav__list">
+          {
+            nav.map((item) => (
+              <li>
+                <a
+                  class="site-nav__link"
+                  href={item.href}
+                  aria-current={path === item.path ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="masthead__lang">
+        <LanguageToggle locale={locale} path={path} />
+      </div>
+
+      <button
+        class="menu-btn"
+        type="button"
+        aria-expanded="false"
+        aria-controls="site-nav"
+      >
+        <span class="menu-btn__bars" aria-hidden="true"></span>
+        <span class="menu-btn__open">{t.nav.menu}</span>
+        <span class="menu-btn__close">{t.nav.close}</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('.menu-btn');
+  const nav = document.getElementById('site-nav');
+  if (btn && nav) {
+    const setOpen = (open: boolean) => {
+      btn.setAttribute('aria-expanded', String(open));
+      nav.dataset.open = String(open);
+      document.documentElement.classList.toggle('nav-open', open);
+      if (open) {
+        const first = nav.querySelector<HTMLAnchorElement>('a');
+        first?.focus();
+      }
+    };
+    btn.addEventListener('click', () => setOpen(btn.getAttribute('aria-expanded') !== 'true'));
+    nav.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) setOpen(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && btn.getAttribute('aria-expanded') === 'true') {
+        setOpen(false);
+        btn.focus();
+      }
+    });
+  }
+</script>
+
+<style>
+  .masthead {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    /* NB: no backdrop-filter/transform here — it would make the fixed mobile
+       nav overlay anchor to the masthead instead of the viewport. */
+    background: var(--bg);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .masthead__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 3.75rem;
+    padding-block: 0.65rem;
+  }
+
+  .wordmark {
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 1.6vw, 1.4rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wordmark);
+    color: var(--text-display);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .wordmark .amp {
+    color: var(--oxidised-bronze);
+  }
+
+  .masthead__right {
+    display: flex;
+    align-items: center;
+    gap: clamp(1rem, 2.5vw, 2rem);
+  }
+
+  /* ---- Desktop nav (inline) ---- */
+  .site-nav__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: clamp(1rem, 2vw, 1.75rem);
+  }
+  .site-nav__link {
+    font-family: var(--font-body);
+    font-size: 0.84rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--text);
+    padding-block: 0.4rem;
+    white-space: nowrap;
+    transition: color 0.25s var(--ease-soft);
+  }
+  .site-nav__link:hover {
+    color: var(--accent);
+  }
+  .site-nav__link[aria-current='page'] {
+    color: var(--accent);
+    border-bottom: 1px solid var(--accent);
+  }
+
+  .menu-btn {
+    display: none;
+  }
+  .menu-btn__close {
+    display: none;
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 47.99rem) {
+    .menu-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text);
+      padding: 0.4rem 0;
+    }
+    .menu-btn__bars,
+    .menu-btn__bars::before,
+    .menu-btn__bars::after {
+      content: '';
+      display: block;
+      width: 20px;
+      height: 1.5px;
+      background: var(--text);
+      transition: transform 0.3s var(--ease-soft), opacity 0.2s var(--ease-soft);
+    }
+    .menu-btn__bars {
+      position: relative;
+    }
+    .menu-btn__bars::before {
+      position: absolute;
+      top: -6px;
+    }
+    .menu-btn__bars::after {
+      position: absolute;
+      top: 6px;
+    }
+    .menu-btn[aria-expanded='true'] .menu-btn__bars {
+      background: transparent;
+    }
+    .menu-btn[aria-expanded='true'] .menu-btn__bars::before {
+      transform: translateY(6px) rotate(45deg);
+    }
+    .menu-btn[aria-expanded='true'] .menu-btn__bars::after {
+      transform: translateY(-6px) rotate(-45deg);
+    }
+    .menu-btn[aria-expanded='true'] .menu-btn__open {
+      display: none;
+    }
+    .menu-btn[aria-expanded='true'] .menu-btn__close {
+      display: inline;
+    }
+
+    .site-nav {
+      position: fixed;
+      inset: 3.75rem 0 0 0;
+      background: var(--bg);
+      padding: clamp(1.5rem, 6vw, 3rem) var(--gutter) 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2rem;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: opacity 0.35s var(--ease-soft), transform 0.35s var(--ease-soft), visibility 0.35s;
+      overflow-y: auto;
+    }
+    .site-nav[data-open='true'] {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+    .site-nav__list {
+      flex-direction: column;
+      gap: 0;
+      align-items: center;
+    }
+    .site-nav__list li {
+      width: 100%;
+      text-align: center;
+      border-bottom: 1px solid var(--rule);
+    }
+    .site-nav__list li:first-child {
+      border-top: 1px solid var(--rule);
+    }
+    .site-nav__link {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 440;
+      text-transform: none;
+      letter-spacing: 0.01em;
+      padding: 1rem 0;
+    }
+    .site-nav__link[aria-current='page'] {
+      border-bottom: 0;
+      font-style: italic;
+    }
+  }
+</style>

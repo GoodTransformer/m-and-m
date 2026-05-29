@@ -1,0 +1,40 @@
+---
+import { type Locale } from '../../lib/i18n';
+import { getStrings } from '../../i18n';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Chapter from '../Chapter.astro';
+import WeekendTimeline from '../WeekendTimeline.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = getStrings(locale);
+---
+
+<BaseLayout locale={locale} path="/the-weekend" title={t.nav.weekend}>
+  <Chapter
+    label={t.weekend.label}
+    numeral="II"
+    title={t.weekend.title}
+    headingLevel="h1"
+    id="weekend"
+  >
+    <p class="lead measure reveal weekend__intro">{t.weekend.intro}</p>
+    <div class="weekend__timeline reveal">
+      <WeekendTimeline events={t.weekend.events} />
+    </div>
+    <p class="muted reveal weekend__closing">{t.weekend.closing}</p>
+  </Chapter>
+</BaseLayout>
+
+<style>
+  .weekend__intro {
+    margin-bottom: clamp(2.25rem, 6vw, 3.5rem);
+  }
+  .weekend__closing {
+    margin-top: clamp(1.5rem, 4vw, 2.5rem);
+    font-style: italic;
+    max-width: 40ch;
+  }
+</style>

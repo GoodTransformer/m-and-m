@@ -1,0 +1,53 @@
+---
+// A fine brass hairline divider, optionally with a restrained centre ornament
+// (a small lozenge — never a book/quill motif).
+interface Props {
+  ornament?: boolean;
+  tone?: 'light' | 'deep';
+  class?: string;
+}
+const { ornament = false, tone = 'light', class: cls = '' } = Astro.props;
+---
+
+<div class:list={['rule', `rule--${tone}`, ornament && 'rule--ornament', cls]} role="separator">
+  {ornament && <span class="rule__dot" aria-hidden="true"></span>}
+</div>
+
+<style>
+  .rule {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 1px;
+    background: var(--rule);
+    border: 0;
+  }
+  .rule--deep {
+    background: var(--rule-on-deep);
+  }
+  .rule--ornament {
+    background: transparent;
+    height: auto;
+    gap: 0;
+  }
+  .rule--ornament::before,
+  .rule--ornament::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+  .rule--ornament.rule--deep::before,
+  .rule--ornament.rule--deep::after {
+    background: var(--rule-on-deep);
+  }
+  .rule__dot {
+    width: 6px;
+    height: 6px;
+    margin: 0 0.9rem;
+    transform: rotate(45deg);
+    background: var(--metal);
+    flex: none;
+  }
+</style>

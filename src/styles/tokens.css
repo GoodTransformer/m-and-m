@@ -1,0 +1,115 @@
+/* ============================================================
+   Design tokens — translated from the Wedding Brand Identity Guide.
+   Rule of the palette: depth first, glow second, softness third.
+   ============================================================ */
+
+:root {
+  /* ---- Raw palette (exact hex from the guide) ---- */
+  /* Grounds & glow (warm bases) */
+  --candle-ivory: #f2e8d8;   /* main neutral / paper      */
+  --old-parchment: #d8c7a8;  /* stationery / menus        */
+  --champagne-silk: #cbb891; /* glow / table accents      */
+  --aged-linen: #bfae96;     /* table linen / texture     */
+
+  /* Depth & atmosphere */
+  --espresso: #24140f;       /* shadow / typography       */
+  --dark-walnut: #2b1b14;    /* venue depth / old-world   */
+  --deep-ivy: #172519;       /* greenery / foliage        */
+  --moss-green: #4a5036;     /* botanical support         */
+  --oxidised-bronze: #6c4f36;/* antique metal             */
+  --antique-brass: #a47a48;  /* candelabra / subtle marks */
+
+  /* Romantic drama (controlled) */
+  --oxblood: #5b1215;        /* romantic drama / details  */
+  --burgundy-wine: #6e1c28;  /* floral depth / wine tone  */
+  --deep-peony: #9e1f2f;     /* feature floral / drama    */
+
+  /* Softness & the wink (very sparing) */
+  --faded-rose: #b77b80;     /* soft accent only          */
+  --vintage-cake: #e8a8b8;   /* playful cake accent       */
+  --cherry-piping: #c6414e;  /* witty retro accent        */
+
+  /* ---- Semantic tokens ---- */
+  --bg: var(--candle-ivory);
+  --bg-alt: var(--old-parchment);
+  --bg-glow: var(--champagne-silk);
+  --bg-card: color-mix(in srgb, var(--old-parchment) 55%, var(--candle-ivory));
+  --bg-card-edge: color-mix(in srgb, var(--oxidised-bronze) 28%, transparent);
+  --bg-deep: var(--dark-walnut);
+  --bg-deep-2: var(--espresso);
+
+  --text: var(--espresso);
+  --text-display: var(--dark-walnut);
+  --text-utility: var(--deep-ivy);
+  --text-muted: color-mix(in srgb, var(--espresso) 74%, var(--old-parchment));
+  --text-on-deep: var(--candle-ivory);
+  --text-muted-on-deep: color-mix(in srgb, var(--candle-ivory) 68%, var(--dark-walnut));
+
+  --rule: color-mix(in srgb, var(--oxidised-bronze) 42%, transparent);
+  --rule-strong: var(--oxidised-bronze);
+  --rule-on-deep: color-mix(in srgb, var(--antique-brass) 70%, transparent);
+  --metal: var(--antique-brass);
+
+  --accent: var(--oxblood);
+  --accent-hover: color-mix(in srgb, var(--oxblood) 84%, #000);
+  --accent-wine: var(--burgundy-wine);
+  --accent-text: var(--candle-ivory);
+
+  --wink: var(--cherry-piping);
+  --wink-soft: var(--vintage-cake);
+
+  --focus: var(--antique-brass);
+
+  /* ---- Spacing scale (4px base) ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  --section-y: clamp(3.5rem, 9vw, 8rem);
+  --gutter: clamp(1.25rem, 5vw, 3rem);
+
+  /* ---- Measure & widths ---- */
+  --measure: 64ch;
+  --measure-narrow: 42ch;
+  --maxw: 72rem;
+  --maxw-wide: 80rem;
+  --maxw-prose: 38rem;
+
+  /* ---- Typography ---- */
+  --font-display: 'Fraunces Variable', 'Fraunces', 'Hoefler Text', Georgia, 'Times New Roman', serif;
+  --font-body: 'EB Garamond Variable', 'EB Garamond', Garamond, 'Hoefler Text', Georgia, serif;
+
+  --fs-display: clamp(2.6rem, 8.5vw, 4.75rem);
+  --fs-h1: clamp(2rem, 6vw, 3rem);
+  --fs-h2: clamp(1.5rem, 4.5vw, 2.25rem);
+  --fs-h3: clamp(1.25rem, 3vw, 1.5rem);
+  --fs-lead: clamp(1.2rem, 2.4vw, 1.5rem);
+  --fs-body: clamp(1.0625rem, 0.55vw + 0.95rem, 1.1875rem);
+  --fs-small: 0.9rem;
+  --fs-label: 0.78rem;
+
+  --lh-body: 1.62;
+  --lh-tight: 1.12;
+  --tracking-label: 0.2em;
+  --tracking-wordmark: 0.04em;
+
+  /* ---- Misc ---- */
+  --radius: 2px;
+  --radius-lg: 5px;
+  --hairline: 1px;
+  --shadow-soft:
+    0 1px 2px color-mix(in srgb, var(--espresso) 9%, transparent),
+    0 10px 34px color-mix(in srgb, var(--espresso) 8%, transparent);
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+}

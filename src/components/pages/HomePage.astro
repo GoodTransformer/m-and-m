@@ -1,0 +1,249 @@
+---
+import { localePath, type Locale } from '../../lib/i18n';
+import { getStrings } from '../../i18n';
+import { VENUES } from '../../data/site';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../Hero.astro';
+import Chapter from '../Chapter.astro';
+import QuickActions from '../QuickActions.astro';
+import Card from '../Card.astro';
+import Button from '../Button.astro';
+import Rule from '../Rule.astro';
+import ImagePlaceholder from '../ImagePlaceholder.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = getStrings(locale);
+
+const quickItems = [
+  { href: localePath('/the-weekend', locale), label: t.quick.weekend },
+  { href: localePath('/venues', locale), label: t.quick.venues },
+  { href: localePath('/travel', locale), label: t.quick.travel },
+  { href: localePath('/questions', locale), label: t.quick.questions },
+  { href: localePath('/today', locale), label: t.quick.today },
+];
+
+const venueRoles: Record<string, string> = {
+  ceremony: t.venues.roleCeremony,
+  reception: t.venues.roleReception,
+};
+---
+
+<BaseLayout locale={locale} path="/">
+  <Hero locale={locale} />
+
+  <!-- Quick actions — kept high, reachable in one tap -->
+  <section class="find" id="find" aria-labelledby="find-title">
+    <div class="container">
+      <p class="chapter-label find__label" id="find-title">{t.quick.title}</p>
+      <QuickActions items={quickItems} ariaLabel={t.quick.title} class="find__actions" />
+    </div>
+  </section>
+
+  <!-- I · Welcome -->
+  <Chapter label={t.home.welcome.label} numeral="I" id="welcome" class="welcome">
+    <div class="welcome__grid">
+      <div class="welcome__text reveal">
+        <h2 class="welcome__title">{t.home.welcome.title}</h2>
+        {t.home.welcome.body.map((p) => <p class="welcome__p">{p}</p>)}
+      </div>
+      <div class="welcome__media reveal">
+        <ImagePlaceholder
+          ratio="4/5"
+          label="Magdalen cloisters, late afternoon light"
+          plate="I"
+        />
+      </div>
+    </div>
+  </Chapter>
+
+  <!-- II · The Weekend — dramatic dark interlude -->
+  <Chapter
+    label={t.home.weekend.label}
+    numeral="II"
+    variant="deep"
+    center
+    id="weekend-preview"
+  >
+    <div class="interlude reveal">
+      <h2 class="interlude__title">{t.home.weekend.title}</h2>
+      <p class="interlude__intro lead">{t.home.weekend.intro}</p>
+      <Rule ornament tone="deep" class="interlude__rule" />
+      <Button href={localePath('/the-weekend', locale)} variant="ghost" class="interlude__cta">
+        {t.home.weekend.cta}
+      </Button>
+    </div>
+  </Chapter>
+
+  <!-- III · The Venues — two name cards -->
+  <Chapter label={t.home.venues.label} numeral="III" title={t.home.venues.title} variant="alt">
+    <p class="section-intro reveal">{t.home.venues.intro}</p>
+    <div class="venue-cards">
+      {
+        VENUES.map((v) => (
+          <Card href={localePath('/venues', locale)} class="venue-card reveal">
+            <p class="chapter-label">{venueRoles[v.role]}</p>
+            <p class="venue-card__name">{v.name}</p>
+            <p class="venue-card__place muted">{v.postcode}</p>
+            <span class="venue-card__arrow" aria-hidden="true">→</span>
+          </Card>
+        ))
+      }
+    </div>
+  </Chapter>
+
+  <!-- IV · Travel & Stay — text + plate split -->
+  <Chapter label={t.home.travel.label} numeral="IV" id="travel-preview">
+    <div class="split">
+      <div class="split__media reveal">
+        <ImagePlaceholder ratio="3/2" label="The road north to Weston Manor" plate="II" />
+      </div>
+      <div class="split__text reveal">
+        <h2>{t.home.travel.title}</h2>
+        <p class="section-intro">{t.home.travel.intro}</p>
+        <Button href={localePath('/travel', locale)} variant="quiet">{t.home.travel.cta}</Button>
+      </div>
+    </div>
+  </Chapter>
+
+  <!-- V · A Note on Gifts — centred -->
+  <Chapter label={t.home.gifts.label} numeral="V" variant="alt" center id="gifts-preview">
+    <div class="gifts reveal">
+      <h2>{t.home.gifts.title}</h2>
+      <p class="section-intro center">{t.home.gifts.intro}</p>
+      <Button href={localePath('/gifts', locale)} variant="quiet">{t.home.gifts.cta}</Button>
+    </div>
+  </Chapter>
+</BaseLayout>
+
+<style>
+  .find {
+    padding-block: clamp(1.5rem, 5vw, 2.5rem) clamp(2.5rem, 6vw, 4rem);
+  }
+  .find__label {
+    display: block;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-intro {
+    font-size: var(--fs-lead);
+    line-height: 1.5;
+    max-width: 40ch;
+    color: var(--text);
+  }
+  .section-intro.center {
+    margin-inline: auto;
+  }
+
+  /* Welcome */
+  .welcome__grid {
+    display: grid;
+    gap: clamp(2rem, 6vw, 4rem);
+    align-items: center;
+  }
+  .welcome__title {
+    margin-bottom: 1.1rem;
+  }
+  .welcome__p {
+    max-width: 46ch;
+  }
+  .welcome__media {
+    max-width: 22rem;
+    margin-inline: auto;
+  }
+  @media (min-width: 48rem) {
+    .welcome__grid {
+      grid-template-columns: 1.1fr 0.9fr;
+    }
+    .welcome__media {
+      max-width: none;
+      order: 2;
+    }
+  }
+
+  /* Interlude */
+  .interlude {
+    max-width: 40rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+  .interlude__title {
+    font-size: clamp(2rem, 6vw, 3.25rem);
+  }
+  .interlude__intro {
+    margin: 1.25rem auto 0;
+    max-width: 34ch;
+  }
+  .interlude__rule {
+    margin: clamp(1.75rem, 4vw, 2.5rem) auto;
+    max-width: 8rem;
+  }
+
+  /* Venue cards */
+  .venue-cards {
+    margin-top: clamp(1.75rem, 4vw, 2.5rem);
+    display: grid;
+    gap: clamp(0.85rem, 2vw, 1.25rem);
+  }
+  .venue-card {
+    position: relative;
+  }
+  .venue-card__name {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    font-weight: 450;
+    margin-top: 0.5rem;
+  }
+  .venue-card__place {
+    margin-top: 0.3rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+  }
+  .venue-card__arrow {
+    position: absolute;
+    top: clamp(1.25rem, 4vw, 2rem);
+    right: clamp(1.25rem, 4vw, 2rem);
+    color: var(--oxidised-bronze);
+    transition: transform 0.3s var(--ease-soft);
+  }
+  @media (hover: hover) {
+    .venue-card:hover .venue-card__arrow {
+      transform: translateX(3px);
+      color: var(--accent);
+    }
+  }
+  @media (min-width: 40rem) {
+    .venue-cards {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* Split */
+  .split {
+    display: grid;
+    gap: clamp(1.75rem, 5vw, 3.5rem);
+    align-items: center;
+  }
+  .split__text h2 {
+    margin-bottom: 1rem;
+  }
+  .split__text .section-intro {
+    margin-bottom: 1.5rem;
+  }
+  @media (min-width: 48rem) {
+    .split {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* Gifts */
+  .gifts h2 {
+    margin-bottom: 1rem;
+  }
+  .gifts .section-intro {
+    margin-bottom: 1.5rem;
+  }
+</style>

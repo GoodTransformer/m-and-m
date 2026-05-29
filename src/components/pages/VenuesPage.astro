@@ -1,0 +1,76 @@
+---
+import { type Locale } from '../../lib/i18n';
+import { getStrings } from '../../i18n';
+import { venueById } from '../../data/site';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Chapter from '../Chapter.astro';
+import VenueCard from '../VenueCard.astro';
+import Rule from '../Rule.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = getStrings(locale);
+
+const magdalen = venueById('magdalen')!;
+const weston = venueById('weston-manor')!;
+const ui = { directions: t.ui.directions, appleMaps: t.ui.appleMaps, what3words: t.ui.what3words };
+---
+
+<BaseLayout locale={locale} path="/venues" title={t.nav.venues}>
+  <Chapter
+    label={t.venues.label}
+    numeral="III"
+    title={t.venues.title}
+    headingLevel="h1"
+    id="venues"
+  >
+    <p class="lead measure reveal venues__intro">{t.venues.intro}</p>
+
+    <div class="venues__list">
+      <VenueCard
+        venue={magdalen}
+        roleLabel={t.venues.roleCeremony}
+        blurb={t.venues.magdalen.blurb}
+        arrival={t.venues.magdalen.arrival}
+        parking={t.venues.magdalen.parking}
+        addressLabel={t.venues.addressLabel}
+        arrivalLabel={t.venues.arrivalLabel}
+        parkingLabel={t.venues.parkingLabel}
+        ui={ui}
+        plate={t.venues.roleCeremony}
+      />
+
+      <Rule ornament class="venues__sep" />
+
+      <VenueCard
+        venue={weston}
+        flip
+        roleLabel={t.venues.roleReception}
+        blurb={t.venues.weston.blurb}
+        arrival={t.venues.weston.arrival}
+        parking={t.venues.weston.parking}
+        addressLabel={t.venues.addressLabel}
+        arrivalLabel={t.venues.arrivalLabel}
+        parkingLabel={t.venues.parkingLabel}
+        ui={ui}
+        plate={t.venues.roleReception}
+      />
+    </div>
+  </Chapter>
+</BaseLayout>
+
+<style>
+  .venues__intro {
+    margin-bottom: clamp(2.25rem, 6vw, 3.5rem);
+  }
+  .venues__list {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 4rem);
+  }
+  .venues__sep {
+    max-width: 10rem;
+    margin-inline: auto;
+  }
+</style>

@@ -1,0 +1,57 @@
+---
+import { type Locale } from '../../lib/i18n';
+import { getStrings } from '../../i18n';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Chapter from '../Chapter.astro';
+import ImagePlaceholder from '../ImagePlaceholder.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = getStrings(locale);
+---
+
+<BaseLayout locale={locale} path="/our-story" title={t.nav.story}>
+  <Chapter label={t.story.label} title={t.story.title} headingLevel="h1" center id="story">
+    <div class="story">
+      <div class="story__media reveal">
+        <ImagePlaceholder ratio="4/5" label="Mari & Michael, a portrait" plate="III" />
+      </div>
+      <div class="story__prose reveal">
+        {t.story.body.map((p, i) => <p class={i === 0 ? 'dropcap' : undefined}>{p}</p>)}
+      </div>
+    </div>
+  </Chapter>
+</BaseLayout>
+
+<style>
+  .story {
+    display: grid;
+    gap: clamp(2rem, 6vw, 3.5rem);
+    align-items: center;
+    text-align: left;
+    max-width: 52rem;
+    margin-inline: auto;
+  }
+  .story__media {
+    max-width: 18rem;
+    margin-inline: auto;
+  }
+  .story__prose p {
+    font-size: var(--fs-lead);
+    line-height: 1.6;
+  }
+  .story__prose p + p {
+    margin-top: 1em;
+  }
+
+  @media (min-width: 48rem) {
+    .story {
+      grid-template-columns: 0.7fr 1fr;
+    }
+    .story__media {
+      max-width: none;
+    }
+  }
+</style>

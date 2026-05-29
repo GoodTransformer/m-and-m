@@ -1,0 +1,31 @@
+# build output
+dist/
+.output/
+
+# dependencies
+node_modules/
+
+# astro
+.astro/
+
+# environment
+.env
+.env.production
+.env.local
+
+# macOS
+.DS_Store
+
+# logs
+npm-debug.log*
+*.log
+
+# editor / local tooling
+.vscode/
+.idea/
+.claude/
+
+# private source briefs (kept locally, not published)
+Brief (suggestion not law)/
+Wedding Brand Guide/
+Wedding Brand Guide /

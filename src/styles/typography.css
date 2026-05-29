@@ -1,0 +1,144 @@
+/* ============================================================
+   Typography — serif-led, literary, editorial. No script faces.
+   Display: Fraunces.  Body: EB Garamond.
+   ============================================================ */
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 460;
+  line-height: var(--lh-tight);
+  color: var(--text-display);
+  font-optical-sizing: auto;
+  letter-spacing: 0.004em;
+  text-wrap: balance;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  line-height: 1.02;
+  font-weight: 430;
+  letter-spacing: -0.012em;
+  color: var(--text-display);
+  font-optical-sizing: auto;
+  text-wrap: balance;
+}
+
+h1,
+.h1 {
+  font-size: var(--fs-h1);
+}
+h2,
+.h2 {
+  font-size: var(--fs-h2);
+}
+h3,
+.h3 {
+  font-size: var(--fs-h3);
+  font-weight: 500;
+}
+
+p {
+  font-size: var(--fs-body);
+  text-wrap: pretty;
+}
+
+p + p {
+  margin-top: 1em;
+}
+
+em,
+i,
+.italic {
+  font-style: italic;
+}
+
+strong {
+  font-weight: 600;
+}
+
+ul,
+ol {
+  padding-left: 1.1em;
+}
+
+li + li {
+  margin-top: 0.35em;
+}
+
+blockquote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 380;
+  font-size: var(--fs-lead);
+  line-height: 1.4;
+}
+
+/* ---- Editorial devices ---- */
+.chapter-label {
+  font-family: var(--font-body);
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  font-weight: 600;
+  color: var(--oxidised-bronze);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+}
+
+.chapter-label--on-deep {
+  /* lighter than raw brass so the small label clears WCAG AA on dark walnut */
+  color: color-mix(in srgb, var(--antique-brass) 50%, var(--champagne-silk));
+}
+
+.chapter-numeral {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.lead {
+  font-size: var(--fs-lead);
+  line-height: 1.5;
+  color: var(--text);
+  font-weight: 420;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.amp {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.dropcap::first-letter {
+  font-family: var(--font-display);
+  font-weight: 460;
+  font-size: 3.1em;
+  line-height: 0.82;
+  float: left;
+  padding-right: 0.08em;
+  padding-top: 0.06em;
+  color: var(--accent-wine);
+}
+
+/* ---- Inverse (on deep grounds) ---- */
+.on-deep,
+.on-deep h1,
+.on-deep h2,
+.on-deep h3 {
+  color: var(--text-on-deep);
+}
+
+.on-deep .muted {
+  color: var(--text-muted-on-deep);
+}

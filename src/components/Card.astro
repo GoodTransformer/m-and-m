@@ -1,0 +1,54 @@
+---
+// A warm linen/parchment panel. If `href` is given the whole card is tappable.
+interface Props {
+  href?: string;
+  external?: boolean;
+  class?: string;
+  pad?: 'normal' | 'roomy';
+}
+const { href, external = false, class: cls = '', pad = 'normal' } = Astro.props;
+const Tag = href ? 'a' : 'div';
+const rel = external ? 'noopener noreferrer' : undefined;
+const target = external ? '_blank' : undefined;
+---
+
+<Tag
+  class:list={['card', href && 'card--link', `card--${pad}`, cls]}
+  href={href}
+  rel={rel}
+  target={target}
+>
+  <slot />
+</Tag>
+
+<style>
+  .card {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--bg-card-edge);
+    border-radius: var(--radius-lg);
+    padding: clamp(1.25rem, 4vw, 2rem);
+    color: inherit;
+  }
+  .card--roomy {
+    padding: clamp(1.75rem, 5vw, 2.75rem);
+  }
+  .card--link {
+    text-decoration: none;
+    transition:
+      border-color 0.3s var(--ease-soft),
+      box-shadow 0.4s var(--ease-soft),
+      transform 0.4s var(--ease-soft);
+  }
+  @media (hover: hover) and (min-width: 48rem) {
+    .card--link:hover {
+      border-color: color-mix(in srgb, var(--oxidised-bronze) 60%, transparent);
+      box-shadow: var(--shadow-soft);
+      transform: translateY(-3px);
+    }
+  }
+  .card--link:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+</style>

@@ -1,0 +1,111 @@
+---
+// A page "chapter" — the core editorial section. Optional small-caps label with
+// a roman numeral, a display title, and a slot. `deep` paints a dark walnut
+// interlude (old-world depth); `alt` uses the parchment ground.
+interface Props {
+  label?: string;
+  numeral?: string;
+  title?: string;
+  variant?: 'light' | 'alt' | 'deep';
+  center?: boolean;
+  id?: string;
+  class?: string;
+  headingLevel?: 'h1' | 'h2';
+  wide?: boolean;
+}
+const {
+  label,
+  numeral,
+  title,
+  variant = 'light',
+  center = false,
+  id,
+  class: cls = '',
+  headingLevel = 'h2',
+  wide = false,
+} = Astro.props;
+const Heading = headingLevel;
+const headingId = id ? `${id}-title` : undefined;
+const hasHead = Boolean(label || title);
+---
+
+<section
+  class:list={['chapter', `chapter--${variant}`, center && 'chapter--center', cls]}
+  id={id}
+  aria-labelledby={title ? headingId : undefined}
+>
+  <div class:list={['container', wide && 'container-wide']}>
+    {
+      hasHead && (
+        <header class="chapter__head reveal">
+          {label && (
+            <p class:list={['chapter-label', variant === 'deep' && 'chapter-label--on-deep']}>
+              {numeral && <span class="chapter-numeral">{numeral}</span>}
+              {label}
+            </p>
+          )}
+          {title && (
+            <Heading id={headingId} class="chapter__title">
+              {title}
+            </Heading>
+          )}
+        </header>
+      )
+    }
+    <slot />
+  </div>
+</section>
+
+<style>
+  .chapter {
+    padding-block: var(--section-y);
+  }
+  .chapter--alt {
+    background: var(--bg-alt);
+  }
+  .chapter--deep {
+    background: var(--bg-deep);
+    color: var(--text-on-deep);
+  }
+  /* Everything inside a deep interlude reads light. */
+  .chapter--deep :global(h1),
+  .chapter--deep :global(h2),
+  .chapter--deep :global(h3),
+  .chapter--deep :global(h4),
+  .chapter--deep :global(.chapter__title),
+  .chapter--deep :global(.lead) {
+    color: var(--text-on-deep);
+  }
+  .chapter--deep :global(.muted) {
+    color: var(--text-muted-on-deep);
+  }
+  .chapter--deep :global(.btn--ghost) {
+    color: var(--text-on-deep);
+    border-color: color-mix(in srgb, var(--antique-brass) 55%, transparent);
+  }
+  .chapter--deep :global(.btn--ghost:hover) {
+    color: var(--candle-ivory);
+    border-color: var(--antique-brass);
+  }
+
+  .chapter__head {
+    margin-bottom: clamp(1.75rem, 5vw, 3rem);
+    max-width: var(--measure);
+  }
+  .chapter--center .chapter__head {
+    margin-inline: auto;
+    text-align: center;
+    max-width: 46ch;
+  }
+
+  .chapter-label {
+    margin-bottom: 0.9rem;
+  }
+
+  .chapter__title {
+    font-size: var(--fs-h2);
+  }
+  .chapter--center :global(.chapter__title) {
+    margin-inline: auto;
+  }
+</style>

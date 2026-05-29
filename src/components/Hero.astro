@@ -1,0 +1,125 @@
+---
+import { localePath, otherLocale, type Locale } from '../lib/i18n';
+import { getStrings } from '../i18n';
+import { SITE } from '../data/site';
+import { formatDateLong, capitalise } from '../lib/format';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = getStrings(locale);
+const dateLine = capitalise(formatDateLong(SITE.date, locale));
+const otherHome = localePath('/', otherLocale(locale));
+---
+
+<section class="hero" aria-labelledby="hero-names">
+  <div class="container hero__inner">
+    <p class="chapter-label hero__eyebrow">{t.hero.eyebrow}</p>
+
+    <h1 class="display hero__names" id="hero-names">
+      Mari <span class="amp">&amp;</span> Michael
+    </h1>
+
+    <p class="hero__date">{dateLine}</p>
+    <p class="hero__venue">{t.hero.venueLine}</p>
+
+    <p class="hero__invite lead measure-narrow center">{t.hero.invitation}</p>
+
+    <a class="hero__lang" href={otherHome} hreflang={otherLocale(locale)} lang={otherLocale(locale)}>
+      {t.lang.switchTo} <span aria-hidden="true">→</span>
+    </a>
+
+    <a class="hero__scroll" href="#find">
+      <span>{t.hero.scrollHint}</span>
+      <span class="hero__scroll-line" aria-hidden="true"></span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .hero {
+    min-height: min(78svh, 720px);
+    display: flex;
+    align-items: center;
+    padding-block: clamp(3rem, 9vw, 6rem);
+    position: relative;
+  }
+  .hero__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+  }
+
+  .hero__eyebrow {
+    margin-bottom: clamp(1.25rem, 4vw, 2rem);
+  }
+
+  .hero__names {
+    font-size: clamp(3rem, 13vw, 6.5rem);
+    line-height: 0.98;
+    margin: 0;
+  }
+  .hero__names .amp {
+    color: var(--oxidised-bronze);
+    font-weight: 400;
+  }
+
+  .hero__date {
+    margin-top: clamp(1.5rem, 4vw, 2.25rem);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.15rem, 3vw, 1.6rem);
+    color: var(--text);
+  }
+  .hero__venue {
+    margin-top: 0.6rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .hero__invite {
+    margin-top: clamp(1.75rem, 5vw, 2.5rem);
+  }
+
+  .hero__lang {
+    margin-top: clamp(1.5rem, 4vw, 2rem);
+    font-size: 0.92rem;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    color: var(--text);
+    border-bottom: 1px solid var(--rule-strong);
+    padding-bottom: 2px;
+    transition: color 0.25s var(--ease-soft), border-color 0.25s var(--ease-soft);
+  }
+  .hero__lang:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .hero__scroll {
+    margin-top: clamp(2.5rem, 7vw, 4rem);
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+  .hero__scroll-line {
+    width: 1px;
+    height: 2.5rem;
+    background: linear-gradient(to bottom, var(--rule-strong), transparent);
+  }
+  .hero__scroll:hover {
+    color: var(--accent);
+  }
+</style>

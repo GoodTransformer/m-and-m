@@ -1,0 +1,104 @@
+---
+// Link-styled button. Primary = oxblood (used sparingly, for the few real CTAs).
+// Ghost = quiet outline. Large tap target throughout.
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'ghost' | 'quiet';
+  external?: boolean;
+  class?: string;
+  ariaLabel?: string;
+}
+const { href, variant = 'ghost', external = false, class: cls = '', ariaLabel } = Astro.props;
+const rel = external ? 'noopener noreferrer' : undefined;
+const target = external ? '_blank' : undefined;
+const Tag = href ? 'a' : 'button';
+---
+
+<Tag
+  class:list={['btn', `btn--${variant}`, cls]}
+  href={href}
+  rel={rel}
+  target={target}
+  aria-label={ariaLabel}
+>
+  <span class="btn__label"><slot /></span>
+  {external && <span class="btn__ext" aria-hidden="true">↗</span>}
+</Tag>
+
+<style>
+  .btn {
+    --btn-fg: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    min-height: 2.85rem;
+    padding: 0.7rem 1.4rem;
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--btn-fg);
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    cursor: pointer;
+    background: transparent;
+    transition:
+      background-color 0.3s var(--ease-soft),
+      color 0.3s var(--ease-soft),
+      border-color 0.3s var(--ease-soft),
+      transform 0.3s var(--ease-soft);
+    text-align: center;
+  }
+
+  .btn:hover {
+    text-decoration: none;
+  }
+
+  .btn--primary {
+    background: var(--accent);
+    color: var(--accent-text);
+    border-color: var(--accent);
+  }
+  .btn--primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+  }
+
+  .btn--ghost {
+    border-color: color-mix(in srgb, var(--oxidised-bronze) 50%, transparent);
+    color: var(--text);
+  }
+  .btn--ghost:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn--quiet {
+    padding-inline: 0;
+    min-height: auto;
+    border: 0;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text);
+    border-bottom: 1px solid var(--rule-strong);
+    border-radius: 0;
+    padding-bottom: 2px;
+  }
+  .btn--quiet:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .btn__ext {
+    font-size: 0.85em;
+    transition: transform 0.3s var(--ease-soft);
+  }
+  .btn:hover .btn__ext {
+    transform: translate(2px, -2px);
+  }
+</style>

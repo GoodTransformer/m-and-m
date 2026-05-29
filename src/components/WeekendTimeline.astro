@@ -1,0 +1,101 @@
+---
+import type { ScheduleEvent } from '../i18n/types';
+
+interface Props {
+  events: ScheduleEvent[];
+  class?: string;
+}
+const { events, class: cls = '' } = Astro.props;
+---
+
+<ol class:list={['timeline', cls]}>
+  {
+    events.map((ev) => (
+      <li class="timeline__item reveal">
+        <div class="timeline__time">{ev.time}</div>
+        <div class="timeline__marker" aria-hidden="true">
+          <span class="timeline__dot" />
+        </div>
+        <div class="timeline__body">
+          <h3 class="timeline__title">{ev.title}</h3>
+          <p class="timeline__venue">{ev.venue}</p>
+          <p class="timeline__note muted">{ev.note}</p>
+        </div>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-width: 44rem;
+  }
+  .timeline__item {
+    display: grid;
+    grid-template-columns: 4.5rem 1.5rem 1fr;
+    column-gap: clamp(0.75rem, 2vw, 1.25rem);
+    align-items: start;
+  }
+  .timeline__time {
+    font-family: var(--font-display);
+    font-size: 0.98rem;
+    font-weight: 500;
+    color: var(--oxidised-bronze);
+    padding-top: 0.1rem;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .timeline__marker {
+    position: relative;
+    align-self: stretch;
+    display: flex;
+    justify-content: center;
+  }
+  .timeline__marker::before {
+    content: '';
+    position: absolute;
+    top: 0.55rem;
+    bottom: -0.2rem;
+    width: 1px;
+    background: var(--rule);
+  }
+  .timeline__item:last-child .timeline__marker::before {
+    display: none;
+  }
+  .timeline__dot {
+    position: relative;
+    z-index: 1;
+    width: 9px;
+    height: 9px;
+    margin-top: 0.5rem;
+    transform: rotate(45deg);
+    background: var(--bg);
+    border: 1.5px solid var(--metal);
+  }
+
+  .timeline__body {
+    padding-bottom: clamp(1.75rem, 4vw, 2.5rem);
+  }
+  .timeline__title {
+    font-size: clamp(1.2rem, 2.4vw, 1.5rem);
+    font-weight: 460;
+    line-height: 1.15;
+  }
+  .timeline__venue {
+    margin-top: 0.3rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .timeline__note {
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    max-width: 32ch;
+  }
+</style>

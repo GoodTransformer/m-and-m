@@ -1,0 +1,102 @@
+---
+// The homepage quick-action row — the practical actions, reachable in one tap,
+// kept within the first screenful. Flows from 2 columns on mobile to a single
+// refined row on desktop.
+interface Item {
+  href: string;
+  label: string;
+}
+interface Props {
+  items: Item[];
+  ariaLabel: string;
+  class?: string;
+}
+const { items, ariaLabel, class: cls = '' } = Astro.props;
+---
+
+<nav class:list={['quick', cls]} aria-label={ariaLabel}>
+  <ul class="quick__list">
+    {
+      items.map((item) => (
+        <li class="quick__item">
+          <a class="quick__link" href={item.href}>
+            <span class="quick__label">{item.label}</span>
+            <span class="quick__arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .quick__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(0.5rem, 2vw, 0.85rem);
+  }
+  .quick__item {
+    margin: 0;
+  }
+
+  .quick__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    height: 100%;
+    min-height: 3.6rem;
+    padding: 0.85rem 1.1rem;
+    text-decoration: none;
+    background: color-mix(in srgb, var(--candle-ivory) 60%, var(--old-parchment));
+    border: 1px solid var(--bg-card-edge);
+    border-radius: var(--radius);
+    color: var(--text);
+    transition:
+      background-color 0.3s var(--ease-soft),
+      border-color 0.3s var(--ease-soft),
+      transform 0.3s var(--ease-soft);
+  }
+  .quick__label {
+    font-family: var(--font-display);
+    font-size: clamp(1.02rem, 1.4vw, 1.18rem);
+    font-weight: 450;
+    line-height: 1.1;
+  }
+  .quick__arrow {
+    color: var(--oxidised-bronze);
+    transition: transform 0.3s var(--ease-soft), color 0.3s var(--ease-soft);
+    flex: none;
+  }
+  @media (hover: hover) {
+    .quick__link:hover {
+      background: var(--bg-card);
+      border-color: color-mix(in srgb, var(--oxidised-bronze) 55%, transparent);
+      transform: translateY(-2px);
+    }
+    .quick__link:hover .quick__arrow {
+      transform: translateX(3px);
+      color: var(--accent);
+    }
+  }
+
+  /* A single elegant row once there is room. */
+  @media (min-width: 48rem) {
+    .quick__list {
+      grid-template-columns: repeat(var(--quick-cols, 5), 1fr);
+    }
+    .quick__link {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.6rem;
+      min-height: 6.5rem;
+      padding: 1.1rem 1.2rem;
+    }
+    .quick__arrow {
+      align-self: flex-start;
+    }
+  }
+</style>

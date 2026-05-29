@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Mari & Michael">
+  <rect width="64" height="64" rx="12" fill="#f2e8d8" />
+  <rect x="2.75" y="2.75" width="58.5" height="58.5" rx="9.5" fill="none" stroke="#a47a48" stroke-width="1.5" />
+  <text x="32" y="45" font-family="Georgia, 'Times New Roman', serif" font-size="42" font-style="italic" text-anchor="middle" fill="#5b1215">&amp;</text>
+</svg>

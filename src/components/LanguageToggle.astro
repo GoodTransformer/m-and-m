@@ -1,0 +1,81 @@
+---
+// The EN · ES toggle. The active language is a non-interactive marker; the other
+// is a link to the same logical page in the counterpart locale (base-aware).
+import { localePath, otherLocale, LOCALE_SHORT, LOCALE_LABEL, type Locale } from '../lib/i18n';
+
+interface Props {
+  locale: Locale;
+  path: string; // logical path, e.g. "/venues"
+  tone?: 'light' | 'deep';
+  class?: string;
+}
+const { locale, path, tone = 'light', class: cls = '' } = Astro.props;
+const other = otherLocale(locale);
+---
+
+<div class:list={['lang', `lang--${tone}`, cls]} role="group" aria-label="Language / Idioma">
+  <span class="lang__item is-active" aria-current="true" lang={locale}>
+    {LOCALE_SHORT[locale]}
+  </span>
+  <span class="lang__sep" aria-hidden="true">·</span>
+  <a
+    class="lang__item"
+    href={localePath(path, other)}
+    hreflang={other}
+    lang={other}
+    rel="alternate"
+    aria-label={`${LOCALE_LABEL[other]}`}
+  >
+    {LOCALE_SHORT[other]}
+  </a>
+</div>
+
+<style>
+  .lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+  }
+  .lang__item {
+    text-decoration: none;
+    color: color-mix(in srgb, var(--text) 52%, var(--bg));
+    padding: 0.25em 0;
+    transition: color 0.25s var(--ease-soft);
+  }
+  .lang__item.is-active {
+    color: var(--text);
+    position: relative;
+  }
+  .lang__item.is-active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.15em;
+    height: 1px;
+    background: var(--metal);
+  }
+  a.lang__item:hover {
+    color: var(--accent);
+  }
+  .lang__sep {
+    color: color-mix(in srgb, var(--text) 35%, var(--bg));
+  }
+
+  .lang--deep .lang__item {
+    color: color-mix(in srgb, var(--candle-ivory) 55%, transparent);
+  }
+  .lang--deep .lang__item.is-active {
+    color: var(--candle-ivory);
+  }
+  .lang--deep .lang__sep {
+    color: color-mix(in srgb, var(--candle-ivory) 40%, transparent);
+  }
+  .lang--deep a.lang__item:hover {
+    color: var(--vintage-cake);
+  }
+</style>

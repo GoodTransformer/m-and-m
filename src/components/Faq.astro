@@ -1,0 +1,112 @@
+---
+import type { Faq } from '../i18n/types';
+
+interface Props {
+  faqs: Faq[];
+  class?: string;
+}
+const { faqs, class: cls = '' } = Astro.props;
+---
+
+<div class:list={['faq', cls]}>
+  {
+    faqs.map((f) => (
+      <details class="faq__item" name="faq">
+        <summary class="faq__q">
+          <span class="faq__q-text">{f.q}</span>
+          <span class="faq__icon" aria-hidden="true" />
+        </summary>
+        <div class="faq__a">
+          <p>{f.a}</p>
+        </div>
+      </details>
+    ))
+  }
+</div>
+
+<style>
+  .faq {
+    max-width: 46rem;
+    border-top: 1px solid var(--rule);
+  }
+  .faq__item {
+    border-bottom: 1px solid var(--rule);
+  }
+  .faq__q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    padding: clamp(1rem, 3vw, 1.4rem) 0;
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-display);
+    font-size: clamp(1.1rem, 2.4vw, 1.35rem);
+    font-weight: 450;
+    color: var(--text-display);
+  }
+  .faq__q::-webkit-details-marker {
+    display: none;
+  }
+  .faq__q:hover {
+    color: var(--accent);
+  }
+  .faq__q-text {
+    flex: 1;
+  }
+
+  .faq__icon {
+    position: relative;
+    flex: none;
+    width: 14px;
+    height: 14px;
+    margin-top: 0.35rem;
+  }
+  .faq__icon::before,
+  .faq__icon::after {
+    content: '';
+    position: absolute;
+    background: var(--oxidised-bronze);
+    transition: transform 0.3s var(--ease-soft), opacity 0.3s var(--ease-soft);
+  }
+  .faq__icon::before {
+    top: 6px;
+    left: 0;
+    width: 14px;
+    height: 1.5px;
+  }
+  .faq__icon::after {
+    left: 6px;
+    top: 0;
+    width: 1.5px;
+    height: 14px;
+  }
+  .faq__item[open] .faq__icon::after {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  .faq__item[open] .faq__q {
+    color: var(--accent);
+  }
+
+  .faq__a {
+    padding: 0 0 clamp(1.1rem, 3vw, 1.5rem);
+    max-width: 60ch;
+  }
+  .faq__a p {
+    color: var(--text);
+  }
+
+  /* Gentle open animation where supported, skipped for reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .faq__item[open] .faq__a {
+      animation: faq-reveal 0.4s var(--ease) both;
+    }
+    @keyframes faq-reveal {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+    }
+  }
+</style>
