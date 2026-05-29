@@ -16,6 +16,7 @@ interface Props {
   parkingLabel: string;
   ui: { directions: string; appleMaps: string; what3words: string };
   plate: string;
+  flip?: boolean;
 }
 const {
   venue,
@@ -28,12 +29,13 @@ const {
   parkingLabel,
   ui,
   plate,
+  flip = false,
 } = Astro.props;
 
 const dest = `${venue.name}, ${venue.postcode}`;
 ---
 
-<article class="venue reveal">
+<article class:list={['venue', flip && 'venue--flip', 'reveal']}>
   <div class="venue__media">
     {
       venue.image ? (
@@ -42,43 +44,42 @@ const dest = `${venue.name}, ${venue.postcode}`;
           alt={venue.image.alt}
           width={venue.image.width}
           height={venue.image.height}
-          ratio="3 / 2"
+          ratio="4 / 5"
         />
       ) : (
-        <ImagePlaceholder ratio="3 / 2" label={`${venue.name} — ${plate}`} plate="I" />
+        <ImagePlaceholder ratio="4 / 5" label={`${venue.name} — ${plate}`} plate="I" />
       )
     }
   </div>
 
-  <header class="venue__head">
-    <div class="venue__title">
-      <p class="chapter-label">{roleLabel}</p>
-      <h3 class="venue__name">{venue.name}</h3>
-    </div>
+  <div class="venue__body">
+    <p class="chapter-label">{roleLabel}</p>
+    <h3 class="venue__name">{venue.name}</h3>
     <p class="venue__blurb">{blurb}</p>
-  </header>
 
-  <dl class="venue__facts">
-    <div class="venue__fact">
-      <dt>{addressLabel}</dt>
-      <dd>
-        {venue.addressLines.map((line) => <span class="venue__addr-line">{line}</span>)}
-        <span class="venue__addr-line">{venue.postcode}</span>
-      </dd>
-    </div>
-    <div class="venue__fact">
-      <dt>{arrivalLabel}</dt>
-      <dd>{arrival}</dd>
-    </div>
-    <div class="venue__fact">
-      <dt>{parkingLabel}</dt>
-      <dd>{parking}</dd>
-    </div>
-  </dl>
+    <dl class="venue__facts">
+      <div class="venue__fact">
+        <dt>{addressLabel}</dt>
+        <dd>
+          {venue.addressLines.map((line) => <span class="venue__addr-line">{line}</span>)}
+          <span class="venue__addr-line">{venue.postcode}</span>
+        </dd>
+      </div>
+      <div class="venue__fact">
+        <dt>{arrivalLabel}</dt>
+        <dd>{arrival}</dd>
+      </div>
+      <div class="venue__fact">
+        <dt>{parkingLabel}</dt>
+        <dd>{parking}</dd>
+      </div>
+    </dl>
 
-  <div class="venue__actions">
-    <Button href={googleDirections(dest)} external variant="primary">{ui.directions}</Button>
-    <Button href={appleMaps(dest)} external variant="quiet">{ui.appleMaps}</Button>
+    <div class="venue__actions">
+      <Button href={googleDirections(dest)} external variant="primary">{ui.directions}</Button>
+      <Button href={appleMaps(dest)} external variant="quiet">{ui.appleMaps}</Button>
+    </div>
+
     {
       venue.what3words && (
         <a class="w3w" href={what3wordsUrl(venue.what3words)} target="_blank" rel="noopener noreferrer">
@@ -96,20 +97,26 @@ const dest = `${venue.name}, ${venue.postcode}`;
 <style>
   .venue {
     display: grid;
-    gap: clamp(1.25rem, 4vw, 1.75rem);
+    gap: clamp(1.5rem, 5vw, 2rem);
+  }
+
+  .venue__media {
+    max-width: 24rem;
+    margin-inline: auto;
+    width: 100%;
   }
 
   .venue__name {
     font-size: clamp(1.6rem, 4vw, 2.25rem);
-    margin-top: 0.4rem;
+    margin-top: 0.5rem;
   }
   .venue__blurb {
     margin-top: 0.9rem;
-    max-width: 46ch;
+    max-width: 42ch;
   }
 
   .venue__facts {
-    margin: 0;
+    margin: clamp(1.25rem, 3vw, 1.75rem) 0 0;
     display: grid;
     gap: 0.9rem;
   }
@@ -127,20 +134,22 @@ const dest = `${venue.name}, ${venue.postcode}`;
     margin: 0;
     font-size: 1rem;
     color: var(--text);
-    max-width: 38ch;
+    max-width: 40ch;
   }
   .venue__addr-line {
     display: block;
   }
 
   .venue__actions {
+    margin-top: clamp(1.25rem, 3vw, 1.75rem);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 1rem 1.75rem;
+    gap: 1rem 1.5rem;
   }
 
   .w3w {
+    margin-top: 1.1rem;
     display: inline-flex;
     flex-direction: column;
     gap: 0.15rem;
@@ -168,56 +177,19 @@ const dest = `${venue.name}, ${venue.postcode}`;
     color: var(--accent);
   }
 
-  /* ---- Desktop: banner on top, editorial dossier below ---- */
+  /* ---- Desktop: image beside text (portrait), alternating sides ---- */
   @media (min-width: 48rem) {
     .venue {
-      grid-template-columns: 1fr 1fr;
-      column-gap: clamp(2rem, 5vw, 4rem);
-      row-gap: clamp(1.75rem, 3.5vw, 2.75rem);
-      grid-template-areas:
-        'head head'
-        'media media'
-        'facts facts'
-        'actions actions';
-      align-items: end;
+      grid-template-columns: 0.82fr 1fr;
+      align-items: center;
+      gap: clamp(2.5rem, 5vw, 4.5rem);
     }
-    .venue__head {
-      grid-area: head;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      column-gap: clamp(2rem, 5vw, 4rem);
-      align-items: end;
-    }
-    .venue__name {
-      margin-top: 0.5rem;
-    }
-    .venue__blurb {
-      margin-top: 0;
-      max-width: 40ch;
-    }
-
     .venue__media {
-      grid-area: media;
+      max-width: none;
+      margin-inline: 0;
     }
-    /* widen to a banner so the landscape photo sits proud, not squeezed */
-    .venue__media :global(.frame) {
-      aspect-ratio: 16 / 7;
-    }
-
-    .venue__facts {
-      grid-area: facts;
-      grid-template-columns: repeat(3, 1fr);
-      gap: clamp(1.5rem, 3vw, 2.75rem);
-      padding-top: clamp(1.25rem, 2.5vw, 1.75rem);
-      border-top: 1px solid var(--rule);
-    }
-    .venue__fact dd {
-      font-size: 1.02rem;
-    }
-
-    .venue__actions {
-      grid-area: actions;
-      gap: 1.25rem 2rem;
+    .venue--flip .venue__media {
+      order: 2;
     }
   }
 </style>

@@ -43,9 +43,9 @@ export const VENUES: Venue[] = [
     what3words: '', // not published by the college — confirm the Porters' Lodge square
     image: {
       src: 'images/magdalen.jpg',
-      alt: 'Magdalen College tower seen through a stone window, Oxford',
-      width: 1600,
-      height: 800,
+      alt: 'Magdalen College and its great tower, Oxford',
+      width: 960,
+      height: 1440,
     },
   },
   {
@@ -60,9 +60,9 @@ export const VENUES: Venue[] = [
     tel: '+441869350621',
     image: {
       src: 'images/weston-manor.jpg',
-      alt: 'The honey-stone front of Weston Manor',
-      width: 1440,
-      height: 700,
+      alt: 'Weston Manor and its gardens',
+      width: 660,
+      height: 960,
     },
   },
 ];

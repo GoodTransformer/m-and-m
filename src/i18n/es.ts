@@ -19,7 +19,7 @@ export const es: Strings = {
     questions: 'Preguntas',
     gifts: 'Sobre los regalos',
     story: 'Nuestra historia',
-    today: 'Ese día',
+    today: 'Lo esencial',
     menu: 'Menú',
     close: 'Cerrar',
   },
@@ -45,7 +45,7 @@ export const es: Strings = {
     venues: 'Los lugares',
     travel: 'Cómo llegar',
     questions: 'Preguntas',
-    today: 'Ese día',
+    today: 'Lo esencial',
   },
 
   home: {
@@ -267,8 +267,8 @@ export const es: Strings = {
   },
 
   today: {
-    label: 'El día',
-    title: 'Ese día',
+    label: 'Lo esencial',
+    title: 'Lo esencial',
     intro: 'Todo lo que necesita, en un solo lugar. Llévelo en el bolsillo.',
     ceremonyTime: '14:00',
     receptionTime: '18:30',

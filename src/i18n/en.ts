@@ -20,7 +20,7 @@ export const en: Strings = {
     questions: 'Questions',
     gifts: 'A Note on Gifts',
     story: 'Our Story',
-    today: 'Today',
+    today: 'The Essentials',
     menu: 'Menu',
     close: 'Close',
   },
@@ -45,7 +45,7 @@ export const en: Strings = {
     venues: 'The Venues',
     travel: 'Travel & Stay',
     questions: 'Questions',
-    today: 'On the Day',
+    today: 'The Essentials',
   },
 
   home: {
@@ -267,8 +267,8 @@ export const en: Strings = {
   },
 
   today: {
-    label: 'Today',
-    title: 'On the day',
+    label: 'The Essentials',
+    title: 'The essentials',
     intro: 'Everything you need, in one place. Keep this open in your pocket.',
     ceremonyTime: '2:00 pm',
     receptionTime: '6:30 pm',
