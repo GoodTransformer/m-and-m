@@ -96,11 +96,15 @@ const homeHref = localePath('/', locale);
 
   .masthead__bar {
     display: flex;
-    align-items: center;
+    /* Baseline row: wordmark, EN·ES and MENU share one baseline, so their
+       bottom edges line up across different fonts and sizes — no per-item
+       nudging. The wordmark's line-height (below) fills the bar's content box,
+       so that shared baseline lands at the vertical centre. */
+    align-items: baseline;
     justify-content: space-between;
     gap: 1rem;
-    min-height: 3.75rem;
-    padding-block: 0.65rem;
+    min-height: var(--masthead-h);
+    padding-block: var(--masthead-pad);
   }
 
   /* Very narrow phones (~320px): tighten internal gaps so the row fits. */
@@ -116,6 +120,9 @@ const homeHref = localePath('/', locale);
   .wordmark {
     font-family: var(--font-display);
     font-size: clamp(1.15rem, 1.6vw, 1.4rem);
+    /* Fill the bar's content box (= height − top/bottom padding) so the
+       baseline-aligned row is vertically centred with no leftover space. */
+    line-height: calc(var(--masthead-h) - 2 * var(--masthead-pad));
     font-weight: 500;
     letter-spacing: var(--tracking-wordmark);
     color: var(--text-display);
@@ -128,7 +135,7 @@ const homeHref = localePath('/', locale);
 
   .masthead__right {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: clamp(1rem, 2.5vw, 2rem);
   }
 
@@ -185,7 +192,7 @@ const homeHref = localePath('/', locale);
   @media (max-width: 59.99rem) {
     .menu-btn {
       display: inline-flex;
-      align-items: center;
+      align-items: baseline;
       gap: 0.5rem;
       background: transparent;
       border: 0;
@@ -210,9 +217,9 @@ const homeHref = localePath('/', locale);
     }
     .menu-btn__bars {
       position: relative;
-      /* Uppercase MENU has no descenders, so its optical centre sits ~1px above
-         the geometric centre; nudge the bars down to match it to the eye. */
-      transform: translateY(1px);
+      /* The MENU text sits on the bar's shared baseline; the hamburger centres
+         to that text rather than hanging off the baseline. */
+      align-self: center;
     }
     .menu-btn__bars::before {
       position: absolute;
@@ -240,7 +247,7 @@ const homeHref = localePath('/', locale);
 
     .site-nav {
       position: fixed;
-      inset: 3.75rem 0 0 0;
+      inset: var(--masthead-h) 0 0 0;
       background: var(--bg);
       padding: clamp(1.5rem, 6vw, 3rem) var(--gutter) 3rem;
       display: flex;
