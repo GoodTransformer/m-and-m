@@ -67,6 +67,10 @@ const faviconHref = `${import.meta.env.BASE_URL}favicon.svg`;
     <slot name="head" />
   </head>
   <body>
+    <!-- Non-sticky anchor for the footer "back to top" link. Must NOT live on the
+         sticky masthead, or scrolling to it from the bottom barely moves (the
+         header is already pinned at the viewport top). -->
+    <span id="top" aria-hidden="true"></span>
     <a class="skip-link" href="#main">Skip to content</a>
     <Masthead locale={locale} path={path} />
     <main id="main" class={mainClass}>
