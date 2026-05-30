@@ -40,6 +40,10 @@ const { dir = 'ne', class: cls = '' } = Astro.props;
 
 <style>
   .arw {
+    /* Override the global `svg { display:block }` reset so the arrow flows
+       inline beside its label in non-flex contexts (hero language link, footer
+       back-to-top). In flex contexts (buttons) display is overridden anyway. */
+    display: inline-block;
     flex: none;
     fill: none;
     stroke: currentColor;
