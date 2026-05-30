@@ -73,8 +73,9 @@ export const ON_DAY_CONTACT = {
   tel: '+447700900123', // PLACEHOLDER UK mobile
 };
 
-/** Local taxis — PLACEHOLDER. Confirm/replace. */
+/** Local taxis — Royal Cars (Oxford + Bicester), per royal-cars.com.
+    Display keeps spaced numbers; the tel: href strips spaces (see TodayPage). */
 export const TAXIS = [
-  { name: 'Royal Cars, Oxford', tel: '+441865777333' }, // PLACEHOLDER
-  { name: 'Bicester Taxis', tel: '+441869320320' }, // PLACEHOLDER
+  { name: 'Royal Cars, Oxford', tel: '+44 1865 777 333' },
+  { name: 'Royal Cars, Bicester', tel: '+44 1869 350 350' },
 ];

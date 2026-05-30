@@ -167,7 +167,7 @@ export const en: Strings = {
     label: 'Travel & Stay',
     title: 'Getting there, and resting',
     intro:
-      'Oxford and Weston-on-the-Green sit about twenty-five minutes apart, some seven miles. Here is the simplest way to each, and a few good places to rest.',
+      'Oxford and Weston-on-the-Green sit around 25 to 35 minutes apart by road, depending on traffic. Here is the simplest way to each, and a few good places to rest.',
     sections: [
       {
         title: 'By car',
@@ -175,11 +175,11 @@ export const en: Strings = {
       },
       {
         title: 'By train',
-        body: 'Oxford station is well served from London Paddington and Marylebone, about an hour from the capital, ten minutes from Magdalen by taxi. For Weston Manor, Bicester Village is the closest stop.',
+        body: 'Oxford station is well served from London Paddington and Marylebone, and is a short taxi ride from Magdalen. For Weston Manor, Islip is the closest station by taxi; Bicester Village is also a practical option.',
       },
       {
         title: 'Between the two',
-        body: 'After drinks at Magdalen we make our way north to Weston Manor: roughly twenty-five minutes, a little more at the midweek evening rush. Final transport details will be confirmed closer to the day.',
+        body: 'After drinks at Magdalen we make our way north to Weston Manor: allow around 25 to 35 minutes by road, and a little more if traffic is slow. Final transport details will be confirmed closer to the day.',
       },
     ],
     stayTitle: 'Where to stay',
@@ -221,7 +221,7 @@ export const en: Strings = {
       },
       {
         q: 'Where do I park?',
-        a: 'There is no parking at Magdalen: use the Oxford Park & Ride (Thornhill is closest) or a taxi. Weston Manor has parking on site.',
+        a: 'There is no parking at Magdalen: use the Oxford Park & Ride or a taxi. Thornhill is a practical option for guests arriving from London or the M40. Weston Manor has parking on site.',
       },
       {
         q: 'Will it be cold?',

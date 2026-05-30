@@ -168,7 +168,7 @@ export const es: Strings = {
     label: 'Cómo llegar',
     title: 'Llegar, y descansar',
     intro:
-      'Oxford y Weston-on-the-Green distan unos veinticinco minutos, unas siete millas. Esta es la forma más sencilla de llegar a cada uno, y algunos buenos lugares donde descansar.',
+      'Oxford y Weston-on-the-Green están a unos 25 o 35 minutos por carretera, según el tráfico. Esta es la forma más sencilla de llegar a cada uno, y algunos buenos lugares donde descansar.',
     sections: [
       {
         title: 'En auto',
@@ -176,11 +176,11 @@ export const es: Strings = {
       },
       {
         title: 'En tren',
-        body: 'La estación de Oxford tiene buenas conexiones desde Londres (Paddington y Marylebone): alrededor de una hora desde la capital y a diez minutos de Magdalen en taxi. Para Weston Manor, Bicester Village es la parada más cercana.',
+        body: 'La estación de Oxford tiene buenas conexiones desde Londres Paddington y London Marylebone, y queda a un corto trayecto en taxi de Magdalen. Para Weston Manor, Islip es la estación más cercana en taxi; Bicester Village también es una opción práctica.',
       },
       {
         title: 'Entre los dos',
-        body: 'Tras las copas en Magdalen iremos hacia el norte, a Weston Manor: unos veinticinco minutos, algo más en la hora pico de la tarde. Los detalles del transporte se confirmarán más cerca del día.',
+        body: 'Tras las copas en Magdalen iremos hacia el norte, a Weston Manor: calculen unos 25 o 35 minutos por carretera, y algo más si el tráfico va lento. Los detalles del transporte se confirmarán más cerca del día.',
       },
     ],
     stayTitle: 'Dónde dormir',
@@ -222,7 +222,7 @@ export const es: Strings = {
       },
       {
         q: '¿Dónde estaciono?',
-        a: 'En Magdalen no hay estacionamiento: usen el Park & Ride de Oxford (Thornhill es el más cercano) o un taxi. Weston Manor tiene estacionamiento propio.',
+        a: 'En Magdalen no hay estacionamiento: usen el Park & Ride de Oxford o un taxi. Thornhill es una opción práctica para quienes llegan desde Londres o la M40. Weston Manor tiene estacionamiento propio.',
       },
       {
         q: '¿Hará frío?',
