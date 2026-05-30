@@ -1,7 +1,8 @@
 import type { Strings } from './types';
 
-// Edición en español. Mismo tono que en inglés: cálido, exacto, sobrio y
-// literario. Bloques emparejados de longitud pareja. Trato neutro ("ustedes").
+// Edición en español (latinoamericano). Mismo tono que en inglés: cálido,
+// exacto, sobrio y literario. Bloques emparejados de longitud pareja.
+// Trato de "ustedes" en todo el sitio; léxico neutro sudamericano.
 export const es: Strings = {
   meta: {
     title: 'Mari & Michael',
@@ -40,7 +41,7 @@ export const es: Strings = {
   },
 
   quick: {
-    title: 'Encuentre su camino',
+    title: 'Encuentren su camino',
     weekend: 'El día',
     venues: 'Los lugares',
     travel: 'Cómo llegar',
@@ -53,8 +54,8 @@ export const es: Strings = {
       label: 'Bienvenida',
       title: 'Una velada a la luz de las velas',
       body: [
-        'Reuniremos a las personas que queremos en Oxford y, un poco más al norte, en Weston Manor, para una larga velada de velas, cena y baile.',
-        'Aquí encontrará todo lo necesario: cuándo llegar, adónde ir y cómo dar con nosotros. Léalo con calma; el día sabrá esperar.',
+        'Reuniremos a las personas que queremos en Oxford y, un poco más al norte, en Weston Manor, para una larga velada a la luz de las velas, con cena y baile.',
+        'Aquí encontrarán todo lo necesario: cuándo llegar, adónde ir y cómo dar con nosotros. Léanlo con calma; el día sabrá esperar.',
       ],
     },
     weekend: {
@@ -76,13 +77,13 @@ export const es: Strings = {
       title: 'Llegar, y descansar',
       intro:
         'Cómo llegar a cada lugar, dónde pasar la noche y la forma más sencilla de ir de Oxford a Bicester.',
-      cta: 'Cómo llegar y dormir',
+      cta: 'Cómo llegar y dónde dormir',
     },
     gifts: {
       label: 'Sobre los regalos',
       title: 'Su presencia',
       intro:
-        'Lo único que de verdad pedimos es su compañía. Si desea hacer algo más, dentro hay unas palabras.',
+        'Lo único que de verdad pedimos es su compañía. Si desean hacer algo más, dentro hay unas palabras.',
       cta: 'Sobre los regalos',
     },
   },
@@ -91,7 +92,7 @@ export const es: Strings = {
     label: 'El día',
     title: 'Cómo transcurre el día',
     intro:
-      'Una tarde y una noche, en dos lugares hermosos. Los horarios son orientativos: llegue con tiempo y déjese llevar.',
+      'Una tarde y una noche, en dos lugares hermosos. Los horarios son orientativos: lleguen con tiempo y déjense llevar.',
     events: [
       {
         time: '14:30',
@@ -109,7 +110,7 @@ export const es: Strings = {
         time: '16:00',
         title: 'Copas en el claustro',
         venue: 'Magdalen College',
-        note: 'Champán y la luz larga de la tarde.',
+        note: 'Champagne y la luz larga de la tarde.',
       },
       {
         time: '17:00',
@@ -133,7 +134,7 @@ export const es: Strings = {
         time: '00:00',
         title: 'Despedida',
         venue: 'Weston Manor',
-        note: 'Los últimos coches y un adiós sin prisa.',
+        note: 'Los últimos autos y un adiós sin prisa.',
       },
     ],
     closing: 'Un programa más detallado les esperará en cada puerta.',
@@ -143,23 +144,23 @@ export const es: Strings = {
     label: 'Los lugares',
     title: 'Dos lugares por descubrir',
     intro:
-      'Nos casamos en Oxford y celebramos cerca de Bicester. Cada ficha trae la dirección, un mapa al instante y cómo llegar a la puerta exacta.',
+      'Nos casamos en Oxford y celebramos cerca de Bicester. Cada ficha trae la dirección, un mapa al instante y las indicaciones para llegar a la puerta exacta.',
     roleCeremony: 'La ceremonia',
     roleReception: 'La celebración',
     arrivalLabel: 'Llegada',
-    parkingLabel: 'Aparcamiento',
+    parkingLabel: 'Estacionamiento',
     addressLabel: 'Dirección',
     magdalen: {
       blurb:
         'Una capilla de piedra y velas en la High Street, donde el parque de los ciervos se encuentra con el río. Aquí nos casaremos, entre los claustros, al caer la tarde.',
       arrival: 'Entren por la conserjería (Porters’ Lodge), en la High Street; alguien les indicará.',
-      parking: 'El College no tiene aparcamiento: usen el Park & Ride de Oxford (Thornhill es el más cercano) o un taxi.',
+      parking: 'El College no tiene estacionamiento: usen el Park & Ride de Oxford (Thornhill es el más cercano) o un taxi.',
     },
     weston: {
       blurb:
         'Un señorío con paneles de madera al norte de Oxford, cálido y de luz tenue, con mesas largas y viejos jardines. La cena y el baile nos llevarán entrada la noche.',
       arrival: 'La entrada está en Northampton Road, a dos millas de la salida 9 de la M40; sigan las indicaciones hasta la casa.',
-      parking: 'Hay aparcamiento propio en el señorío.',
+      parking: 'Hay estacionamiento propio en el señorío.',
     },
   },
 
@@ -170,8 +171,8 @@ export const es: Strings = {
       'Oxford y Weston-on-the-Green distan unos veinticinco minutos, unas siete millas. Esta es la forma más sencilla de llegar a cada uno, y algunos buenos lugares donde descansar.',
     sections: [
       {
-        title: 'En coche',
-        body: 'Ambos lugares son fáciles por carretera. Weston Manor está a dos millas de la salida 9 de la M40, junto a la A34. Magdalen no tiene aparcamiento: el Park & Ride de Oxford (Thornhill es el más cercano) evita el tráfico.',
+        title: 'En auto',
+        body: 'Ambos lugares son fáciles por carretera. Weston Manor está a dos millas de la salida 9 de la M40, junto a la A34. Magdalen no tiene estacionamiento: el Park & Ride de Oxford (Thornhill es el más cercano) evita el tráfico.',
       },
       {
         title: 'En tren',
@@ -179,7 +180,7 @@ export const es: Strings = {
       },
       {
         title: 'Entre los dos',
-        body: 'Tras las copas en Magdalen iremos hacia el norte, a Weston Manor: unos veinticinco minutos, algo más en la hora punta de la tarde. Los detalles del transporte se confirmarán más cerca del día.',
+        body: 'Tras las copas en Magdalen iremos hacia el norte, a Weston Manor: unos veinticinco minutos, algo más en la hora pico de la tarde. Los detalles del transporte se confirmarán más cerca del día.',
       },
     ],
     stayTitle: 'Dónde dormir',
@@ -220,12 +221,12 @@ export const es: Strings = {
         a: 'Todo lo necesario para responder está en su invitación. (Si no lo encuentran, escríbannos y les indicaremos.)',
       },
       {
-        q: '¿Dónde aparco?',
-        a: 'En Magdalen no hay aparcamiento: usen el Park & Ride de Oxford (Thornhill es el más cercano) o un taxi. Weston Manor tiene aparcamiento propio.',
+        q: '¿Dónde estaciono?',
+        a: 'En Magdalen no hay estacionamiento: usen el Park & Ride de Oxford (Thornhill es el más cercano) o un taxi. Weston Manor tiene estacionamiento propio.',
       },
       {
         q: '¿Hará frío?',
-        a: 'Las tardes de septiembre son suaves, pero sin prisa. El claustro está al aire libre: traigan algo de abrigo para las copas y el camino a los coches.',
+        a: 'Las tardes de septiembre son suaves, pero sin prisa. El claustro está al aire libre: traigan algo de abrigo para las copas y el camino a los autos.',
       },
       {
         q: '¿Cuándo debo llegar?',
@@ -240,7 +241,7 @@ export const es: Strings = {
         a: 'Por supuesto — solo pedimos discreción durante la ceremonia, para que el momento transcurra sin prisa. Después, fotografíen cuanto quieran; nos encantaría ver la velada con sus ojos.',
       },
     ],
-    note: '¿Sigue con alguna duda? Escríbannos: la dirección está en su invitación.',
+    note: '¿Siguen con alguna duda? Escríbannos: la dirección está en su invitación.',
   },
 
   gifts: {
@@ -248,7 +249,7 @@ export const es: Strings = {
     title: 'Su presencia es el regalo',
     body: [
       'Tener en una misma sala, a la luz de las velas, a las personas que queremos es cuanto deseamos. De verdad, que vengan es más que suficiente.',
-      'Si aun así desean marcar el día, una aportación para nuestro primer viaje juntos se recibirá con enorme cariño, y sin ninguna expectativa.',
+      'Si aun así desean marcar el día, un aporte para nuestro primer viaje juntos se recibirá con enorme cariño, y sin ninguna expectativa.',
     ],
     note: 'Con cariño y gratitud — Mari y Michael.',
   },
@@ -267,7 +268,7 @@ export const es: Strings = {
   today: {
     label: 'Esencial',
     title: 'Para el día',
-    intro: 'Todo lo que necesita, en un solo lugar. Llévelo en el bolsillo.',
+    intro: 'Todo lo que necesitan, en un solo lugar. Llévenlo en el bolsillo.',
     ceremonyTime: '15:00',
     receptionTime: '18:30',
     ceremonyLabel: 'La ceremonia',
@@ -276,8 +277,8 @@ export const es: Strings = {
     dress: 'Etiqueta (black tie)',
     contactLabel: 'Contacto ese día',
     taxisLabel: 'Taxis',
-    weatherLabel: 'El tiempo',
-    weather: 'Suave, pero fresco al anochecer: traigan algo de abrigo para el claustro y el camino a los coches.',
+    weatherLabel: 'El clima',
+    weather: 'Suave, pero fresco al anochecer: traigan algo de abrigo para el claustro y el camino a los autos.',
     closing: 'Nos vemos allí.',
   },
 
