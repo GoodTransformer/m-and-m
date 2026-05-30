@@ -78,6 +78,13 @@
   --section-y: clamp(3.5rem, 9vw, 8rem);
   --gutter: clamp(1.25rem, 5vw, 3rem);
 
+  /* Masthead height + padding. The bar's min-height and the wordmark's
+     line-height derive from these, and the mobile nav overlay starts flush at
+     --masthead-h. The padding gives the baseline-aligned row room to breathe so
+     the EN·ES / active-nav underlines never touch the bottom rule. */
+  --masthead-h: 4.25rem;
+  --masthead-pad: 0.8rem;
+
   /* ---- Measure & widths ---- */
   --measure: 64ch;
   --measure-narrow: 42ch;
