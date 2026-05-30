@@ -103,6 +103,16 @@ const homeHref = localePath('/', locale);
     padding-block: 0.65rem;
   }
 
+  /* Very narrow phones (~320px): tighten internal gaps so the row fits. */
+  @media (max-width: 20.5rem) {
+    .masthead__bar {
+      gap: 0.5rem;
+    }
+    .masthead__right {
+      gap: 0.75rem;
+    }
+  }
+
   .wordmark {
     font-family: var(--font-display);
     font-size: clamp(1.15rem, 1.6vw, 1.4rem);

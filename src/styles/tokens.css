@@ -113,3 +113,12 @@
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Very narrow phones (iPhone SE 1st-gen, Galaxy Fold cover, ~320px): trim the
+   gutter so the masthead row (wordmark + EN·ES + Menu) never crowds the edge.
+   Common widths (360/375/390px) are unaffected. */
+@media (max-width: 20.5rem) {
+  :root {
+    --gutter: 0.85rem;
+  }
+}
