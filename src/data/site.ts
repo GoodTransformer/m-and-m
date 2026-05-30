@@ -61,8 +61,8 @@ export const VENUES: Venue[] = [
     image: {
       src: 'images/weston-manor.jpg',
       alt: 'Weston Manor and its gardens',
-      width: 660,
-      height: 960,
+      width: 1280,
+      height: 1600,
     },
   },
 ];
