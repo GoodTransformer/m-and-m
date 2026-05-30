@@ -7,7 +7,7 @@ export const es: Strings = {
   meta: {
     title: 'Mari & Michael',
     description:
-      'Una invitación a la boda de Mari y Michael — Magdalen College, Oxford y Weston Manor, Bicester.',
+      'Una invitación a la boda de Mari y Michael: Magdalen College, Oxford y Weston Manor, Bicester.',
   },
 
   nav: {
@@ -238,7 +238,7 @@ export const es: Strings = {
       },
       {
         q: '¿Puedo hacer fotos?',
-        a: 'Por supuesto — solo pedimos discreción durante la ceremonia, para que el momento transcurra sin prisa. Después, fotografíen cuanto quieran; nos encantaría ver la velada con sus ojos.',
+        a: 'Por supuesto. Solo pedimos discreción durante la ceremonia, para que el momento transcurra sin prisa. Después, fotografíen cuanto quieran; nos encantaría ver la velada con sus ojos.',
       },
     ],
     note: '¿Siguen con alguna duda? Escríbannos: la dirección está en su invitación.',
@@ -251,7 +251,7 @@ export const es: Strings = {
       'Tener en una misma sala, a la luz de las velas, a las personas que queremos es cuanto deseamos. De verdad, que vengan es más que suficiente.',
       'Si aun así desean marcar el día, un aporte para nuestro primer viaje juntos se recibirá con enorme cariño, y sin ninguna expectativa.',
     ],
-    note: 'Con cariño y gratitud — Mari y Michael.',
+    note: 'Con cariño y gratitud, Mari y Michael.',
   },
 
   story: {

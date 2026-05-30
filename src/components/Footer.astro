@@ -45,6 +45,17 @@ const dateLine = capitalise(formatDateLong(SITE.date, locale));
   </div>
 </footer>
 
+<script>
+  // Bulletproof "back to top": always scroll to the very top, regardless of
+  // sticky-header offsets, scroll-padding, or smooth-scroll timing quirks.
+  // The href="#top" anchor (→ #top sentinel) stays as the no-JS fallback.
+  document.querySelector('.footer__top')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+  });
+</script>
+
 <style>
   .footer {
     flex: none;

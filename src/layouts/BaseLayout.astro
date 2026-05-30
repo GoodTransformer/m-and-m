@@ -25,7 +25,7 @@ interface Props {
 const { locale, path, title, description, mainClass = '' } = Astro.props;
 const t = getStrings(locale);
 
-const pageTitle = title ? `${title} — Mari & Michael` : t.meta.title;
+const pageTitle = title ? `${title} · Mari & Michael` : t.meta.title;
 const pageDesc = description ?? t.meta.description;
 const ogImage = new URL(`${import.meta.env.BASE_URL}og.png`, Astro.site ?? 'https://example.com').href;
 const faviconHref = `${import.meta.env.BASE_URL}favicon.svg`;
