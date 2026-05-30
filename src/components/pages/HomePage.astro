@@ -10,6 +10,7 @@ import Card from '../Card.astro';
 import Button from '../Button.astro';
 import Rule from '../Rule.astro';
 import Frame from '../Frame.astro';
+import Arrow from '../Arrow.astro';
 import { magdalenWide, westonGarden } from '../../assets/images';
 
 interface Props {
@@ -85,7 +86,7 @@ const venueRoles: Record<string, string> = {
             <p class="chapter-label">{venueRoles[v.role]}</p>
             <p class="venue-card__name">{v.name}</p>
             <p class="venue-card__place muted">{v.postcode}</p>
-            <span class="venue-card__arrow" aria-hidden="true">→</span>
+            <span class="venue-card__arrow" aria-hidden="true"><Arrow dir="right" /></span>
           </Card>
         ))
       }

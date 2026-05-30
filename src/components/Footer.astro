@@ -6,6 +6,7 @@ import { SITE } from '../data/site';
 import { formatDateLong, capitalise } from '../lib/format';
 import LanguageToggle from './LanguageToggle.astro';
 import Rule from './Rule.astro';
+import Arrow from './Arrow.astro';
 
 interface Props {
   locale: Locale;
@@ -40,7 +41,7 @@ const dateLine = capitalise(formatDateLong(SITE.date, locale));
 
     <div class="footer__meta">
       <LanguageToggle locale={locale} path={path} />
-      <a class="footer__top" href="#top">{t.footer.backToTop} ↑</a>
+      <a class="footer__top" href="#top">{t.footer.backToTop} <Arrow dir="up" /></a>
     </div>
   </div>
 </footer>
