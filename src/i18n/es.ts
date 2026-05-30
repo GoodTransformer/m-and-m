@@ -287,7 +287,7 @@ export const es: Strings = {
   },
 
   ui: {
-    directions: 'Cómo llegar',
+    directions: 'Google Maps',
     appleMaps: 'Apple Maps',
     what3words: 'what3words',
     address: 'Dirección',

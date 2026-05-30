@@ -74,5 +74,18 @@ const t = getStrings(locale);
       max-width: none;
       margin-inline: 0;
     }
+    /* Lift the first line's cap-height to the image's top edge by trimming
+       the half-leading above it. Modern browsers use text-box-trim; older
+       browsers fall back to an equivalent negative margin. */
+    .story__prose > p:first-child {
+      margin-block-start: calc((var(--fs-lead) * 1.6 - var(--fs-lead)) / -2);
+    }
+    @supports (text-box-trim: trim-start) {
+      .story__prose > p:first-child {
+        margin-block-start: 0;
+        text-box-trim: trim-start;
+        text-box-edge: cap;
+      }
+    }
   }
 </style>

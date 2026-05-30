@@ -22,7 +22,12 @@ const Tag = href ? 'a' : 'button';
   aria-label={ariaLabel}
 >
   <span class="btn__label"><slot /></span>
-  {external && <span class="btn__ext" aria-hidden="true">↗</span>}
+  {external && (
+    <svg class="btn__ext" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+      <line x1="2.5" y1="9.5" x2="9.5" y2="2.5" />
+      <polyline points="4.5,2.5 9.5,2.5 9.5,7.5" />
+    </svg>
+  )}
 </Tag>
 
 <style>
@@ -94,8 +99,18 @@ const Tag = href ? 'a' : 'button';
     border-color: var(--accent);
   }
 
+  /* Refined hairline NE arrow — replaces the chunky ↗ glyph that iOS rendered
+     as an emoji. Sized to the cap-height of the label. */
   .btn__ext {
-    font-size: 0.85em;
+    width: 0.78em;
+    height: 0.78em;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.25;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+    overflow: visible;
     transition: transform 0.3s var(--ease-soft);
   }
   .btn:hover .btn__ext {
