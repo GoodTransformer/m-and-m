@@ -4,6 +4,7 @@ import { getStrings } from '../../i18n';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Chapter from '../Chapter.astro';
 import Card from '../Card.astro';
+import Arrow from '../Arrow.astro';
 
 interface Props {
   locale: Locale;
@@ -46,7 +47,7 @@ const t = getStrings(locale);
             <p class="muted stay__note">{s.note}</p>
             {s.url && (
               <a class="stay__link" href={s.url} target="_blank" rel="noopener noreferrer">
-                {t.ui.readMore} <span aria-hidden="true">↗</span>
+                {t.ui.readMore} <Arrow dir="ne" />
               </a>
             )}
           </Card>

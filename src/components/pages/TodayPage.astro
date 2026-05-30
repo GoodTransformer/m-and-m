@@ -6,6 +6,7 @@ import { formatDateLong, capitalise } from '../../lib/format';
 import { googleDirections, what3wordsUrl } from '../../lib/maps';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Chapter from '../Chapter.astro';
+import Arrow from '../Arrow.astro';
 
 interface Props {
   locale: Locale;
@@ -47,7 +48,7 @@ const places = [
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {t.ui.directions} <span aria-hidden="true">↗</span>
+                {t.ui.directions} <Arrow dir="ne" />
               </a>
               {p.venue.what3words && (
                 <a

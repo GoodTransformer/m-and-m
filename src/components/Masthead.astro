@@ -210,6 +210,9 @@ const homeHref = localePath('/', locale);
     }
     .menu-btn__bars {
       position: relative;
+      /* Uppercase MENU has no descenders, so its optical centre sits ~1px above
+         the geometric centre; nudge the bars down to match it to the eye. */
+      transform: translateY(1px);
     }
     .menu-btn__bars::before {
       position: absolute;

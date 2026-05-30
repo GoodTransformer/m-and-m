@@ -3,6 +3,7 @@ import { localePath, otherLocale, type Locale } from '../lib/i18n';
 import { getStrings } from '../i18n';
 import { SITE } from '../data/site';
 import { formatDateLong, capitalise } from '../lib/format';
+import Arrow from './Arrow.astro';
 
 interface Props {
   locale: Locale;
@@ -27,7 +28,7 @@ const otherHome = localePath('/', otherLocale(locale));
     <p class="hero__invite lead measure-narrow center">{t.hero.invitation}</p>
 
     <a class="hero__lang" href={otherHome} hreflang={otherLocale(locale)} lang={otherLocale(locale)}>
-      {t.lang.switchTo} <span aria-hidden="true">→</span>
+      {t.lang.switchTo} <Arrow dir="right" />
     </a>
 
     <a class="hero__scroll" href="#find">
