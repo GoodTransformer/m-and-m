@@ -74,8 +74,12 @@ Placeholders currently in the site — replace before sharing widely:
 
 Venue photographs are the venues' own promotional images, used here for the private
 preview. Replace with licensed or couple-owned photos before wider use.
-- **Magdalen College** (`public/images/magdalen.jpg`) — magd.ox.ac.uk (© John Cairns).
-- **Weston Manor** (`public/images/weston-manor.jpg`, `weston-garden.webp`) — themanorweston.com.
+Photos live in `src/assets/images/` and are optimised at build time by Astro
+(Sharp → WebP, downscaled, zero layout shift) via the `Frame` / `<Image>`
+components. To swap one, replace the file (keep the name) — no markup change.
+- **Magdalen College** (`magdalen.jpg`, `magdalen-wide.jpg`) — magd.ox.ac.uk (© John Cairns).
+- **Weston Manor** (`weston-manor.jpg`, `weston-garden.webp`) — themanorweston.com.
+- **Our Story** (`our-story.jpg`) — couple's own.
 
 Regenerate the social-share card after changing the date/photos:
 `Google Chrome --headless --screenshot=public/og.png --window-size=1200,630 scripts/og.html`

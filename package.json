@@ -11,12 +11,13 @@
     "check": "astro check"
   },
   "dependencies": {
-    "astro": "^5.6.0",
+    "@fontsource-variable/eb-garamond": "^5.2.0",
     "@fontsource-variable/fraunces": "^5.1.0",
-    "@fontsource-variable/eb-garamond": "^5.2.0"
+    "astro": "^5.6.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "@types/node": "^22.19.19",
     "typescript": "^5.7.0"
   }
 }

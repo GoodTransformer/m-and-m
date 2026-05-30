@@ -4,6 +4,7 @@ import { googleDirections, appleMaps, what3wordsUrl } from '../lib/maps';
 import ImagePlaceholder from './ImagePlaceholder.astro';
 import Frame from './Frame.astro';
 import Button from './Button.astro';
+import { venueImages } from '../assets/images';
 
 interface Props {
   venue: Venue;
@@ -38,13 +39,12 @@ const dest = `${venue.name}, ${venue.postcode}`;
 <article class:list={['venue', flip && 'venue--flip', 'reveal']}>
   <div class="venue__media">
     {
-      venue.image ? (
+      venueImages[venue.id] ? (
         <Frame
-          src={venue.image.src}
-          alt={venue.image.alt}
-          width={venue.image.width}
-          height={venue.image.height}
+          src={venueImages[venue.id]}
+          alt={venue.image?.alt ?? venue.name}
           ratio="4 / 5"
+          width={940}
         />
       ) : (
         <ImagePlaceholder ratio="4 / 5" label={`${venue.name} — ${plate}`} plate="I" />

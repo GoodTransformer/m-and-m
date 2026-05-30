@@ -4,6 +4,7 @@ import { getStrings } from '../../i18n';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Chapter from '../Chapter.astro';
 import Frame from '../Frame.astro';
+import { ourStory } from '../../assets/images';
 
 interface Props {
   locale: Locale;
@@ -17,10 +18,9 @@ const t = getStrings(locale);
     <div class="story">
       <figure class="story__media reveal">
         <Frame
-          src="images/our-story.jpg"
+          src={ourStory}
           alt="A storybook cover, Bells Bells!, with Mari & Michael drawn among bell-ringers, wizards and a dragon above an Oxford square"
-          width={990}
-          height={1400}
+          width={820}
           ratio="99 / 140"
           eager
           class="story__frame"

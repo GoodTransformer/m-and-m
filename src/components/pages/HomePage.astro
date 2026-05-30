@@ -10,6 +10,7 @@ import Card from '../Card.astro';
 import Button from '../Button.astro';
 import Rule from '../Rule.astro';
 import Frame from '../Frame.astro';
+import { magdalenWide, westonGarden } from '../../assets/images';
 
 interface Props {
   locale: Locale;
@@ -49,13 +50,7 @@ const venueRoles: Record<string, string> = {
         {t.home.welcome.body.map((p) => <p class="welcome__p">{p}</p>)}
       </div>
       <div class="welcome__media reveal">
-        <Frame
-          src="images/magdalen-wide.jpg"
-          alt="Magdalen College, Oxford"
-          width={1600}
-          height={800}
-          ratio="3/2"
-        />
+        <Frame src={magdalenWide} alt="Magdalen College, Oxford" width={1120} ratio="3/2" />
       </div>
     </div>
   </Chapter>
@@ -101,13 +96,7 @@ const venueRoles: Record<string, string> = {
   <Chapter label={t.home.travel.label} numeral="IV" id="travel-preview">
     <div class="split">
       <div class="split__media reveal">
-        <Frame
-          src="images/weston-garden.webp"
-          alt="Weston Manor across its gardens"
-          width={800}
-          height={534}
-          ratio="3/2"
-        />
+        <Frame src={westonGarden} alt="Weston Manor across its gardens" width={900} ratio="3/2" />
       </div>
       <div class="split__text reveal">
         <h2>{t.home.travel.title}</h2>
