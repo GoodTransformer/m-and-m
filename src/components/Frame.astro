@@ -1,7 +1,10 @@
 ---
-// A real photograph, framed to match the site's "plate" aesthetic. The image is
-// run through Astro's pipeline (Sharp) → WebP, downscaled to `width`, with
-// intrinsic dimensions baked in (zero layout shift). Lazy by default.
+// A real photograph, framed to match the site's "plate" aesthetic. Astro's
+// pipeline (Sharp) emits WebP at several widths with a `sizes` hint, so each
+// device downloads only what it displays — phones get a small file, retina
+// desktops a crisp one. Intrinsic width/height are baked in (zero layout shift),
+// and the warm frame background shows while the bytes arrive, so nothing flashes
+// white. Lazy by default; eager images are also fetch-prioritised.
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
@@ -9,23 +12,41 @@ interface Props {
   src: ImageMetadata;
   alt: string;
   ratio?: string;
-  width?: number; // optimised output width cap (px); default 1000
+  /** Max display width (px). Caps the generated set; never upscales past source. */
+  width?: number;
+  /** Responsive sizes hint. Default suits the half-width splits used on the site. */
+  sizes?: string;
   eager?: boolean;
   class?: string;
 }
-const { src, alt, ratio = '3/2', width = 1000, eager = false, class: cls = '' } = Astro.props;
-// never upscale past the source
-const outWidth = Math.min(width, src.width);
+const {
+  src,
+  alt,
+  ratio = '3/2',
+  width = 1000,
+  sizes = '(min-width: 48rem) 48vw, 92vw',
+  eager = false,
+  class: cls = '',
+} = Astro.props;
+
+// Never upscale past the source, then build a small ladder of widths up to that
+// cap: phones pull ~400–640px, laptops the mid sizes, retina the full width.
+const cap = Math.min(width, src.width);
+const widths = [...new Set([400, 640, 960, 1280, cap])]
+  .filter((w) => w <= cap)
+  .sort((a, b) => a - b);
 ---
 
 <figure class:list={['frame', cls]} style={`--ratio:${ratio}`}>
   <Image
     src={src}
     alt={alt}
-    width={outWidth}
+    widths={widths}
+    sizes={sizes}
     format="webp"
     quality={74}
     loading={eager ? 'eager' : 'lazy'}
+    fetchpriority={eager ? 'high' : 'auto'}
     decoding="async"
   />
 </figure>
