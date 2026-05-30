@@ -45,18 +45,18 @@ src/
 
 ### Swapping in real photos
 
-Images are currently the `ImagePlaceholder` component (a framed "plate" that
-holds exact dimensions, so there's no layout shift when you replace it). When
-photos are ready, drop them in `public/` and replace the relevant
-`<ImagePlaceholder … />` with a `<picture>` (export art-directed mobile and
-desktop crops; prefer AVIF/WebP; keep the same aspect ratio).
+Photos live in `src/assets/images/` and render through the `Frame` component
+(Astro's `<Image>` → Sharp), which optimises to WebP, downscales to the size
+actually displayed, and reserves the aspect ratio so there's zero layout shift.
+To swap one, replace the file in `src/assets/images/` keeping the same name —
+no markup change needed.
 
 ## Details to confirm
 
 Placeholders currently in the site — replace before sharing widely:
 
 - [x] **Wedding date** — Wednesday, 23 September 2026 (confirmed; midweek, so no "weekend" copy)
-- [ ] **Ceremony & reception times** (2:00 pm / 6:30 pm) — `i18n/*.ts` (`weekend`, `today`)
+- [ ] **Ceremony & reception times** (currently 3:00 pm / 6:30 pm — 3 pm not yet firmly confirmed) — `i18n/*.ts` (`weekend`, `today`)
 - [ ] **Running order** of the day — `i18n/*.ts` (`weekend.events`)
 - [ ] **Dress code** wording (currently *Black tie*) — `i18n/*.ts`
 - [ ] **what3words** square for each entrance — `data/site.ts`
