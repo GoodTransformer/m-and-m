@@ -6,10 +6,20 @@ import Footer from '../components/Footer.astro';
 
 // Self-hosted fonts (Fontsource). Fraunces "standard" carries the weight +
 // optical-size axes; EB Garamond carries weight. Italics imported separately.
+// Each @font-face is unicode-range-gated, so a visitor only downloads the latin
+// faces their text needs (Spanish accents are U+00xx ∈ latin); the other subsets
+// ship in the bundle but are never fetched.
 import '@fontsource-variable/fraunces/standard.css';
 import '@fontsource-variable/fraunces/standard-italic.css';
 import '@fontsource-variable/eb-garamond/index.css';
 import '@fontsource-variable/eb-garamond/wght-italic.css';
+
+// Preload the three latin faces that paint the hero/body above the fold, so the
+// type settles immediately instead of flashing from the serif fallback. These
+// `?url` imports resolve to the build-hashed file paths (robust across rebuilds).
+import frauncesNormal from '@fontsource-variable/fraunces/files/fraunces-latin-standard-normal.woff2?url';
+import frauncesItalic from '@fontsource-variable/fraunces/files/fraunces-latin-standard-italic.woff2?url';
+import ebGaramondNormal from '@fontsource-variable/eb-garamond/files/eb-garamond-latin-wght-normal.woff2?url';
 
 import '../styles/tokens.css';
 import '../styles/base.css';
@@ -45,6 +55,12 @@ const faviconHref = `${import.meta.env.BASE_URL}favicon.svg`;
     <meta name="color-scheme" content="light" />
     <meta name="theme-color" content="#f2e8d8" />
     <link rel="icon" href={faviconHref} type="image/svg+xml" />
+
+    <!-- Preload the latin faces that paint the hero/body above the fold so the
+         type settles instantly (no flash from the serif fallback). -->
+    <link rel="preload" href={frauncesNormal} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={frauncesItalic} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={ebGaramondNormal} as="font" type="font/woff2" crossorigin />
 
     <!-- Social preview (for sharing the link privately) -->
     <meta property="og:type" content="website" />
