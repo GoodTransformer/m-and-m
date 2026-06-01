@@ -74,17 +74,26 @@ export function mealLabel(id: string, locale: 'en' | 'es'): string {
   return MEALS.find((m) => m.id === id)?.[locale] ?? id;
 }
 
-/** Pair up per-guest names with their meal choice into "Name: Dish" lines, for
-    the admin roster, the CSV, and the confirmation email (place-card ready). */
-export function rosterLines(guestNames: string[], meals: string[], locale: 'en' | 'es'): string[] {
-  const len = Math.max(guestNames.length, meals.length);
-  const lines: string[] = [];
-  for (let i = 0; i < len; i++) {
-    const name = (guestNames[i] || '').trim() || `#${i + 1}`;
-    const meal = meals[i] ? mealLabel(meals[i], locale) : '—';
-    lines.push(`${name}: ${meal}`);
-  }
-  return lines;
+/** A minimal shape of a reply's roster entry (matches db.ts RosterEntry, but
+    declared structurally so this language-neutral module needn't import the DB). */
+export interface RosterLike {
+  name: string;
+  coming: boolean;
+  meal: string;
+}
+
+/** "Name: Dish" lines for the guests who are coming — for the admin roster, the
+    CSV, and the confirmation email (place-card ready). */
+export function rosterLines(roster: RosterLike[], locale: 'en' | 'es'): string[] {
+  return roster
+    .filter((r) => r.coming)
+    .map((r) => `${(r.name || '').trim() || '—'}: ${r.meal ? mealLabel(r.meal, locale) : '—'}`);
+}
+
+/** Names of guests marked not coming — shown muted in the admin so a partial
+    decline is visible at a glance. */
+export function notComingNames(roster: RosterLike[]): string[] {
+  return roster.filter((r) => !r.coming && (r.name || '').trim()).map((r) => r.name.trim());
 }
 
 export const VENUES: Venue[] = [

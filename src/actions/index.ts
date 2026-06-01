@@ -1,12 +1,20 @@
 // ============================================================
 // RSVP submission. The form carries a household `code` (from the personal link),
 // so a reply is tied to one household and *updates* on resubmit — never a
-// duplicate. Flow: validate → anti-spam → look up household → cap party size →
-// upsert reply → best-effort confirmation + (slim) notification emails.
+// duplicate. The invited people's NAMES come from the household on the server,
+// never the form: the form only reports, per seat, whether that person is coming
+// and their meal, plus any typed names for plus-one seats you've granted.
+// Flow: validate → anti-spam → look up household → build roster → upsert →
+// best-effort confirmation + (slim) notification emails.
 // ============================================================
 import { defineAction, ActionError } from 'astro:actions';
 import { z } from 'astro:schema';
-import { getHouseholdByCode, upsertRsvpForHousehold, getResponseForHousehold } from '../lib/db';
+import {
+  getHouseholdByCode,
+  upsertRsvpForHousehold,
+  getResponseForHousehold,
+  type RosterEntry,
+} from '../lib/db';
 import { verifyTurnstile } from '../lib/turnstile';
 import { sendGuestConfirmation, sendCoupleNotification } from '../lib/email';
 import { isRsvpOpen, MEAL_IDS } from '../data/site';
@@ -20,17 +28,16 @@ export const server = {
     accept: 'form',
     input: z.object({
       code: z.string().trim().min(1).max(32),
-      names: z.string().trim().min(1).max(200),
       email: z.string().trim().email().max(200),
       attending: z.enum(['yes', 'no']),
-      partySize: z.coerce.number().int().min(0).max(50).catch(1),
       dietary: optionalText(1000),
       message: optionalText(2000),
-      // One meal id per attending guest. A bare z.array makes Astro collect every
-      // same-name <select> via getAll() (a preprocess/effects wrapper would not).
-      meals: z.array(z.string().max(40)).max(30),
-      // Optional name per attending guest, parallel to meals (for place cards).
-      guestNames: z.array(z.string().max(120)).max(30),
+      // Per-seat fields. Bare z.array makes Astro collect every same-name control
+      // via getAll() (a preprocess/effects wrapper would not). One `coming` and
+      // one `meals` per invited seat (in order); one `plusName` per plus-one seat.
+      coming: z.array(z.string().max(8)).max(60),
+      meals: z.array(z.string().max(40)).max(60),
+      plusName: z.array(z.string().max(120)).max(30),
       // Anti-spam (not shown to humans):
       website: optionalText(100), // honeypot — must come back empty
       _t: z.coerce.number().catch(0), // epoch ms the form was rendered
@@ -58,29 +65,39 @@ export const server = {
         if (!ts.ok) throw new ActionError({ code: 'BAD_REQUEST', message: 'captcha' });
       }
 
-      // Cap the party size to this household's allowance (never below 1 seat).
-      const cap = Math.max(household.maxSeats, 1);
-      const partySize = input.attending === 'yes' ? Math.min(Math.max(input.partySize, 1), cap) : 0;
+      // Build the reply roster server-side. Invited names are the household's, not
+      // the form's; plus-one names are accepted only up to the granted allowance.
+      const invited = household.invitedGuests;
+      const plusCap = Math.max(household.plusOnes, 0);
+      const mealAt = (i: number) => {
+        const m = input.meals[i] ?? '';
+        return MEAL_IDS.has(m) ? m : '';
+      };
 
-      // One meal per attending guest; keep only valid ids ('' = not chosen).
-      const meals =
-        input.attending === 'yes'
-          ? input.meals.slice(0, partySize).map((m) => (MEAL_IDS.has(m) ? m : ''))
-          : [];
-      const guestNames =
-        input.attending === 'yes'
-          ? input.guestNames.slice(0, partySize).map((s) => s.trim().slice(0, 120))
-          : [];
+      const roster: RosterEntry[] = [];
+      if (input.attending === 'yes') {
+        invited.forEach((name, i) => {
+          const coming = input.coming[i] !== 'no'; // default to coming unless said otherwise
+          roster.push({ name, coming, meal: coming ? mealAt(i) : '', plusOne: false });
+        });
+        for (let j = 0; j < plusCap; j++) {
+          const name = (input.plusName[j] ?? '').trim().slice(0, 120);
+          const coming = name !== ''; // a plus-one only counts once named
+          roster.push({ name, coming, meal: coming ? mealAt(invited.length + j) : '', plusOne: true });
+        }
+      }
+
+      const partySize = roster.filter((r) => r.coming).length;
+      // Said yes but nobody is actually coming → treat as a decline.
+      const attending = partySize > 0 ? 'yes' : 'no';
 
       await upsertRsvpForHousehold(household.id, {
-        attending: input.attending,
+        attending,
         partySize,
-        names: input.names,
+        roster,
         email: input.email,
         dietary: input.dietary,
         message: input.message,
-        meals,
-        guestNames,
       });
 
       const response = await getResponseForHousehold(household.id);
@@ -100,7 +117,7 @@ export const server = {
         }
       }
 
-      return { ok: true as const, attending: input.attending };
+      return { ok: true as const, attending };
     },
   }),
 };

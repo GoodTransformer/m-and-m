@@ -52,9 +52,9 @@ const heading = household ? t.title : t.noCodeTitle;
             <RsvpForm
               locale={locale}
               code={household.code}
-              invitedNames={household.invitedNames}
+              invitedGuests={household.invitedGuests}
+              plusOnes={household.plusOnes}
               defaultEmail={household.email ?? ''}
-              maxSeats={household.maxSeats}
               response={response}
               submitted={submitted}
               errors={errors}

@@ -2,7 +2,7 @@
 export const prerender = false;
 import { listHouseholdsWithResponses, type HouseholdWithResponse } from '../lib/db';
 import { householdLink, siteOriginLooksUnset } from '../lib/links';
-import { MEALS, MEALS_ENABLED, rosterLines } from '../data/site';
+import { MEALS, MEALS_ENABLED, rosterLines, notComingNames } from '../data/site';
 import '../styles/tokens.css';
 
 const households = await listHouseholdsWithResponses();
@@ -14,13 +14,16 @@ const pendingInvite = households.filter((h) => h.inviteStatus !== 'sent' && h.em
 const outstanding = households.filter((h) => h.inviteStatus === 'sent' && !h.response).length;
 const dietaryCount = attending.filter((h) => h.response!.dietary.trim()).length;
 
-// Meal tally for the caterer + count of households still missing a meal for someone.
+// Meal tally for the caterer + count of households where a coming guest has no meal.
 const mealTally = MEALS.map((m) => ({
   label: m.en,
-  count: attending.reduce((n, h) => n + h.response!.meals.filter((x) => x === m.id).length, 0),
+  count: attending.reduce(
+    (n, h) => n + h.response!.roster.filter((r) => r.coming && r.meal === m.id).length,
+    0,
+  ),
 }));
-const missingMeals = attending.filter(
-  (h) => h.response!.meals.filter(Boolean).length < h.response!.partySize,
+const missingMeals = attending.filter((h) =>
+  h.response!.roster.some((r) => r.coming && !r.meal),
 ).length;
 
 // Safety net: warn if the live origin looks unset, which would bake broken
@@ -40,16 +43,12 @@ function statusLabel(s: string): string {
   return s === 'sent' ? 'invited' : s;
 }
 
-function mealSummary(guestNames: string[], meals: string[]): string {
-  const lines = rosterLines(guestNames, meals, 'en');
-  return lines.length ? lines.join(', ') : '—';
-}
 function isMissingMeals(h: HouseholdWithResponse): boolean {
   return Boolean(
     MEALS_ENABLED &&
       h.response &&
       h.response.attending === 'yes' &&
-      h.response.meals.filter(Boolean).length < h.response.partySize,
+      h.response.roster.some((r) => r.coming && !r.meal),
   );
 }
 ---
@@ -165,7 +164,10 @@ function isMissingMeals(h: HouseholdWithResponse): boolean {
                         <code class="code">{h.code}</code>
                       </td>
                       <td>{h.email ?? '—'}</td>
-                      <td>{h.maxSeats}</td>
+                      <td>
+                        {h.invitedGuests.length}
+                        {h.plusOnes > 0 && <span class="muted-inline"> +{h.plusOnes}</span>}
+                      </td>
                       <td>{h.locale}</td>
                       <td>{statusLabel(h.inviteStatus)}</td>
                       <td>
@@ -177,9 +179,19 @@ function isMissingMeals(h: HouseholdWithResponse): boolean {
                       </td>
                       {MEALS_ENABLED && (
                         <td>
-                          {h.response && h.response.attending === 'yes'
-                            ? mealSummary(h.response.guestNames, h.response.meals)
-                            : '—'}
+                          {h.response && h.response.attending === 'yes' ? (
+                            <>
+                              {rosterLines(h.response.roster, 'en').join(', ') || '—'}
+                              {notComingNames(h.response.roster).length > 0 && (
+                                <span class="declined">
+                                  {'  ·  '}
+                                  {notComingNames(h.response.roster).join(', ')} can’t come
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            '—'
+                          )}
                         </td>
                       )}
                     </tr>
@@ -195,14 +207,17 @@ function isMissingMeals(h: HouseholdWithResponse): boolean {
       <section class="card">
         <h2>Import guest list</h2>
         <p class="muted">
-          Paste a CSV with a header row. Columns: <code>household, email, seats, language, names</code>
-          — only <code>household</code> is required. Re-importing updates existing rows (matched by
-          email). Each new household gets its own unguessable link.
+          Paste a CSV with a header row. Columns:
+          <code>household, guests, email, plus, language</code> — only <code>household</code> is
+          required. List each household's people in <code>guests</code>, separated by semicolons —
+          those are the seats. <code>plus</code> is how many extra “+ guest” seats they may bring
+          (default 0). Re-importing updates existing rows (matched by email). Each new household gets
+          its own unguessable link.
         </p>
         <textarea
           data-csv
           rows="6"
-          placeholder="household,email,seats,language,names&#10;The Whitfields,eleanor@example.com,2,en,Eleanor & James"
+          placeholder="household,guests,email,plus,language&#10;The Whitfields,Eleanor Whitfield; James Whitfield,eleanor@example.com,0,en"
 ></textarea>
         <div class="btns">
           <button type="button" data-import-preview>Preview</button>
@@ -479,6 +494,13 @@ function isMissingMeals(h: HouseholdWithResponse): boolean {
       }
       tr.missing td {
         background: color-mix(in srgb, #b8860b 14%, transparent);
+      }
+      .declined,
+      .muted-inline {
+        color: var(--text-muted, #6b5a4f);
+      }
+      .declined {
+        font-size: 0.85em;
       }
     </style>
   </body>

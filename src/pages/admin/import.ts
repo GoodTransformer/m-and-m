@@ -49,8 +49,9 @@ export const POST: APIRoute = async ({ request }) => {
     const base: NewHousehold = {
       label: row.label,
       invitedNames: row.invitedNames,
+      invitedGuests: row.invitedGuests,
+      plusOnes: row.plusOnes,
       email: row.email,
-      maxSeats: row.maxSeats,
       locale: row.locale,
     };
     // Match an existing household by email, else by name — so correcting a typo'd

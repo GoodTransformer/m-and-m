@@ -3,7 +3,7 @@
 export const prerender = false;
 import type { APIRoute } from 'astro';
 import { listHouseholdsWithResponses } from '../../lib/db';
-import { rosterLines } from '../../data/site';
+import { rosterLines, notComingNames } from '../../data/site';
 import { csvCell } from '../../lib/csv';
 
 export const GET: APIRoute = async () => {
@@ -19,6 +19,7 @@ export const GET: APIRoute = async () => {
     'Attending',
     'Party size',
     'Guests & meals',
+    'Not coming',
     'Dietary',
     'Message',
     'Updated',
@@ -37,7 +38,8 @@ export const GET: APIRoute = async () => {
         r ? 'yes' : 'no',
         r ? r.attending : '',
         r && r.attending === 'yes' ? r.partySize : '',
-        r && r.attending === 'yes' ? rosterLines(r.guestNames, r.meals, 'en').join('; ') : '',
+        r && r.attending === 'yes' ? rosterLines(r.roster, 'en').join('; ') : '',
+        r ? notComingNames(r.roster).join('; ') : '',
         r ? r.dietary : '',
         r ? r.message : '',
         r ? r.updatedAt : '',

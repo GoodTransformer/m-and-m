@@ -12,10 +12,11 @@ service below.
    link like `https://site/rsvp/?c=K7P2QX` (Spanish households get the `/es/` one).
 2. You send each household its link by email — **automatically from `/admin`**, or
    by copying the link and sending it yourself.
-3. The guest opens their link: the form is **pre-filled** with their names, the
-   party size is **capped at their allowed seats**, and they answer attending /
-   dietary / message. Submitting **updates their one record** — replying again
-   never makes a duplicate, and the same link lets them **edit** later.
+3. The guest opens their link: their **invited people are listed by name**, and
+   they confirm who can come and pick each person's meal. They **cannot add anyone
+   you didn't invite** — only a plus-one seat you've explicitly granted lets them
+   type a name. Submitting **updates their one record** — replying again never
+   makes a duplicate, and the same link lets them **edit** later.
 4. On submit, the guest gets a confirmation email and the couple get a
    notification. Anyone opening `/rsvp` **without** a valid link sees a polite
    "use your invitation link" page — no open form, so no gate-crashing.
@@ -41,16 +42,20 @@ A header row plus one row per household. Only `household` is required.
 | Column | Required | Meaning |
 |---|---|---|
 | `household` | ✓ | The greeting / display name, e.g. `The Whitfields` |
+| `guests` | – | The people invited — one full name each, separated by **semicolons**. These *are* the seats. Defaults to a single seat using `household`. |
 | `email` | – | Where the invitation is sent (blank = a "paper" guest you invite by hand) |
-| `seats` | – | Allowed party size (default 2) — the form won't let them exceed it |
+| `plus` | – | Extra "+ guest" seats the household may bring (default `0`) — the only way a guest can add an un-named person |
 | `language` | – | `en` or `es` (default `en`) — picks their language edition |
-| `names` | – | Names to pre-fill on the form (default = `household`) |
 
 ```csv
-household,email,seats,language,names
-The Whitfields,eleanor@example.com,2,en,Eleanor & James Whitfield
-Familia Peña,pena@example.com,4,es,Mariana y familia
+household,guests,email,plus,language
+The Whitfields,Eleanor Whitfield; James Whitfield,eleanor@example.com,0,en
+Familia Peña,Mariana Peña; Diego Peña; Lucía Peña,pena@example.com,1,es
 ```
+
+`guests` is the heart of it: list exactly the people you're inviting, and those
+become their seats. A guest can never add someone you didn't name — give a
+household a `plus` of `1` only when you want to allow an un-named partner.
 
 ### The safe send workflow (do this in order)
 

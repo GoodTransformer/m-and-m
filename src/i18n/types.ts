@@ -28,25 +28,24 @@ export interface RsvpStrings {
   intro: string;
   deadlineNote: string; // contains a {date} token, filled in at render time
 
-  namesLabel: string;
-  namesHint: string;
   emailLabel: string;
   emailHint: string;
   attendingLegend: string;
   attendingYes: string;
   attendingNo: string;
-  partyLabel: string;
-  partyHint: string;
   dietaryLabel: string;
   dietaryHint: string;
   messageLabel: string;
   messageHint: string;
 
-  mealsLabel: string;
+  mealsLabel: string; // the "Guests & meals" section heading
   mealsHint: string;
-  mealGuest: string; // "Guest {n}" — {n} is replaced with the seat number
-  mealChoose: string; // the empty "— choose —" option
-  mealName: string; // placeholder for the optional per-guest name field
+  mealChoose: string; // the empty "— choose —" meal option
+  comingLabel: string; // aria label for a guest's attendance toggle
+  comingYes: string; // "Coming"
+  comingNo: string; // "Can’t come"
+  plusOneName: string; // placeholder for a granted plus-one's name
+  plusOneNote: string; // note under the guest list when a plus-one is allowed
 
   required: string;
   optional: string;
@@ -57,10 +56,8 @@ export interface RsvpStrings {
   successTitle: string;
   successBody: string;
   errorSummary: string;
-  errorNames: string;
   errorEmail: string;
   errorAttending: string;
-  errorParty: string;
   submitError: string;
 
   closedTitle: string;

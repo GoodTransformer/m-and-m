@@ -1,8 +1,10 @@
 // ============================================================
 // RSVP datastore (libSQL / Turso). SERVER-ONLY — never imported by client code.
-// Guest-list model: one `households` row per invited party (with an unguessable
-// code and invite status), and at most one `rsvps` row per household (their
-// reply). Every query is parameterised, so input can't be interpolated into SQL.
+// Guest-list model: one `households` row per invited party, carrying the *named*
+// invited guests and any granted plus-ones (plus an unguessable code + invite
+// status), and at most one `rsvps` row per household — their reply, stored as a
+// per-person roster. Every query is parameterised, so input can't be
+// interpolated into SQL.
 // ============================================================
 import { createClient, type Client } from '@libsql/client';
 import { generateCode } from './code';
@@ -24,9 +26,11 @@ export interface Household {
   id: number;
   code: string;
   label: string;
-  invitedNames: string;
+  invitedNames: string; // display string, e.g. "Eleanor & James Whitfield"
+  invitedGuests: string[]; // the named people — the authoritative seat list
+  plusOnes: number; // granted extra "+ guest" seats (default 0)
   email: string | null;
-  maxSeats: number;
+  maxSeats: number; // = invitedGuests.length + plusOnes (the cap)
   locale: Locale;
   inviteStatus: InviteStatus;
   invitedAt: string | null;
@@ -35,15 +39,22 @@ export interface Household {
   createdAt: string;
 }
 
+/** One seat of a reply. `name` is an invited person (taken from the household,
+    never the form) or, for a plus-one, the name the guest typed. */
+export interface RosterEntry {
+  name: string;
+  coming: boolean;
+  meal: string; // meal id, or '' when none chosen / not coming
+  plusOne: boolean;
+}
+
 export interface RsvpResponse {
-  attending: Attending;
-  partySize: number;
-  names: string;
+  attending: Attending; // derived: 'yes' iff at least one seat is coming
+  partySize: number; // count of coming seats
+  roster: RosterEntry[]; // positional: invited guests first, then plus-one slots
   email: string;
   dietary: string;
   message: string;
-  meals: string[]; // one meal id per attending guest ('' = not chosen)
-  guestNames: string[]; // optional name per attending guest, parallel to meals
   updatedAt: string;
 }
 
@@ -54,9 +65,15 @@ export interface HouseholdWithResponse extends Household {
 export interface NewHousehold {
   label: string;
   invitedNames: string;
+  invitedGuests: string[];
+  plusOnes: number;
   email: string | null;
-  maxSeats: number;
   locale: Locale;
+}
+
+/** Seat cap = named people + granted plus-ones, never below 1. */
+export function seatsFor(invitedGuests: string[], plusOnes: number): number {
+  return Math.max(invitedGuests.length + Math.max(plusOnes, 0), 1);
 }
 
 // --- schema -------------------------------------------------------------------
@@ -67,18 +84,20 @@ function ensureSchema(): Promise<void> {
       await db().batch(
         [
           `CREATE TABLE IF NOT EXISTS households (
-            id            INTEGER PRIMARY KEY AUTOINCREMENT,
-            code          TEXT    NOT NULL UNIQUE,
-            label         TEXT    NOT NULL,
-            invited_names TEXT    NOT NULL DEFAULT '',
-            email         TEXT,
-            max_seats     INTEGER NOT NULL DEFAULT 2,
-            locale        TEXT    NOT NULL DEFAULT 'en',
-            invite_status TEXT    NOT NULL DEFAULT 'pending',
-            invited_at    TEXT,
-            reminded_at   TEXT,
-            invite_error  TEXT,
-            created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            code           TEXT    NOT NULL UNIQUE,
+            label          TEXT    NOT NULL,
+            invited_names  TEXT    NOT NULL DEFAULT '',
+            invited_guests TEXT    NOT NULL DEFAULT '[]',
+            plus_ones      INTEGER NOT NULL DEFAULT 0,
+            email          TEXT,
+            max_seats      INTEGER NOT NULL DEFAULT 2,
+            locale         TEXT    NOT NULL DEFAULT 'en',
+            invite_status  TEXT    NOT NULL DEFAULT 'pending',
+            invited_at     TEXT,
+            reminded_at    TEXT,
+            invite_error   TEXT,
+            created_at     TEXT    NOT NULL DEFAULT (datetime('now'))
           )`,
           // One household per email (NULLs allowed for paper-only guests).
           `CREATE UNIQUE INDEX IF NOT EXISTS idx_households_email ON households(lower(email))`,
@@ -87,25 +106,22 @@ function ensureSchema(): Promise<void> {
             household_id INTEGER NOT NULL UNIQUE REFERENCES households(id) ON DELETE CASCADE,
             attending    TEXT    NOT NULL,
             party_size   INTEGER NOT NULL DEFAULT 0,
-            names        TEXT    NOT NULL DEFAULT '',
+            roster       TEXT    NOT NULL DEFAULT '[]',
             email        TEXT    NOT NULL DEFAULT '',
             dietary      TEXT    NOT NULL DEFAULT '',
             message      TEXT    NOT NULL DEFAULT '',
-            meals        TEXT    NOT NULL DEFAULT '[]',
-            guest_names  TEXT    NOT NULL DEFAULT '[]',
             created_at   TEXT    NOT NULL DEFAULT (datetime('now')),
             updated_at   TEXT    NOT NULL DEFAULT (datetime('now'))
           )`,
         ],
         'write',
       );
-      // Migrations for databases created before a column existed (no-op if present).
-      await db()
-        .execute(`ALTER TABLE rsvps ADD COLUMN meals TEXT NOT NULL DEFAULT '[]'`)
-        .catch(() => undefined);
-      await db()
-        .execute(`ALTER TABLE rsvps ADD COLUMN guest_names TEXT NOT NULL DEFAULT '[]'`)
-        .catch(() => undefined);
+      // Additive migrations for databases created before a column existed
+      // (no-op if the column is already there).
+      const add = (sql: string) => db().execute(sql).catch(() => undefined);
+      await add(`ALTER TABLE households ADD COLUMN invited_guests TEXT NOT NULL DEFAULT '[]'`);
+      await add(`ALTER TABLE households ADD COLUMN plus_ones INTEGER NOT NULL DEFAULT 0`);
+      await add(`ALTER TABLE rsvps ADD COLUMN roster TEXT NOT NULL DEFAULT '[]'`);
     })().catch((err) => {
       _schema = null;
       throw err;
@@ -116,14 +132,46 @@ function ensureSchema(): Promise<void> {
 
 // --- row mappers --------------------------------------------------------------
 /* eslint-disable @typescript-eslint/no-explicit-any */
+function parseStringArray(v: unknown): string[] {
+  if (typeof v !== 'string' || !v) return [];
+  try {
+    const a = JSON.parse(v);
+    return Array.isArray(a) ? a.filter((x) => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+function parseRoster(v: unknown): RosterEntry[] {
+  if (typeof v !== 'string' || !v) return [];
+  try {
+    const a = JSON.parse(v);
+    if (!Array.isArray(a)) return [];
+    return a
+      .filter((x) => x && typeof x === 'object')
+      .map((x: any) => ({
+        name: typeof x.name === 'string' ? x.name : '',
+        coming: Boolean(x.coming),
+        meal: typeof x.meal === 'string' ? x.meal : '',
+        plusOne: Boolean(x.plusOne),
+      }));
+  } catch {
+    return [];
+  }
+}
+
 function toHousehold(r: any): Household {
+  const invitedGuests = parseStringArray(r.invited_guests);
+  const plusOnes = Math.max(Number(r.plus_ones ?? 0) || 0, 0);
   return {
     id: Number(r.id),
     code: String(r.code),
     label: String(r.label ?? ''),
     invitedNames: String(r.invited_names ?? ''),
+    invitedGuests,
+    plusOnes,
     email: r.email == null ? null : String(r.email),
-    maxSeats: Number(r.max_seats ?? 1),
+    maxSeats: Number(r.max_seats ?? 0) || seatsFor(invitedGuests, plusOnes),
     locale: String(r.locale) === 'es' ? 'es' : 'en',
     inviteStatus: (['pending', 'sent', 'failed'].includes(String(r.invite_status))
       ? String(r.invite_status)
@@ -135,27 +183,15 @@ function toHousehold(r: any): Household {
   };
 }
 
-function parseStringArray(v: unknown): string[] {
-  if (typeof v !== 'string' || !v) return [];
-  try {
-    const a = JSON.parse(v);
-    return Array.isArray(a) ? a.filter((x) => typeof x === 'string') : [];
-  } catch {
-    return [];
-  }
-}
-
 function toResponse(r: any): RsvpResponse | null {
   if (r.attending == null) return null;
   return {
     attending: String(r.attending) === 'no' ? 'no' : 'yes',
     partySize: Number(r.party_size ?? 0),
-    names: String(r.r_names ?? ''),
+    roster: parseRoster(r.roster),
     email: String(r.r_email ?? ''),
     dietary: String(r.dietary ?? ''),
     message: String(r.message ?? ''),
-    meals: parseStringArray(r.meals),
-    guestNames: parseStringArray(r.guest_names),
     updatedAt: String(r.r_updated ?? ''),
   };
 }
@@ -198,9 +234,18 @@ export async function insertHousehold(h: NewHousehold): Promise<string> {
   await ensureSchema();
   const code = await generateUniqueCode();
   await db().execute({
-    sql: `INSERT INTO households (code, label, invited_names, email, max_seats, locale)
-          VALUES (?, ?, ?, ?, ?, ?)`,
-    args: [code, h.label, h.invitedNames, h.email, h.maxSeats, h.locale],
+    sql: `INSERT INTO households (code, label, invited_names, invited_guests, plus_ones, email, max_seats, locale)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      code,
+      h.label,
+      h.invitedNames,
+      JSON.stringify(h.invitedGuests),
+      h.plusOnes,
+      h.email,
+      seatsFor(h.invitedGuests, h.plusOnes),
+      h.locale,
+    ],
   });
   return code;
 }
@@ -210,9 +255,18 @@ export async function updateHouseholdDetails(id: number, h: NewHousehold): Promi
   await ensureSchema();
   await db().execute({
     sql: `UPDATE households
-          SET label = ?, invited_names = ?, email = ?, max_seats = ?, locale = ?
+          SET label = ?, invited_names = ?, invited_guests = ?, plus_ones = ?, email = ?, max_seats = ?, locale = ?
           WHERE id = ?`,
-    args: [h.label, h.invitedNames, h.email, h.maxSeats, h.locale, id],
+    args: [
+      h.label,
+      h.invitedNames,
+      JSON.stringify(h.invitedGuests),
+      h.plusOnes,
+      h.email,
+      seatsFor(h.invitedGuests, h.plusOnes),
+      h.locale,
+      id,
+    ],
   });
 }
 
@@ -228,24 +282,51 @@ export async function importHouseholds(
   await ensureSchema();
   const stmts = [
     ...inserts.map((h) => ({
-      sql: `INSERT OR IGNORE INTO households (code, label, invited_names, email, max_seats, locale)
-            VALUES (?, ?, ?, ?, ?, ?)`,
-      args: [h.code, h.label, h.invitedNames, h.email, h.maxSeats, h.locale],
+      sql: `INSERT OR IGNORE INTO households (code, label, invited_names, invited_guests, plus_ones, email, max_seats, locale)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [
+        h.code,
+        h.label,
+        h.invitedNames,
+        JSON.stringify(h.invitedGuests),
+        h.plusOnes,
+        h.email,
+        seatsFor(h.invitedGuests, h.plusOnes),
+        h.locale,
+      ],
     })),
     ...updates.map((h) =>
       h.resetInvite
         ? {
             sql: `UPDATE households
-                  SET label = ?, invited_names = ?, email = ?, max_seats = ?, locale = ?,
+                  SET label = ?, invited_names = ?, invited_guests = ?, plus_ones = ?, email = ?, max_seats = ?, locale = ?,
                       invite_status = 'pending', invited_at = NULL, invite_error = NULL
                   WHERE id = ?`,
-            args: [h.label, h.invitedNames, h.email, h.maxSeats, h.locale, h.id],
+            args: [
+              h.label,
+              h.invitedNames,
+              JSON.stringify(h.invitedGuests),
+              h.plusOnes,
+              h.email,
+              seatsFor(h.invitedGuests, h.plusOnes),
+              h.locale,
+              h.id,
+            ],
           }
         : {
             sql: `UPDATE households
-                  SET label = ?, invited_names = ?, email = ?, max_seats = ?, locale = ?
+                  SET label = ?, invited_names = ?, invited_guests = ?, plus_ones = ?, email = ?, max_seats = ?, locale = ?
                   WHERE id = ?`,
-            args: [h.label, h.invitedNames, h.email, h.maxSeats, h.locale, h.id],
+            args: [
+              h.label,
+              h.invitedNames,
+              JSON.stringify(h.invitedGuests),
+              h.plusOnes,
+              h.email,
+              seatsFor(h.invitedGuests, h.plusOnes),
+              h.locale,
+              h.id,
+            ],
           },
     ),
   ];
@@ -256,8 +337,8 @@ export async function listHouseholdsWithResponses(): Promise<HouseholdWithRespon
   await ensureSchema();
   const { rows } = await db().execute(
     `SELECT h.*,
-            r.attending, r.party_size, r.names AS r_names, r.email AS r_email,
-            r.dietary, r.message, r.meals, r.guest_names, r.updated_at AS r_updated
+            r.attending, r.party_size, r.roster, r.email AS r_email,
+            r.dietary, r.message, r.updated_at AS r_updated
      FROM households h
      LEFT JOIN rsvps r ON r.household_id = h.id
      ORDER BY h.label COLLATE NOCASE`,
@@ -271,38 +352,32 @@ export async function upsertRsvpForHousehold(
   data: {
     attending: Attending;
     partySize: number;
-    names: string;
+    roster: RosterEntry[];
     email: string;
     dietary: string;
     message: string;
-    meals: string[];
-    guestNames: string[];
   },
 ): Promise<void> {
   await ensureSchema();
   await db().execute({
-    sql: `INSERT INTO rsvps (household_id, attending, party_size, names, email, dietary, message, meals, guest_names)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    sql: `INSERT INTO rsvps (household_id, attending, party_size, roster, email, dietary, message)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(household_id) DO UPDATE SET
             attending   = excluded.attending,
             party_size  = excluded.party_size,
-            names       = excluded.names,
+            roster      = excluded.roster,
             email       = excluded.email,
             dietary     = excluded.dietary,
             message     = excluded.message,
-            meals       = excluded.meals,
-            guest_names = excluded.guest_names,
             updated_at  = datetime('now')`,
     args: [
       householdId,
       data.attending,
       data.partySize,
-      data.names,
+      JSON.stringify(data.roster),
       data.email,
       data.dietary,
       data.message,
-      JSON.stringify(data.meals),
-      JSON.stringify(data.guestNames),
     ],
   });
 }
@@ -310,8 +385,8 @@ export async function upsertRsvpForHousehold(
 export async function getResponseForHousehold(householdId: number): Promise<RsvpResponse | null> {
   await ensureSchema();
   const { rows } = await db().execute({
-    sql: `SELECT attending, party_size, names AS r_names, email AS r_email,
-                 dietary, message, meals, guest_names, updated_at AS r_updated
+    sql: `SELECT attending, party_size, roster, email AS r_email,
+                 dietary, message, updated_at AS r_updated
           FROM rsvps WHERE household_id = ? LIMIT 1`,
     args: [householdId],
   });

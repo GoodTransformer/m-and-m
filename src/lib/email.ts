@@ -8,7 +8,7 @@
 import { Resend } from 'resend';
 import type { Household, RsvpResponse } from './db';
 import { householdLink, adminUrl } from './links';
-import { SITE, RSVP, rosterLines } from '../data/site';
+import { SITE, RSVP, rosterLines, notComingNames } from '../data/site';
 
 const API_KEY = import.meta.env.RESEND_API_KEY || '';
 const FROM = import.meta.env.RSVP_FROM_EMAIL || 'Mari & Michael <onboarding@resend.dev>';
@@ -153,12 +153,11 @@ export async function sendGuestConfirmation(
   const es = locale === 'es';
   const subject = es ? 'Hemos recibido su respuesta · Mari & Michael' : 'We have your reply · Mari & Michael';
   const intro = es ? 'Esto es lo que nos enviaron:' : 'Here is what you sent us:';
-  const rows = [
-    [es ? 'Nombre(s)' : 'Name(s)', r.names],
-    [es ? 'Respuesta' : 'Reply', attendingLine(r, locale)],
-  ];
-  const roster = rosterLines(r.guestNames, r.meals, locale);
-  if (roster.length) rows.push([es ? 'Menú' : 'Meals', roster.join(', ')]);
+  const rows = [[es ? 'Respuesta' : 'Reply', attendingLine(r, locale)]];
+  const coming = rosterLines(r.roster, locale);
+  if (coming.length) rows.push([es ? 'Quiénes vienen' : 'Who’s coming', coming.join(', ')]);
+  const notComing = notComingNames(r.roster);
+  if (notComing.length) rows.push([es ? 'No podrán' : 'Not coming', notComing.join(', ')]);
   if (r.dietary.trim()) rows.push([es ? 'Dietas / alergias' : 'Dietary / allergies', r.dietary]);
   if (r.message.trim()) rows.push([es ? 'Mensaje' : 'Message', r.message]);
   const table = rows

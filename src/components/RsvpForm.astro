@@ -10,9 +10,9 @@ import Button from './Button.astro';
 interface Props {
   locale: Locale;
   code: string;
-  invitedNames: string;
+  invitedGuests: string[];
+  plusOnes: number;
   defaultEmail: string;
-  maxSeats: number;
   response?: RsvpResponse | null;
   submitted?: SubmittedValues;
   errors?: RsvpFieldErrors;
@@ -21,9 +21,9 @@ interface Props {
 const {
   locale,
   code,
-  invitedNames,
+  invitedGuests,
+  plusOnes,
   defaultEmail,
-  maxSeats,
   response = null,
   submitted,
   errors = {},
@@ -35,20 +35,39 @@ const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY || '';
 const dby = (id: string, hasErr: boolean) => (hasErr ? `${id}-hint ${id}-error` : `${id}-hint`);
 
 // Pre-fill order: what the guest just typed (no-JS error re-render) > a prior
-// reply (edit mode) > the invitation defaults.
-const nameValue = submitted?.names || response?.names || invitedNames;
+// reply (edit mode) > the defaults.
 const emailValue = submitted?.email || response?.email || defaultEmail;
 const messageValue = submitted?.message ?? response?.message ?? '';
 const dietaryValue = submitted?.dietary ?? response?.dietary ?? '';
 const attendingChoice = submitted?.attending ?? response?.attending;
 const attendingYes = attendingChoice === 'yes';
 const attendingNo = attendingChoice === 'no';
-const seats = Array.from({ length: Math.max(maxSeats, 1) }, (_, i) => i + 1);
-const partyValue = submitted?.partySize ?? response?.partySize ?? 1;
-const selectedSeats = Math.min(Math.max(partyValue, 1), Math.max(maxSeats, 1));
+
 const showMeals = MEALS_ENABLED;
-const mealPrefill = submitted?.meals ?? response?.meals ?? [];
-const guestNamePrefill = submitted?.guestNames ?? response?.guestNames ?? [];
+const N = invitedGuests.length;
+// A single invited guest needs no per-person toggle — they're coming if the
+// household is. With two or more, each gets a Coming / Can't-come choice.
+const perGuestToggle = N > 1;
+const roster = response?.roster ?? [];
+
+const comingPrefill = (i: number): boolean => {
+  const s = submitted?.coming;
+  if (s && i < s.length) return s[i] !== 'no';
+  const e = roster[i];
+  return e ? e.coming : true; // default to coming
+};
+// Meals are positional across all seats: invited guests [0..N-1], then plus-ones.
+const mealPrefillAt = (seat: number): string => {
+  const s = submitted?.meals;
+  if (s && seat < s.length) return s[seat] ?? '';
+  return roster[seat]?.meal ?? '';
+};
+const plusNamePrefill = (j: number): string => {
+  const s = submitted?.plusName;
+  if (s && j < s.length) return s[j] ?? '';
+  return roster[N + j]?.name ?? '';
+};
+const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
 ---
 
 <form
@@ -57,10 +76,8 @@ const guestNamePrefill = submitted?.guestNames ?? response?.guestNames ?? [];
   action={actions.rsvp}
   data-rsvp
   data-err-summary={t.errorSummary}
-  data-err-names={t.errorNames}
   data-err-email={t.errorEmail}
   data-err-attending={t.errorAttending}
-  data-err-party={t.errorParty}
   data-err-closed={t.closedBody}
   data-err-submit={t.submitError}
   data-label-submit={t.submit}
@@ -76,26 +93,6 @@ const guestNamePrefill = submitted?.guestNames ?? response?.guestNames ?? [];
 
   <input type="hidden" name="code" value={code} />
   <input type="hidden" name="_t" value="" data-rendered-at />
-
-  {/* Name(s) */}
-  <div class="field">
-    <label for="rsvp-names">{t.namesLabel} <span class="req">{t.required}</span></label>
-    <p class="field__hint" id="rsvp-names-hint">{t.namesHint}</p>
-    <input
-      id="rsvp-names"
-      name="names"
-      type="text"
-      required
-      maxlength="200"
-      autocomplete="name"
-      value={nameValue}
-      aria-describedby={dby('rsvp-names', Boolean(errors.names))}
-      aria-invalid={errors.names ? 'true' : undefined}
-    />
-    <p class="field__error" id="rsvp-names-error" data-error="names" hidden={!errors.names}>
-      {errors.names}
-    </p>
-  </div>
 
   {/* Attending */}
   <fieldset class="field" aria-describedby={errors.attending ? 'rsvp-attending-error' : undefined}>
@@ -115,60 +112,67 @@ const guestNamePrefill = submitted?.guestNames ?? response?.guestNames ?? [];
     </p>
   </fieldset>
 
-  {/* Party size — only when more than one seat; JS hides it on "no". */}
-  {
-    maxSeats > 1 && (
-      <div class="field" data-when-yes>
-        <label for="rsvp-party">{t.partyLabel}</label>
-        <p class="field__hint" id="rsvp-party-hint">{t.partyHint}</p>
-        <select id="rsvp-party" name="partySize" aria-describedby="rsvp-party-hint">
-          {seats.map((n) => (
-            <option value={n} selected={n === selectedSeats}>
-              {n}
-            </option>
-          ))}
-        </select>
-      </div>
-    )
-  }
-
-  {/* Meal choices — one per attending guest; JS shows only party-size of them. */}
-  {
-    showMeals && (
-      <div class="field" data-when-yes data-meal-section>
-        <span class="field__grouplabel">{t.mealsLabel}</span>
-        <p class="field__hint">{t.mealsHint}</p>
-        <div class="meals">
-          {seats.map((n) => {
-            const who = t.mealGuest.replace('{n}', String(n));
-            return (
-              <div class="meal" data-meal-row data-seat={n}>
-                <span class="meal__who">{who}</span>
-                <input
-                  type="text"
-                  name="guestNames"
-                  class="meal__name"
-                  placeholder={t.mealName}
-                  value={guestNamePrefill[n - 1] ?? ''}
-                  maxlength="120"
-                  autocomplete="off"
-                  aria-label={`${who} — ${t.mealName}`}
-                />
-                <select name="meals" class="meal__select" aria-label={`${who} — ${t.mealsLabel}`}>
-                  <option value="">{t.mealChoose}</option>
-                  {MEALS.map((m) => (
-                    <option value={m.id} selected={mealPrefill[n - 1] === m.id}>
-                      {locale === 'es' ? m.es : m.en}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    )
-  }
+  {/* Who's coming + meals — your named guests (fixed), then any granted plus-one. */}
+  <div class="field" data-when-yes>
+    <span class="field__grouplabel">{t.mealsLabel}</span>
+    <p class="field__hint">{t.mealsHint}</p>
+    <div class="guests">
+      {
+        invitedGuests.map((name, i) => (
+          <div class="guest" data-guest-row>
+            <span class="guest__name">{name}</span>
+            {perGuestToggle && (
+              <select class="guest__coming" name="coming" aria-label={`${name} — ${t.comingLabel}`}>
+                <option value="yes" selected={comingPrefill(i)}>
+                  {t.comingYes}
+                </option>
+                <option value="no" selected={!comingPrefill(i)}>
+                  {t.comingNo}
+                </option>
+              </select>
+            )}
+            {showMeals && (
+              <select class="guest__meal" name="meals" data-meal aria-label={`${name} — ${t.mealsLabel}`}>
+                <option value="">{t.mealChoose}</option>
+                {MEALS.map((m) => (
+                  <option value={m.id} selected={mealPrefillAt(i) === m.id}>
+                    {locale === 'es' ? m.es : m.en}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+        ))
+      }
+      {
+        plusSlots.map((j) => (
+          <div class="guest guest--plus" data-guest-row data-plus>
+            <input
+              type="text"
+              name="plusName"
+              class="guest__plusname"
+              placeholder={t.plusOneName}
+              value={plusNamePrefill(j)}
+              maxlength="120"
+              autocomplete="off"
+              aria-label={t.plusOneName}
+            />
+            {showMeals && (
+              <select class="guest__meal" name="meals" data-meal aria-label={`${t.plusOneName} — ${t.mealsLabel}`}>
+                <option value="">{t.mealChoose}</option>
+                {MEALS.map((m) => (
+                  <option value={m.id} selected={mealPrefillAt(N + j) === m.id}>
+                    {locale === 'es' ? m.es : m.en}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+        ))
+      }
+    </div>
+    {plusOnes > 0 && <p class="field__hint guests__note">{t.plusOneNote}</p>}
+  </div>
 
   {/* Email */}
   <div class="field">
@@ -247,10 +251,8 @@ const guestNamePrefill = submitted?.guestNames ?? response?.guestNames ?? [];
       closed: d.errClosed || '',
       submitError: d.errSubmit || '',
       fields: {
-        names: d.errNames || '',
         email: d.errEmail || '',
         attending: d.errAttending || '',
-        partySize: d.errParty || '',
       } as Record<string, string>,
     };
 
@@ -261,6 +263,7 @@ const guestNamePrefill = submitted?.guestNames ?? response?.guestNames ?? [];
     const stamp = form.querySelector<HTMLInputElement>('[data-rendered-at]');
     if (stamp) stamp.value = String(Date.now());
 
+    // Reveal the attending-only sections (guests, dietary) on "yes".
     const conditional = Array.from(form.querySelectorAll<HTMLElement>('[data-when-yes]'));
     const radios = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="attending"]'));
     const syncConditional = () => {
@@ -271,18 +274,30 @@ const guestNamePrefill = submitted?.guestNames ?? response?.guestNames ?? [];
     radios.forEach((r) => r.addEventListener('change', syncConditional));
     syncConditional();
 
-    // Show only as many meal selectors as the chosen party size.
-    const partySelect = form.querySelector<HTMLSelectElement>('#rsvp-party');
-    const mealRows = Array.from(form.querySelectorAll<HTMLElement>('[data-meal-row]'));
-    const syncMeals = () => {
-      const n = partySelect ? Number(partySelect.value) || 1 : Infinity;
-      mealRows.forEach((row) => {
-        row.hidden = Number(row.dataset.seat) > n;
-      });
+    // Per guest: show the meal selector only when that person is actually coming
+    // (or, for a plus-one, only once a name is typed).
+    const guestRows = Array.from(form.querySelectorAll<HTMLElement>('[data-guest-row]'));
+    const syncGuestRow = (row: HTMLElement) => {
+      const meal = row.querySelector<HTMLElement>('[data-meal]');
+      if (!meal) return;
+      const coming = row.querySelector<HTMLSelectElement>('select[name="coming"]');
+      const plusname = row.querySelector<HTMLInputElement>('input[name="plusName"]');
+      let show = true;
+      if (coming) show = coming.value !== 'no';
+      else if (plusname) show = plusname.value.trim() !== '';
+      meal.hidden = !show;
     };
-    partySelect?.addEventListener('change', syncMeals);
-    syncMeals();
+    guestRows.forEach((row) => {
+      row
+        .querySelector<HTMLSelectElement>('select[name="coming"]')
+        ?.addEventListener('change', () => syncGuestRow(row));
+      row
+        .querySelector<HTMLInputElement>('input[name="plusName"]')
+        ?.addEventListener('input', () => syncGuestRow(row));
+      syncGuestRow(row);
+    });
 
+    const ERROR_FIELDS = ['attending', 'email'] as const;
     const fieldError = (name: string) => form.querySelector<HTMLElement>(`[data-error="${name}"]`);
     const fieldInput = (name: string) =>
       form.querySelector<HTMLInputElement | HTMLSelectElement>(`[name="${name}"]`);
@@ -313,7 +328,7 @@ const guestNamePrefill = submitted?.guestNames ?? response?.guestNames ?? [];
         summaryEl.hidden = true;
         summaryEl.textContent = '';
       }
-      (['names', 'email', 'attending', 'partySize'] as const).forEach((name) => {
+      ERROR_FIELDS.forEach((name) => {
         const err = fieldError(name);
         if (err) {
           err.hidden = true;
@@ -371,7 +386,7 @@ const guestNamePrefill = submitted?.guestNames ?? response?.guestNames ?? [];
       if (error && isInputError(error)) {
         const fields = error.fields as Record<string, string[] | undefined>;
         let firstInvalid: string | null = null;
-        (['names', 'attending', 'partySize', 'email'] as const).forEach((name) => {
+        ERROR_FIELDS.forEach((name) => {
           if (fields[name]) {
             showFieldError(name, labels.fields[name]);
             if (!firstInvalid) firstInvalid = name;
@@ -503,34 +518,50 @@ const guestNamePrefill = submitted?.guestNames ?? response?.guestNames ?? [];
     font-weight: 500;
     color: var(--text-display);
   }
-  .meals {
+
+  /* Per-guest rows: a fixed name, an optional coming toggle, a meal select. */
+  .guests {
     display: grid;
-    gap: 0.55rem;
+    gap: 0.6rem;
     margin-top: 0.5rem;
   }
-  .meal {
+  .guest {
     display: flex;
     align-items: center;
     gap: 0.6rem;
     flex-wrap: wrap;
   }
-  .meal[hidden] {
-    display: none;
+  .guest__name {
+    flex: 0 0 auto;
+    min-width: 7.5rem;
+    font-size: 1rem;
+    font-weight: 460;
+    color: var(--text);
   }
-  .meal__who {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    min-width: 3.5rem;
-  }
-  .meal__name {
-    flex: 1 1 9rem;
-    min-width: 0;
+  .guest__coming {
+    flex: 0 1 9rem;
     max-width: none;
   }
-  .meal__select {
+  .guest__meal {
     flex: 1 1 11rem;
     min-width: 0;
     max-width: none;
+  }
+  .guest__meal[hidden] {
+    display: none;
+  }
+  .guest__plusname {
+    flex: 1 1 10rem;
+    min-width: 0;
+    max-width: none;
+  }
+  .guest--plus {
+    margin-top: 0.15rem;
+    padding-top: 0.65rem;
+    border-top: 1px dashed var(--rule);
+  }
+  .guests__note {
+    margin-top: 0.65rem;
   }
 
   .rsvp__summary {

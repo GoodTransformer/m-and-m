@@ -8,10 +8,8 @@ import type { Locale } from './i18n';
 import { getHouseholdByCode, getResponseForHousehold, type Household, type RsvpResponse } from './db';
 
 export interface RsvpFieldErrors {
-  names?: string;
   email?: string;
   attending?: string;
-  partySize?: string;
 }
 
 export interface RsvpErrorState {
@@ -31,10 +29,8 @@ export function rsvpErrorsFrom(
   if (isInputError(error as never)) {
     const fields = (error as { fields: Record<string, string[] | undefined> }).fields;
     const errors: RsvpFieldErrors = {};
-    if (fields.names) errors.names = t.errorNames;
     if (fields.email) errors.email = t.errorEmail;
     if (fields.attending) errors.attending = t.errorAttending;
-    if (fields.partySize) errors.partySize = t.errorParty;
     return { errors, summary: t.errorSummary };
   }
 
@@ -45,14 +41,13 @@ export function rsvpErrorsFrom(
 }
 
 export interface SubmittedValues {
-  names?: string;
   email?: string;
   attending?: 'yes' | 'no';
-  partySize?: number;
   dietary?: string;
   message?: string;
-  meals?: string[];
-  guestNames?: string[];
+  coming?: string[]; // per invited seat: 'yes' | 'no'
+  meals?: string[]; // per seat (invited guests, then plus-one slots)
+  plusName?: string[]; // per plus-one seat
 }
 
 export interface RsvpContext {
@@ -87,16 +82,16 @@ export async function loadRsvp(
         return typeof v === 'string' ? v : undefined;
       };
       const att = str('attending');
-      const party = str('partySize');
+      const strArr = (k: string) =>
+        fd.getAll(k).filter((v): v is string => typeof v === 'string');
       submitted = {
-        names: str('names'),
         email: str('email'),
         attending: att === 'yes' || att === 'no' ? att : undefined,
-        partySize: party ? Number(party) : undefined,
         dietary: str('dietary'),
         message: str('message'),
-        meals: fd.getAll('meals').filter((v): v is string => typeof v === 'string'),
-        guestNames: fd.getAll('guestNames').filter((v): v is string => typeof v === 'string'),
+        coming: strArr('coming'),
+        meals: strArr('meals'),
+        plusName: strArr('plusName'),
       };
     } catch {
       submitted = undefined;

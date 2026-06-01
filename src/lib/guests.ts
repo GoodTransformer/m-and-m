@@ -2,17 +2,23 @@
 // endpoint for both the dry-run preview and the real import).
 //
 // Accepted columns (header row, case-insensitive; aliases in parentheses):
-//   household (label, party)   — required: the greeting / display name
-//   email                      — optional: where the invitation is sent
-//   seats (max_seats)          — optional: allowed party size (default 2)
-//   language (locale)          — optional: en | es (default en)
-//   names (invited_names)      — optional: names to pre-fill (default = household)
+//   household (label, party)        — required: the greeting / display name
+//   guests (names, invited_names)   — the people invited, one full name each,
+//                                     separated by semicolons. These ARE the
+//                                     seats. If blank, defaults to one seat using
+//                                     the household name.
+//   plus (plus_ones, plus-one)      — optional: extra unnamed "+ guest" seats the
+//                                     household may bring (default 0)
+//   email                           — optional: where the invitation is sent
+//   language (locale)               — optional: en | es (default en)
 import { parseCsv } from './csv';
 
 export interface ParsedGuestRow {
   line: number;
   label: string;
   email: string | null;
+  invitedGuests: string[];
+  plusOnes: number;
   maxSeats: number;
   locale: 'en' | 'es';
   invitedNames: string;
@@ -27,9 +33,17 @@ export interface ParsedGuestList {
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_GUESTS = 20;
+const MAX_PLUS = 20;
 
 function findColumn(header: string[], names: string[]): number {
   return header.findIndex((h) => names.includes(h));
+}
+
+/** Natural-language join: "Eleanor", "Eleanor & James", "Chidi, Amara & Ngozi". */
+function joinNames(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? '';
+  return `${names.slice(0, -1).join(', ')} & ${names[names.length - 1]}`;
 }
 
 export function parseGuestCsv(text: string): ParsedGuestList {
@@ -40,14 +54,14 @@ export function parseGuestCsv(text: string): ParsedGuestList {
   const col = {
     label: findColumn(header, ['household', 'label', 'party', 'name']),
     email: findColumn(header, ['email', 'e-mail']),
-    seats: findColumn(header, ['seats', 'max_seats', 'max seats', 'maxseats']),
+    guests: findColumn(header, ['guests', 'names', 'invited_names', 'invited names', 'people']),
+    plus: findColumn(header, ['plus', 'plus_ones', 'plus ones', 'plusones', 'plus_one', 'plus-one', 'plus one', 'extra']),
     locale: findColumn(header, ['language', 'locale', 'lang']),
-    names: findColumn(header, ['names', 'invited_names', 'invited names', 'guests']),
   };
   if (col.label === -1) {
     return {
       rows: [],
-      headerError: 'Missing a "household" column. Header row must include at least: household, email.',
+      headerError: 'Missing a "household" column. Header row must include at least: household, guests.',
       validCount: 0,
     };
   }
@@ -61,22 +75,30 @@ export function parseGuestCsv(text: string): ParsedGuestList {
     const label = get(col.label);
     const rawEmail = get(col.email);
     const email = rawEmail ? rawEmail.toLowerCase() : null;
-    const rawSeats = get(col.seats);
     const rawLocale = get(col.locale).toLowerCase();
-    const names = get(col.names) || label;
+    const rawPlus = get(col.plus);
+
+    // The named people are the seats. Separate with semicolons or new lines.
+    let invitedGuests = get(col.guests)
+      .split(/[;\n]+/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((s) => s.slice(0, 120));
+    if (invitedGuests.length === 0 && label) invitedGuests = [label];
 
     let issue: string | undefined;
-    let maxSeats = 2;
+    let plusOnes = 0;
     let locale: 'en' | 'es' = 'en';
 
     if (!label) issue = 'Missing household name';
     else if (email && !EMAIL_RE.test(email)) issue = 'Invalid email';
     else if (email && seenEmail.has(email)) issue = 'Duplicate email in list';
-    else if (rawSeats && !/^\d+$/.test(rawSeats)) issue = 'Seats must be a whole number';
-    else if (rawSeats && (Number(rawSeats) < 1 || Number(rawSeats) > 50)) issue = 'Seats must be 1–50';
+    else if (invitedGuests.length > MAX_GUESTS) issue = `Too many guests (max ${MAX_GUESTS})`;
+    else if (rawPlus && !/^\d+$/.test(rawPlus)) issue = 'Plus-ones must be a whole number';
+    else if (rawPlus && Number(rawPlus) > MAX_PLUS) issue = `Plus-ones must be 0–${MAX_PLUS}`;
     else if (rawLocale && rawLocale !== 'en' && rawLocale !== 'es') issue = 'Language must be en or es';
 
-    if (rawSeats && /^\d+$/.test(rawSeats)) maxSeats = Math.min(Math.max(Number(rawSeats), 1), 50);
+    if (rawPlus && /^\d+$/.test(rawPlus)) plusOnes = Math.min(Number(rawPlus), MAX_PLUS);
     if (rawLocale === 'es') locale = 'es';
     if (email) seenEmail.add(email);
 
@@ -84,9 +106,11 @@ export function parseGuestCsv(text: string): ParsedGuestList {
       line: i + 1,
       label,
       email,
-      maxSeats,
+      invitedGuests,
+      plusOnes,
+      maxSeats: Math.max(invitedGuests.length + plusOnes, 1),
       locale,
-      invitedNames: names,
+      invitedNames: joinNames(invitedGuests) || label,
       valid: !issue,
       issue,
     });
