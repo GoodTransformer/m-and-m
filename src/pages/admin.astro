@@ -2,7 +2,7 @@
 export const prerender = false;
 import { listHouseholdsWithResponses, type HouseholdWithResponse } from '../lib/db';
 import { householdLink, siteOriginLooksUnset } from '../lib/links';
-import { MEALS, MEALS_ENABLED, mealLabel } from '../data/site';
+import { MEALS, MEALS_ENABLED, rosterLines } from '../data/site';
 import '../styles/tokens.css';
 
 const households = await listHouseholdsWithResponses();
@@ -40,9 +40,9 @@ function statusLabel(s: string): string {
   return s === 'sent' ? 'invited' : s;
 }
 
-function mealSummary(meals: string[]): string {
-  const chosen = meals.filter(Boolean).map((id) => mealLabel(id, 'en'));
-  return chosen.length ? chosen.join(', ') : '—';
+function mealSummary(guestNames: string[], meals: string[]): string {
+  const lines = rosterLines(guestNames, meals, 'en');
+  return lines.length ? lines.join(', ') : '—';
 }
 function isMissingMeals(h: HouseholdWithResponse): boolean {
   return Boolean(
@@ -178,7 +178,7 @@ function isMissingMeals(h: HouseholdWithResponse): boolean {
                       {MEALS_ENABLED && (
                         <td>
                           {h.response && h.response.attending === 'yes'
-                            ? mealSummary(h.response.meals)
+                            ? mealSummary(h.response.guestNames, h.response.meals)
                             : '—'}
                         </td>
                       )}

@@ -74,6 +74,19 @@ export function mealLabel(id: string, locale: 'en' | 'es'): string {
   return MEALS.find((m) => m.id === id)?.[locale] ?? id;
 }
 
+/** Pair up per-guest names with their meal choice into "Name: Dish" lines, for
+    the admin roster, the CSV, and the confirmation email (place-card ready). */
+export function rosterLines(guestNames: string[], meals: string[], locale: 'en' | 'es'): string[] {
+  const len = Math.max(guestNames.length, meals.length);
+  const lines: string[] = [];
+  for (let i = 0; i < len; i++) {
+    const name = (guestNames[i] || '').trim() || `#${i + 1}`;
+    const meal = meals[i] ? mealLabel(meals[i], locale) : '—';
+    lines.push(`${name}: ${meal}`);
+  }
+  return lines;
+}
+
 export const VENUES: Venue[] = [
   {
     id: 'magdalen',

@@ -43,6 +43,7 @@ export interface RsvpResponse {
   dietary: string;
   message: string;
   meals: string[]; // one meal id per attending guest ('' = not chosen)
+  guestNames: string[]; // optional name per attending guest, parallel to meals
   updatedAt: string;
 }
 
@@ -91,6 +92,7 @@ function ensureSchema(): Promise<void> {
             dietary      TEXT    NOT NULL DEFAULT '',
             message      TEXT    NOT NULL DEFAULT '',
             meals        TEXT    NOT NULL DEFAULT '[]',
+            guest_names  TEXT    NOT NULL DEFAULT '[]',
             created_at   TEXT    NOT NULL DEFAULT (datetime('now')),
             updated_at   TEXT    NOT NULL DEFAULT (datetime('now'))
           )`,
@@ -100,6 +102,9 @@ function ensureSchema(): Promise<void> {
       // Migrations for databases created before a column existed (no-op if present).
       await db()
         .execute(`ALTER TABLE rsvps ADD COLUMN meals TEXT NOT NULL DEFAULT '[]'`)
+        .catch(() => undefined);
+      await db()
+        .execute(`ALTER TABLE rsvps ADD COLUMN guest_names TEXT NOT NULL DEFAULT '[]'`)
         .catch(() => undefined);
     })().catch((err) => {
       _schema = null;
@@ -130,7 +135,7 @@ function toHousehold(r: any): Household {
   };
 }
 
-function parseMeals(v: unknown): string[] {
+function parseStringArray(v: unknown): string[] {
   if (typeof v !== 'string' || !v) return [];
   try {
     const a = JSON.parse(v);
@@ -149,7 +154,8 @@ function toResponse(r: any): RsvpResponse | null {
     email: String(r.r_email ?? ''),
     dietary: String(r.dietary ?? ''),
     message: String(r.message ?? ''),
-    meals: parseMeals(r.meals),
+    meals: parseStringArray(r.meals),
+    guestNames: parseStringArray(r.guest_names),
     updatedAt: String(r.r_updated ?? ''),
   };
 }
@@ -251,7 +257,7 @@ export async function listHouseholdsWithResponses(): Promise<HouseholdWithRespon
   const { rows } = await db().execute(
     `SELECT h.*,
             r.attending, r.party_size, r.names AS r_names, r.email AS r_email,
-            r.dietary, r.message, r.meals, r.updated_at AS r_updated
+            r.dietary, r.message, r.meals, r.guest_names, r.updated_at AS r_updated
      FROM households h
      LEFT JOIN rsvps r ON r.household_id = h.id
      ORDER BY h.label COLLATE NOCASE`,
@@ -270,21 +276,23 @@ export async function upsertRsvpForHousehold(
     dietary: string;
     message: string;
     meals: string[];
+    guestNames: string[];
   },
 ): Promise<void> {
   await ensureSchema();
   await db().execute({
-    sql: `INSERT INTO rsvps (household_id, attending, party_size, names, email, dietary, message, meals)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    sql: `INSERT INTO rsvps (household_id, attending, party_size, names, email, dietary, message, meals, guest_names)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(household_id) DO UPDATE SET
-            attending  = excluded.attending,
-            party_size = excluded.party_size,
-            names      = excluded.names,
-            email      = excluded.email,
-            dietary    = excluded.dietary,
-            message    = excluded.message,
-            meals      = excluded.meals,
-            updated_at = datetime('now')`,
+            attending   = excluded.attending,
+            party_size  = excluded.party_size,
+            names       = excluded.names,
+            email       = excluded.email,
+            dietary     = excluded.dietary,
+            message     = excluded.message,
+            meals       = excluded.meals,
+            guest_names = excluded.guest_names,
+            updated_at  = datetime('now')`,
     args: [
       householdId,
       data.attending,
@@ -294,6 +302,7 @@ export async function upsertRsvpForHousehold(
       data.dietary,
       data.message,
       JSON.stringify(data.meals),
+      JSON.stringify(data.guestNames),
     ],
   });
 }
@@ -302,7 +311,7 @@ export async function getResponseForHousehold(householdId: number): Promise<Rsvp
   await ensureSchema();
   const { rows } = await db().execute({
     sql: `SELECT attending, party_size, names AS r_names, email AS r_email,
-                 dietary, message, meals, updated_at AS r_updated
+                 dietary, message, meals, guest_names, updated_at AS r_updated
           FROM rsvps WHERE household_id = ? LIMIT 1`,
     args: [householdId],
   });

@@ -46,6 +46,7 @@ export interface RsvpStrings {
   mealsHint: string;
   mealGuest: string; // "Guest {n}" — {n} is replaced with the seat number
   mealChoose: string; // the empty "— choose —" option
+  mealName: string; // placeholder for the optional per-guest name field
 
   required: string;
   optional: string;

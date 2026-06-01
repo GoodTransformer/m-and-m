@@ -52,6 +52,7 @@ export interface SubmittedValues {
   dietary?: string;
   message?: string;
   meals?: string[];
+  guestNames?: string[];
 }
 
 export interface RsvpContext {
@@ -95,6 +96,7 @@ export async function loadRsvp(
         dietary: str('dietary'),
         message: str('message'),
         meals: fd.getAll('meals').filter((v): v is string => typeof v === 'string'),
+        guestNames: fd.getAll('guestNames').filter((v): v is string => typeof v === 'string'),
       };
     } catch {
       submitted = undefined;

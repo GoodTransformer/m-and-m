@@ -29,6 +29,8 @@ export const server = {
       // One meal id per attending guest. A bare z.array makes Astro collect every
       // same-name <select> via getAll() (a preprocess/effects wrapper would not).
       meals: z.array(z.string().max(40)).max(30),
+      // Optional name per attending guest, parallel to meals (for place cards).
+      guestNames: z.array(z.string().max(120)).max(30),
       // Anti-spam (not shown to humans):
       website: optionalText(100), // honeypot — must come back empty
       _t: z.coerce.number().catch(0), // epoch ms the form was rendered
@@ -65,6 +67,10 @@ export const server = {
         input.attending === 'yes'
           ? input.meals.slice(0, partySize).map((m) => (MEAL_IDS.has(m) ? m : ''))
           : [];
+      const guestNames =
+        input.attending === 'yes'
+          ? input.guestNames.slice(0, partySize).map((s) => s.trim().slice(0, 120))
+          : [];
 
       await upsertRsvpForHousehold(household.id, {
         attending: input.attending,
@@ -74,6 +80,7 @@ export const server = {
         dietary: input.dietary,
         message: input.message,
         meals,
+        guestNames,
       });
 
       const response = await getResponseForHousehold(household.id);
