@@ -1,8 +1,10 @@
 name: Deploy to GitHub Pages
 
+# The app now needs server rendering (Astro + Vercel adapter); a static GitHub
+# Pages build would publish a BROKEN copy (no /admin, no RSVP action). The
+# automatic push trigger is disabled — run manually only if you need the old
+# static export. Remove this workflow once the Vercel cutover is complete.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

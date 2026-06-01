@@ -2,8 +2,10 @@
 // Transactional email via Resend. SERVER-ONLY.
 //  - Guest confirmation + couple notification fire on each reply (best-effort).
 //  - Invitations + reminders are sent in guarded batches from /admin.
-// Health data (dietary/allergies) is NEVER put in email — the couple read it in
-// the secured /admin inbox. With no RESEND_API_KEY (dev) sends are logged, not made.
+// Dietary/allergy notes are kept out of the COUPLE notification (they read those
+// in the secured /admin inbox); the guest's own confirmation echoes their reply —
+// including any dietary note they entered — back to their own on-file address, so
+// they can check it. With no RESEND_API_KEY (dev) sends are logged, not made.
 // ============================================================
 import { Resend } from 'resend';
 import type { Household, RsvpResponse } from './db';

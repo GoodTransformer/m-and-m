@@ -456,7 +456,18 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
       }
 
       setBusy(true);
-      const { data, error } = await actions.rsvp(new FormData(form));
+      let result: Awaited<ReturnType<typeof actions.rsvp>>;
+      try {
+        result = await actions.rsvp(new FormData(form));
+      } catch {
+        // Network/transport failure — the action never returned. Recover the
+        // button and tell the guest instead of leaving "Sending…" stuck forever.
+        setBusy(false);
+        showSummary(labels.submitError);
+        summaryEl?.focus();
+        return;
+      }
+      const { data, error } = result;
 
       if (!error && data?.ok) {
         renderReview(

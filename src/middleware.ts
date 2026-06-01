@@ -45,6 +45,18 @@ export const onRequest = defineMiddleware((context, next) => {
     const userOk = safeEqual(user, USER);
     const passOk = safeEqual(pass, PASS);
     if (!(userOk && passOk)) return challenge();
+
+    // CSRF: a mutating admin request (send / import) must originate from the admin
+    // page itself. Browsers always send Origin on a POST; reject a cross-site one.
+    // (The endpoints also require a JSON body, which already blocks simple form
+    // CSRF — this is belt-and-suspenders.)
+    if (context.request.method === 'POST') {
+      const origin = context.request.headers.get('origin');
+      const host = context.request.headers.get('host');
+      if (origin && host && new URL(origin).host !== host) {
+        return new Response('Cross-origin request refused.', { status: 403 });
+      }
+    }
   }
   return next();
 });

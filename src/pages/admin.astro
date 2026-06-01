@@ -229,18 +229,23 @@ function isMissingMeals(h: HouseholdWithResponse): boolean {
 
     <script>
       const postJSON = async (url: string, body: unknown) => {
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
-        let data: any = {};
         try {
-          data = await res.json();
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          let data: any = {};
+          try {
+            data = await res.json();
+          } catch {
+            /* ignore */
+          }
+          return { ok: res.ok, data };
         } catch {
-          /* ignore */
+          // Network failure — surface it instead of leaving the status spinning.
+          return { ok: false, data: { error: 'Network error — check your connection and try again.' } };
         }
-        return { ok: res.ok, data };
       };
       const esc = (s: unknown) =>
         String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] || c);

@@ -68,6 +68,18 @@ export const server = {
         if (!ts.ok) throw new ActionError({ code: 'BAD_REQUEST', message: 'captcha' });
       }
 
+      // Every named guest of a multi-person household must have an explicit
+      // attendance choice. The JS form enforces this client-side; this backstops
+      // the no-JS path (and tampering) so a blank is never silently read as "not
+      // coming" and a guest can't accidentally decline for everyone.
+      if (
+        input.attending === 'yes' &&
+        household.invitedGuests.length > 1 &&
+        !household.invitedGuests.every((_, i) => input.coming[i] === 'yes' || input.coming[i] === 'no')
+      ) {
+        throw new ActionError({ code: 'BAD_REQUEST', message: 'choose' });
+      }
+
       // Build the reply roster server-side (pure, unit-tested logic in lib/roster).
       // Invited names are the household's, not the form's; plus-one names are
       // accepted only up to the granted allowance; attendance for two-or-more named

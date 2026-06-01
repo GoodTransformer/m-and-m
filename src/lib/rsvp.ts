@@ -39,6 +39,7 @@ export function rsvpErrorsFrom(
   const message = (error as { message?: string }).message;
   if (message === 'closed')
     return { errors: {}, summary: t.closedBody.replace('{email}', CONTACT_EMAIL) };
+  if (message === 'choose') return { errors: {}, summary: t.errorChoose };
   return { errors: {}, summary: t.errorSummary };
 }
 

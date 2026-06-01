@@ -15,6 +15,7 @@ import {
   type Household,
 } from '../../lib/db';
 import { buildInvite, buildReminder, sendBatch, type EmailPayload } from '../../lib/email';
+import { siteOriginLooksUnset } from '../../lib/links';
 
 const DEFAULT_LIMIT = 90; // headroom under Resend's free 100/day cap
 const MAX_LIMIT = 100; // Resend batch maximum per call
@@ -65,6 +66,16 @@ export const POST: APIRoute = async ({ request }) => {
   const mode = (['test', 'dryRun', 'live'] as const).find((m) => m === body.mode) ?? 'dryRun';
   const limit = Math.min(Math.max(Number(body.limit) || DEFAULT_LIMIT, 1), MAX_LIMIT);
   const build = type === 'invite' ? buildInvite : buildReminder;
+
+  // Guardrails for a real send (test or live) in production: refuse if email or the
+  // link origin isn't configured — better to fail loudly than to "succeed" into the
+  // void (no key → mail is only logged, not sent) or to mail broken personal links.
+  if (mode !== 'dryRun' && import.meta.env.PROD) {
+    if (!import.meta.env.RESEND_API_KEY)
+      return json({ error: 'Email isn’t configured yet (RESEND_API_KEY) — no mail was sent.' }, 503);
+    if (siteOriginLooksUnset())
+      return json({ error: 'SITE_URL isn’t set — personal links would be broken. Set it and redeploy.' }, 503);
+  }
 
   const recipients = type === 'invite' ? await householdsPendingInvite() : await invitedNonResponders();
 
@@ -140,6 +151,7 @@ export const POST: APIRoute = async ({ request }) => {
     sent: sentIds.length,
     failed: failures.length,
     failures,
-    remaining: Math.max(recipients.length - payloads.length, 0),
+    // Failed recipients are still pending — count only the ones actually sent.
+    remaining: Math.max(recipients.length - sentIds.length, 0),
   });
 };
