@@ -111,9 +111,9 @@ export const en: Strings = {
     editNote: 'You’ve already replied — update your answer below and resend.',
     consentNote:
       'By sending this you agree we may store these details — including any dietary needs — to plan the day.',
-    noCodeTitle: 'Please use your invitation link',
+    noCodeTitle: 'Your link is in your invitation email',
     noCodeBody:
-      'Your RSVP link is personal to you — please open the link from your invitation. If you can’t find it, email us at {email} (or reply to your invitation) and we’ll resend it.',
+      'It’s personal to you, so it isn’t shown here — open the link from the email we sent you. Can’t find it? Reply to that invitation, or write to us at {email}, and we’ll resend it.',
   },
 
   home: {

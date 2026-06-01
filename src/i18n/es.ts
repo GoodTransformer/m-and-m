@@ -112,9 +112,9 @@ export const es: Strings = {
     editNote: 'Ya respondieron — actualicen su respuesta abajo y vuelvan a enviarla.',
     consentNote:
       'Al enviar, aceptan que guardemos estos datos —incluidas las necesidades dietéticas— para planificar el día.',
-    noCodeTitle: 'Usen su enlace de invitación',
+    noCodeTitle: 'Su enlace está en su correo de invitación',
     noCodeBody:
-      'Su enlace para confirmar es personal — abran el enlace de su invitación. Si no lo encuentran, escríbannos a {email} (o respondan a su correo de invitación) y se lo reenviaremos.',
+      'Es personal, por eso no aparece aquí — abran el enlace del correo que les enviamos. ¿No lo encuentran? Respondan a esa invitación, o escríbannos a {email}, y se lo reenviaremos.',
   },
 
   home: {
