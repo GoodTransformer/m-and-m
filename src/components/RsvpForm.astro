@@ -603,7 +603,8 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
   textarea:focus-visible {
     border-bottom-color: var(--accent);
     box-shadow: inset 0 -2px 0 0 var(--accent);
-    background: color-mix(in srgb, var(--accent) 4%, transparent);
+    /* background-color only — the shorthand would wipe the select's chevron image. */
+    background-color: color-mix(in srgb, var(--accent) 4%, transparent);
   }
   input[aria-invalid='true'],
   select[aria-invalid='true'],
@@ -653,7 +654,7 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
   }
   .guest {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 0.35rem 0.9rem;
     flex-wrap: wrap;
   }
@@ -701,11 +702,21 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
     margin-top: 0.8rem;
     font-style: italic;
   }
-  /* Narrow screens: the whole control set drops beneath the name as one block,
-     keeping each person's name, attendance, and meal unmistakably together. */
-  @media (max-width: 33rem) {
+  /* Narrow screens: the name, then attendance, then meal each take a full-width
+     line — kept together as one block beneath the name. Full width gives the meal
+     room for long dish names (a side-by-side select would clip them) and leaves a
+     "Can't come" row with a clean full-width rule rather than a stub. */
+  @media (max-width: 36rem) {
     .guest__name,
     .guest__controls {
+      flex-basis: 100%;
+    }
+    .guest__controls {
+      flex-wrap: wrap;
+    }
+    .guest__coming,
+    .guest__meal,
+    .guest__plusname {
       flex-basis: 100%;
     }
   }
