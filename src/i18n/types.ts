@@ -42,6 +42,7 @@ export interface RsvpStrings {
   mealsHint: string;
   mealChoose: string; // the empty "— choose —" meal option
   comingLabel: string; // aria label for a guest's attendance toggle
+  comingChoose: string; // the empty, must-pick attendance option ("— choose —")
   comingYes: string; // "Coming"
   comingNo: string; // "Can’t come"
   plusOneName: string; // placeholder for a granted plus-one's name
@@ -55,9 +56,16 @@ export interface RsvpStrings {
 
   successTitle: string;
   successBody: string;
+  successReview: string; // "Here's what you sent — check it over:" intro
+  successNotComing: string; // label before the not-coming names
+  successNoMeal: string; // shown next to a coming guest with no meal chosen
+  successDecline: string; // shown when the whole household declined
+  successChangeHint: string; // "Spotted a mistake?"
+  successChange: string; // the "Change my answer" button
   errorSummary: string;
   errorEmail: string;
   errorAttending: string;
+  errorChoose: string; // shown when a guest's attendance is left unanswered
   submitError: string;
 
   closedTitle: string;

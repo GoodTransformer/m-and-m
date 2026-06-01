@@ -17,7 +17,7 @@ import {
 } from '../lib/db';
 import { verifyTurnstile } from '../lib/turnstile';
 import { sendGuestConfirmation, sendCoupleNotification } from '../lib/email';
-import { isRsvpOpen, MEAL_IDS } from '../data/site';
+import { isRsvpOpen, MEAL_IDS, mealLabel } from '../data/site';
 
 // Astro forwards empty form fields as null; normalize optional text to ''.
 const optionalText = (max: number) =>
@@ -74,10 +74,15 @@ export const server = {
         return MEAL_IDS.has(m) ? m : '';
       };
 
+      // With two or more named guests, attendance is an explicit per-person choice:
+      // only an outright "yes" counts as coming (blank or "no" → not coming), so no
+      // one is ever marked attending by accident. A lone guest is implied by the
+      // household's "yes" — there is no per-person toggle to leave unanswered.
+      const perGuest = invited.length > 1;
       const roster: RosterEntry[] = [];
       if (input.attending === 'yes') {
         invited.forEach((name, i) => {
-          const coming = input.coming[i] !== 'no'; // default to coming unless said otherwise
+          const coming = perGuest ? input.coming[i] === 'yes' : true;
           roster.push({ name, coming, meal: coming ? mealAt(i) : '', plusOne: false });
         });
         for (let j = 0; j < plusCap; j++) {
@@ -106,7 +111,7 @@ export const server = {
         // entered one only when there is none) — never an arbitrary form value.
         const confirmTo = household.email || response.email;
         try {
-          await sendGuestConfirmation(response, household.locale, confirmTo);
+          await sendGuestConfirmation(response, household.locale, confirmTo, household.code);
         } catch (err) {
           console.error('[rsvp] guest confirmation email failed', err);
         }
@@ -117,7 +122,17 @@ export const server = {
         }
       }
 
-      return { ok: true as const, attending };
+      // Echo the stored choices back so the success screen can show exactly what
+      // was recorded (meal labels localized to the household's language).
+      const locale = household.locale;
+      return {
+        ok: true as const,
+        attending,
+        coming: roster
+          .filter((r) => r.coming)
+          .map((r) => ({ name: r.name, meal: r.meal ? mealLabel(r.meal, locale) : '' })),
+        notComing: roster.filter((r) => !r.coming && r.name.trim()).map((r) => r.name),
+      };
     },
   }),
 };

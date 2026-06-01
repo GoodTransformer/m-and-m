@@ -144,40 +144,62 @@ export async function sendGuestConfirmation(
   r: RsvpResponse,
   locale: 'en' | 'es',
   toEmail: string,
+  code: string,
 ): Promise<void> {
   if (!toEmail) return;
+  const es = locale === 'es';
+  const link = householdLink(code, locale);
+  const subject = es
+    ? 'Hemos recibido su respuesta · Mari & Michael'
+    : 'We have your reply · Mari & Michael';
+  const heading = es ? 'Gracias — tenemos su respuesta.' : 'Thank you — we have your reply.';
+  const intro = es
+    ? 'Esto es lo que registramos. Si algo no está bien, pueden cambiarlo cuando quieran:'
+    : 'Here’s what we recorded. Please check it — if anything is wrong, you can change it any time:';
+  const coming = rosterLines(r.roster, locale);
+  const notComing = notComingNames(r.roster);
+  const changeLabel = es ? 'Cambiar mi respuesta' : 'Change my reply';
+
+  // --- HTML body: the reply, then a clear per-person list, then a change button.
+  let inner = `<p>${esc(heading)}</p><p>${esc(intro)}</p>`;
+  inner += `<p style="margin:0.9rem 0 0.3rem"><strong>${esc(attendingLine(r, locale))}</strong></p>`;
+  if (coming.length) {
+    inner +=
+      `<ul style="margin:0.2rem 0 0;padding-left:1.1rem">` +
+      coming.map((l) => `<li style="margin:0.15rem 0">${esc(l)}</li>`).join('') +
+      `</ul>`;
+  }
+  if (notComing.length) {
+    inner += `<p style="margin:0.6rem 0 0;color:#6b5a4f">${es ? 'No podrán venir' : 'Can’t come'}: ${esc(notComing.join(', '))}</p>`;
+  }
+  if (r.dietary.trim()) {
+    inner += `<p style="margin:0.6rem 0 0;color:#6b5a4f">${es ? 'Dietas / alergias' : 'Dietary / allergies'}: ${esc(r.dietary)}</p>`;
+  }
+  if (r.message.trim()) {
+    inner += `<p style="margin:0.6rem 0 0;color:#6b5a4f">${es ? 'Mensaje' : 'Message'}: ${esc(r.message)}</p>`;
+  }
+  inner += button(link, changeLabel);
+
+  // --- plain-text alternative (includes the link as a URL).
+  const lines: string[] = [heading, '', intro, '', attendingLine(r, locale)];
+  for (const l of coming) lines.push(`  • ${l}`);
+  if (notComing.length) lines.push(`${es ? 'No podrán venir' : 'Can’t come'}: ${notComing.join(', ')}`);
+  if (r.dietary.trim()) lines.push(`${es ? 'Dietas / alergias' : 'Dietary / allergies'}: ${r.dietary}`);
+  if (r.message.trim()) lines.push(`${es ? 'Mensaje' : 'Message'}: ${r.message}`);
+  lines.push('', `${changeLabel}: ${link}`, '', '— Mari & Michael');
+  const text = lines.join('\n');
+
   if (!resend) {
-    console.log(`[email skipped] guest confirmation → ${toEmail} (${r.attending})`);
+    console.log(`[email skipped] guest confirmation → ${toEmail}\n---\n${text}\n---`);
     return;
   }
-  const es = locale === 'es';
-  const subject = es ? 'Hemos recibido su respuesta · Mari & Michael' : 'We have your reply · Mari & Michael';
-  const intro = es ? 'Esto es lo que nos enviaron:' : 'Here is what you sent us:';
-  const rows = [[es ? 'Respuesta' : 'Reply', attendingLine(r, locale)]];
-  const coming = rosterLines(r.roster, locale);
-  if (coming.length) rows.push([es ? 'Quiénes vienen' : 'Who’s coming', coming.join(', ')]);
-  const notComing = notComingNames(r.roster);
-  if (notComing.length) rows.push([es ? 'No podrán' : 'Not coming', notComing.join(', ')]);
-  if (r.dietary.trim()) rows.push([es ? 'Dietas / alergias' : 'Dietary / allergies', r.dietary]);
-  if (r.message.trim()) rows.push([es ? 'Mensaje' : 'Message', r.message]);
-  const table = rows
-    .map(([k, v]) => `<tr><td style="padding:4px 16px 4px 0;color:#6b5a4f">${esc(k)}</td><td>${esc(v)}</td></tr>`)
-    .join('');
-  const closing = es
-    ? 'Si algo cambia, vuelvan a abrir su enlace personal para actualizar la respuesta.'
-    : 'If anything changes, just re-open your personal link to update your reply.';
-  const text = `${es ? 'Gracias — lo tenemos.' : 'Thank you — we’ve got it.'}\n\n${intro}\n${rows
-    .map(([k, v]) => `${k}: ${v}`)
-    .join('\n')}\n\n${closing}\n\n— Mari & Michael`;
   await resend.emails.send(
     {
       from: FROM,
       to: toEmail,
       replyTo: COUPLE || undefined,
       subject,
-      html: shell(
-        `<p>${es ? 'Gracias' : 'Thank you'} — ${es ? 'lo tenemos' : 'we’ve got it'}.</p><p>${intro}</p><table style="border-collapse:collapse;margin:1rem 0">${table}</table><p style="color:#6b5a4f">${closing}</p>`,
-      ),
+      html: shell(inner),
       text,
     },
     { idempotencyKey: `confirm:${toEmail}:${r.updatedAt}` },

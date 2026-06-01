@@ -50,11 +50,17 @@ const N = invitedGuests.length;
 const perGuestToggle = N > 1;
 const roster = response?.roster ?? [];
 
-const comingPrefill = (i: number): boolean => {
+// Tri-state: true = coming, false = can't come, undefined = not yet chosen (the
+// guest must pick — nothing is assumed). Edit mode reflects the saved reply.
+const comingPrefill = (i: number): boolean | undefined => {
   const s = submitted?.coming;
-  if (s && i < s.length) return s[i] !== 'no';
+  if (s && i < s.length) {
+    if (s[i] === 'yes') return true;
+    if (s[i] === 'no') return false;
+    return undefined;
+  }
   const e = roster[i];
-  return e ? e.coming : true; // default to coming
+  return e ? e.coming : undefined;
 };
 // Meals are positional across all seats: invited guests [0..N-1], then plus-ones.
 const mealPrefillAt = (seat: number): string => {
@@ -78,10 +84,14 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
   data-err-summary={t.errorSummary}
   data-err-email={t.errorEmail}
   data-err-attending={t.errorAttending}
+  data-err-choose={t.errorChoose}
   data-err-closed={t.closedBody}
   data-err-submit={t.submitError}
   data-label-submit={t.submit}
   data-label-submitting={t.submitting}
+  data-succ-notcoming={t.successNotComing}
+  data-succ-nomeal={t.successNoMeal}
+  data-succ-decline={t.successDecline}
 >
   <div class="rsvp__summary" role="alert" data-error-summary hidden={!summary}>{summary}</div>
 
@@ -123,11 +133,14 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
             <span class="guest__name">{name}</span>
             <div class="guest__controls">
               {perGuestToggle && (
-                <select class="guest__coming" name="coming" aria-label={`${name} — ${t.comingLabel}`}>
-                  <option value="yes" selected={comingPrefill(i)}>
+                <select class="guest__coming" name="coming" data-coming aria-label={`${name} — ${t.comingLabel}`}>
+                  <option value="" selected={comingPrefill(i) === undefined}>
+                    {t.comingChoose}
+                  </option>
+                  <option value="yes" selected={comingPrefill(i) === true}>
                     {t.comingYes}
                   </option>
-                  <option value="no" selected={!comingPrefill(i)}>
+                  <option value="no" selected={comingPrefill(i) === false}>
                     {t.comingNo}
                   </option>
                 </select>
@@ -254,6 +267,10 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
       submitting: d.labelSubmitting || '…',
       closed: d.errClosed || '',
       submitError: d.errSubmit || '',
+      choose: d.errChoose || '',
+      succNotComing: d.succNotcoming || '',
+      succNoMeal: d.succNomeal || '',
+      succDecline: d.succDecline || '',
       fields: {
         email: d.errEmail || '',
         attending: d.errAttending || '',
@@ -287,14 +304,16 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
       const coming = row.querySelector<HTMLSelectElement>('select[name="coming"]');
       const plusname = row.querySelector<HTMLInputElement>('input[name="plusName"]');
       let show = true;
-      if (coming) show = coming.value !== 'no';
+      if (coming) show = coming.value === 'yes'; // the meal appears only once "Coming" is chosen
       else if (plusname) show = plusname.value.trim() !== '';
       meal.hidden = !show;
     };
     guestRows.forEach((row) => {
-      row
-        .querySelector<HTMLSelectElement>('select[name="coming"]')
-        ?.addEventListener('change', () => syncGuestRow(row));
+      const coming = row.querySelector<HTMLSelectElement>('select[name="coming"]');
+      coming?.addEventListener('change', () => {
+        coming.removeAttribute('aria-invalid');
+        syncGuestRow(row);
+      });
       row
         .querySelector<HTMLInputElement>('input[name="plusName"]')
         ?.addEventListener('input', () => syncGuestRow(row));
@@ -340,6 +359,9 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
         }
         applyErrorAria(name, false);
       });
+      form
+        .querySelectorAll<HTMLSelectElement>('[data-coming]')
+        .forEach((s) => s.removeAttribute('aria-invalid'));
     };
 
     const showFieldError = (name: string, message: string) => {
@@ -366,20 +388,84 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
       if (submitLabel) submitLabel.textContent = busy ? labels.submitting : labels.submit;
     };
 
+    // Success echo: re-show exactly what was recorded so any mistake is obvious,
+    // with a button to reopen the form (values intact) and fix it.
+    const successEl = document.querySelector<HTMLElement>('[data-rsvp-success]');
+    const reviewEl = successEl?.querySelector<HTMLElement>('[data-success-review]');
+    const esc = (s: unknown) =>
+      String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] || c));
+    const renderReview = (data: {
+      attending?: string;
+      coming?: Array<{ name: string; meal: string }>;
+      notComing?: string[];
+    }) => {
+      if (!reviewEl) return;
+      if (data.attending !== 'yes') {
+        reviewEl.innerHTML = `<p class="rsvp__decline">${esc(labels.succDecline)}</p>`;
+        return;
+      }
+      const items = (data.coming ?? [])
+        .map(
+          (g) =>
+            `<li><span class="rsvp__rname">${esc(g.name)}</span>${
+              g.meal
+                ? ` — ${esc(g.meal)}`
+                : ` <span class="rsvp__nomeal">(${esc(labels.succNoMeal)})</span>`
+            }</li>`,
+        )
+        .join('');
+      let html = `<ul class="rsvp__rlist">${items}</ul>`;
+      const nc = data.notComing ?? [];
+      if (nc.length)
+        html += `<p class="rsvp__rnot"><strong>${esc(labels.succNotComing)}</strong> ${esc(nc.join(', '))}</p>`;
+      reviewEl.innerHTML = html;
+    };
+
+    successEl
+      ?.querySelector<HTMLButtonElement>('[data-change-answer]')
+      ?.addEventListener('click', () => {
+        successEl.hidden = true;
+        form.hidden = false;
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+    // Every named guest must have an explicit attendance choice when attending.
+    const unansweredComing = () =>
+      Array.from(form.querySelectorAll<HTMLSelectElement>('[data-coming]')).filter(
+        (s) => !s.disabled && s.value === '',
+      );
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       clearErrors();
-      setBusy(true);
 
+      if (radios.find((r) => r.checked)?.value === 'yes') {
+        const unanswered = unansweredComing();
+        if (unanswered.length) {
+          unanswered.forEach((s) => s.setAttribute('aria-invalid', 'true'));
+          showSummary(labels.choose);
+          unanswered[0].focus();
+          unanswered[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+      }
+
+      setBusy(true);
       const { data, error } = await actions.rsvp(new FormData(form));
 
       if (!error && data?.ok) {
-        const success = document.querySelector<HTMLElement>('[data-rsvp-success]');
+        renderReview(
+          data as {
+            attending?: string;
+            coming?: Array<{ name: string; meal: string }>;
+            notComing?: string[];
+          },
+        );
         form.hidden = true;
-        if (success) {
-          success.hidden = false;
-          success.focus();
-          success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (successEl) {
+          successEl.hidden = false;
+          successEl.focus();
+          successEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         return;
       }

@@ -71,6 +71,7 @@ export const en: Strings = {
     mealsHint: 'Tell us who can make it and choose each person’s meal — it helps us with the place cards.',
     mealChoose: '— choose a meal —',
     comingLabel: 'Attending',
+    comingChoose: '— choose —',
     comingYes: 'Coming',
     comingNo: 'Can’t come',
     plusOneName: 'Name of your guest',
@@ -85,10 +86,17 @@ export const en: Strings = {
 
     successTitle: 'Thank you — your reply is in.',
     successBody:
-      'We’ve noted it, and a confirmation is on its way to your inbox. We can’t wait to celebrate with you.',
+      'A confirmation is on its way to your inbox. We can’t wait to celebrate with you.',
+    successReview: 'Here’s what you sent us — please check it over:',
+    successNotComing: 'Can’t come:',
+    successNoMeal: 'no meal chosen yet',
+    successDecline: 'You’ve let us know you can’t make it — we’ll miss you.',
+    successChangeHint: 'Spotted a mistake?',
+    successChange: 'Change my answer',
     errorSummary: 'Please check the highlighted fields and try again.',
     errorEmail: 'Please enter a valid email address.',
     errorAttending: 'Please let us know if you can come.',
+    errorChoose: 'Please choose “Coming” or “Can’t come” for each guest.',
     submitError: 'Sorry — that didn’t go through. Please try again, or get in touch with us.',
 
     closedTitle: 'Replies are now closed',

@@ -72,6 +72,7 @@ export const es: Strings = {
     mealsHint: 'Díganos quién podrá venir y elijan el plato de cada persona — nos ayuda con las tarjetas.',
     mealChoose: '— elegir plato —',
     comingLabel: 'Asistencia',
+    comingChoose: '— elegir —',
     comingYes: 'Viene',
     comingNo: 'No viene',
     plusOneName: 'Nombre de su acompañante',
@@ -86,10 +87,17 @@ export const es: Strings = {
 
     successTitle: 'Gracias — su respuesta quedó registrada.',
     successBody:
-      'La anotamos y les enviamos una confirmación por correo. Tenemos muchas ganas de celebrar con ustedes.',
+      'Les enviamos una confirmación por correo. Tenemos muchas ganas de celebrar con ustedes.',
+    successReview: 'Esto es lo que nos enviaron — por favor, revísenlo:',
+    successNotComing: 'No podrán venir:',
+    successNoMeal: 'sin plato elegido',
+    successDecline: 'Nos avisaron que no podrán acompañarnos — los echaremos de menos.',
+    successChangeHint: '¿Vieron un error?',
+    successChange: 'Cambiar mi respuesta',
     errorSummary: 'Por favor, revisen los campos marcados e inténtenlo de nuevo.',
     errorEmail: 'Introduzcan un correo electrónico válido.',
     errorAttending: 'Indíquennos si pueden venir, por favor.',
+    errorChoose: 'Por favor, elijan “Viene” o “No viene” para cada invitado.',
     submitError: 'Lo sentimos — no se pudo enviar. Inténtenlo de nuevo o escríbannos.',
 
     closedTitle: 'Las respuestas están cerradas',

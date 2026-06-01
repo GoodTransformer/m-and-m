@@ -63,6 +63,12 @@ const heading = household ? t.title : t.noCodeTitle;
           </div>
           <div class="rsvp__success" data-rsvp-success tabindex="-1" hidden>
             <h2 class="rsvp__success-title">{t.successTitle}</h2>
+            <p class="rsvp__success-review">{t.successReview}</p>
+            <div class="rsvp__review" data-success-review></div>
+            <p class="rsvp__success-remedy">
+              <span class="rsvp__remedy-hint">{t.successChangeHint}</span>
+              <button type="button" class="rsvp__change" data-change-answer>{t.successChange}</button>
+            </p>
             <p class="rsvp__success-body">{t.successBody}</p>
           </div>
         </>
@@ -105,8 +111,75 @@ const heading = household ? t.title : t.noCodeTitle;
     color: var(--accent);
     margin-bottom: 0.6rem;
   }
+  .rsvp__success-review {
+    margin: 0 0 0.4rem;
+    font-weight: 500;
+  }
+  .rsvp__review {
+    margin: 0.25rem 0 0;
+  }
+  :global(.rsvp__rlist) {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.35rem;
+  }
+  :global(.rsvp__rlist li) {
+    position: relative;
+    padding-left: 1.3rem;
+  }
+  :global(.rsvp__rlist li)::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  :global(.rsvp__rname) {
+    font-weight: 500;
+  }
+  :global(.rsvp__nomeal) {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+  :global(.rsvp__rnot) {
+    margin: 0.65rem 0 0;
+    color: var(--text-muted);
+  }
+  :global(.rsvp__decline) {
+    margin: 0;
+  }
+  .rsvp__success-remedy {
+    margin: 1.15rem 0 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .rsvp__remedy-hint {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+  }
+  .rsvp__change {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    padding: 0.45rem 0.95rem;
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background-color 0.25s var(--ease-soft);
+  }
+  .rsvp__change:hover {
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
   .rsvp__success-body {
     max-width: 48ch;
+    margin: 1.15rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
   }
   .rsvp__closed-title {
     margin-bottom: 0.75rem;
