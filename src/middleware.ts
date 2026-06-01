@@ -15,6 +15,14 @@ function challenge(): Response {
   });
 }
 
+/** Length-aware constant-time string compare (avoids a passcode timing oracle). */
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 export const onRequest = defineMiddleware((context, next) => {
   if (/\/admin(\/|$)/i.test(context.url.pathname)) {
     if (!PASS) {
@@ -33,7 +41,10 @@ export const onRequest = defineMiddleware((context, next) => {
     const sep = decoded.indexOf(':');
     const user = decoded.slice(0, sep);
     const pass = decoded.slice(sep + 1);
-    if (user !== USER || pass !== PASS) return challenge();
+    // Compute both before combining so timing doesn't reveal which half failed.
+    const userOk = safeEqual(user, USER);
+    const passOk = safeEqual(pass, PASS);
+    if (!(userOk && passOk)) return challenge();
   }
   return next();
 });

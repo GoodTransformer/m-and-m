@@ -43,5 +43,9 @@ export function parseCsv(text: string): string[][] {
 }
 
 export function csvCell(v: unknown): string {
-  return `"${String(v ?? '').replace(/"/g, '""')}"`;
+  let s = String(v ?? '');
+  // Prevent spreadsheet formula injection: a cell beginning with one of these is
+  // executed as a formula by Excel/Sheets. Prefix with ' so it stays plain text.
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+  return `"${s.replace(/"/g, '""')}"`;
 }

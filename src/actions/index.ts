@@ -68,8 +68,11 @@ export const server = {
 
       const response = await getResponseForHousehold(household.id);
       if (response) {
+        // Send the confirmation to the household's on-file address (or the
+        // entered one only when there is none) — never an arbitrary form value.
+        const confirmTo = household.email || response.email;
         try {
-          await sendGuestConfirmation(response, household.locale);
+          await sendGuestConfirmation(response, household.locale, confirmTo);
         } catch (err) {
           console.error('[rsvp] guest confirmation email failed', err);
         }

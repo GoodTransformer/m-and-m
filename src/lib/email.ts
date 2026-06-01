@@ -137,10 +137,17 @@ function attendingLine(r: RsvpResponse, locale: 'en' | 'es'): string {
   return es ? 'No podrán asistir' : 'Unable to attend';
 }
 
-/** Confirmation to the guest, echoing their own reply (their data, to them). */
-export async function sendGuestConfirmation(r: RsvpResponse, locale: 'en' | 'es'): Promise<void> {
+/** Confirmation to the guest, echoing their reply. `toEmail` is the household's
+    on-file address (chosen by the action, not the form input) so the form can
+    never be used to send mail from our domain to an arbitrary recipient. */
+export async function sendGuestConfirmation(
+  r: RsvpResponse,
+  locale: 'en' | 'es',
+  toEmail: string,
+): Promise<void> {
+  if (!toEmail) return;
   if (!resend) {
-    console.log(`[email skipped] guest confirmation → ${r.email} (${r.attending})`);
+    console.log(`[email skipped] guest confirmation → ${toEmail} (${r.attending})`);
     return;
   }
   const es = locale === 'es';
@@ -164,7 +171,7 @@ export async function sendGuestConfirmation(r: RsvpResponse, locale: 'en' | 'es'
   await resend.emails.send(
     {
       from: FROM,
-      to: r.email,
+      to: toEmail,
       replyTo: COUPLE || undefined,
       subject,
       html: shell(
@@ -172,7 +179,7 @@ export async function sendGuestConfirmation(r: RsvpResponse, locale: 'en' | 'es'
       ),
       text,
     },
-    { idempotencyKey: `confirm:${r.email}:${r.updatedAt}` },
+    { idempotencyKey: `confirm:${toEmail}:${r.updatedAt}` },
   );
 }
 

@@ -15,3 +15,9 @@ export function householdLink(code: string, locale: 'en' | 'es'): string {
 export function adminUrl(): string {
   return `${ORIGIN}${BASE}admin/`;
 }
+
+/** True if SITE_URL looks unset/placeholder (still localhost or the example
+    origin). Used to warn in /admin that invitation links would be wrong. */
+export function siteOriginLooksUnset(): boolean {
+  return !ORIGIN || /localhost|127\.0\.0\.1|example\./.test(ORIGIN);
+}

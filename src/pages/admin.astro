@@ -1,7 +1,7 @@
 ---
 export const prerender = false;
 import { listHouseholdsWithResponses } from '../lib/db';
-import { householdLink } from '../lib/links';
+import { householdLink, siteOriginLooksUnset } from '../lib/links';
 import '../styles/tokens.css';
 
 const households = await listHouseholdsWithResponses();
@@ -12,6 +12,9 @@ const declined = responded.filter((h) => h.response!.attending === 'no').length;
 const pendingInvite = households.filter((h) => h.inviteStatus !== 'sent' && h.email).length;
 const outstanding = households.filter((h) => h.inviteStatus === 'sent' && !h.response).length;
 const dietaryCount = attending.filter((h) => h.response!.dietary.trim()).length;
+// Safety net: warn if the live origin looks unset, which would bake broken
+// personal links into every invitation (only flags in production).
+const linkWarning = import.meta.env.PROD && siteOriginLooksUnset();
 
 const stats = [
   [headcount, 'guests attending'],
@@ -40,6 +43,15 @@ function statusLabel(s: string): string {
         <h1>RSVP admin</h1>
         <a class="link" href="export.csv">Download CSV</a>
       </header>
+
+      {
+        linkWarning && (
+          <p class="warn">
+            ⚠ SITE_URL looks unset — personal links in invitations would be wrong. Set SITE_URL to
+            your live origin in Vercel, redeploy, then re-check a link before sending.
+          </p>
+        )
+      }
 
       <ul class="stats">
         {
@@ -300,6 +312,16 @@ function statusLabel(s: string): string {
       .muted {
         color: var(--text-muted, #6b5a4f);
         font-size: 0.92rem;
+        max-width: 70ch;
+      }
+      .warn {
+        margin: 1rem 0 0;
+        padding: 0.75rem 1rem;
+        background: color-mix(in srgb, var(--accent, #5b1215) 10%, #fff);
+        border: 1px solid var(--accent, #5b1215);
+        border-radius: var(--radius, 6px);
+        color: var(--accent, #5b1215);
+        font-size: 0.9rem;
         max-width: 70ch;
       }
       .stats {
