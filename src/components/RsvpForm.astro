@@ -191,6 +191,8 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
     {plusOnes > 0 && <p class="field__hint guests__note">{t.plusOneNote}</p>}
   </div>
 
+  <hr class="rsvp__rule" />
+
   {/* Email */}
   <div class="field">
     <label for="rsvp-email">{t.emailLabel} <span class="req">{t.required}</span></label>
@@ -391,6 +393,7 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
     // Success echo: re-show exactly what was recorded so any mistake is obvious,
     // with a button to reopen the form (values intact) and fix it.
     const successEl = document.querySelector<HTMLElement>('[data-rsvp-success]');
+    const leadEl = document.querySelector<HTMLElement>('[data-rsvp-lead]');
     const reviewEl = successEl?.querySelector<HTMLElement>('[data-success-review]');
     const esc = (s: unknown) =>
       String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] || c));
@@ -425,6 +428,7 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
       ?.querySelector<HTMLButtonElement>('[data-change-answer]')
       ?.addEventListener('click', () => {
         successEl.hidden = true;
+        if (leadEl) leadEl.hidden = false;
         form.hidden = false;
         form.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
@@ -462,6 +466,7 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
           },
         );
         form.hidden = true;
+        if (leadEl) leadEl.hidden = true;
         if (successEl) {
           successEl.hidden = false;
           successEl.focus();
@@ -502,73 +507,109 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
   }
 
   .field {
-    margin: 0 0 clamp(1.25rem, 3.5vw, 1.85rem);
+    margin: 0 0 clamp(1.75rem, 4.5vw, 2.6rem);
     border: 0;
     padding: 0;
     min-inline-size: 0;
   }
 
-  label,
+  /* The one prompt of the form keeps the display face, like a venue's name. */
   legend {
     display: block;
     font-family: var(--font-display);
-    font-size: 1.05rem;
+    font-size: 1.2rem;
     font-weight: 500;
+    line-height: 1.3;
     color: var(--text-display);
+    padding: 0;
+  }
+
+  /* Field + section labels borrow the site's small-caps marker (cf. "ADDRESS").
+     The radio choices are also <label>s, so they're excluded — they read as
+     warm sentence-case prose. */
+  label:not(.radio),
+  .field__grouplabel {
+    display: block;
+    font-family: var(--font-body);
+    font-size: var(--fs-label);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
     padding: 0;
   }
 
   .req,
   .opt {
     font-family: var(--font-body);
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    font-size: 0.82rem;
+    font-weight: 430;
+    font-style: italic;
+    letter-spacing: 0.01em;
+    text-transform: none;
     color: var(--text-muted);
-    margin-inline-start: 0.4rem;
-    vertical-align: 0.08em;
+    margin-inline-start: 0.5rem;
   }
 
   .field__hint {
-    margin: 0.3rem 0 0.6rem;
-    font-size: 0.88rem;
+    margin: 0.45rem 0 0.7rem;
+    font-size: 0.9rem;
     color: var(--text-muted);
     max-width: 46ch;
   }
 
+  /* Boxless fields: a single hairline rule, no fill — calmer, and of a piece
+     with a site that never encloses content in boxes. */
   input[type='text'],
   input[type='email'],
   select,
   textarea {
     display: block;
     width: 100%;
-    padding: 0.7rem 0.85rem;
+    padding: 0.5rem 0.15rem;
     font-family: var(--font-body);
-    font-size: 1rem;
+    font-size: 1.05rem;
     color: var(--text);
-    background: color-mix(in srgb, var(--candle-ivory) 55%, var(--old-parchment));
-    border: 1px solid var(--rule-strong);
-    border-radius: var(--radius);
-    transition: border-color 0.25s var(--ease-soft), box-shadow 0.25s var(--ease-soft);
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--rule-strong);
+    border-radius: 0;
+    transition: border-color 0.25s var(--ease-soft), background-color 0.25s var(--ease-soft),
+      box-shadow 0.25s var(--ease-soft);
   }
+  /* Selects: strip the native chrome, add a quiet bronze chevron. */
   select {
-    max-width: 8rem;
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 1.4rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%236c4f36' stroke-width='1.4'%3E%3Cpath d='M1 1.6 6 6.4 11 1.6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.15rem center;
+    background-size: 0.7rem;
+    cursor: pointer;
   }
   textarea {
     resize: vertical;
-    min-height: 3rem;
+    min-height: 2.6rem;
+    line-height: 1.5;
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
   }
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
-    border-color: var(--accent);
+    border-bottom-color: var(--accent);
+    box-shadow: inset 0 -2px 0 0 var(--accent);
+    background: color-mix(in srgb, var(--accent) 4%, transparent);
   }
   input[aria-invalid='true'],
   select[aria-invalid='true'],
   textarea[aria-invalid='true'] {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px var(--accent);
+    border-bottom-color: var(--accent);
+    box-shadow: inset 0 -2px 0 0 var(--accent);
   }
 
   .radios {
@@ -601,33 +642,26 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
     color: var(--accent);
   }
 
-  .field__grouplabel {
-    display: block;
-    font-family: var(--font-display);
-    font-size: 1.05rem;
-    font-weight: 500;
-    color: var(--text-display);
-  }
-
   /* Per-guest rows: a fixed name (or a plus-one's editable name) followed by a
      grouped control set (coming + meal). The controls stay together as one unit,
      so on a narrow screen they wrap beneath the name rather than the meal drifting
      onto its own line where it could be misread against the wrong person. */
   .guests {
     display: grid;
-    gap: 0.85rem;
-    margin-top: 0.55rem;
+    gap: 1.15rem;
+    margin-top: 0.85rem;
   }
   .guest {
     display: flex;
-    align-items: center;
-    gap: 0.35rem 0.7rem;
+    align-items: baseline;
+    gap: 0.35rem 0.9rem;
     flex-wrap: wrap;
   }
   .guest__name {
     flex: 0 1 auto;
-    min-width: 6rem;
-    font-size: 1rem;
+    min-width: 7rem;
+    font-family: var(--font-body);
+    font-size: 1.05rem;
     font-weight: 460;
     color: var(--text);
   }
@@ -659,12 +693,13 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
     max-width: none;
   }
   .guest--plus {
-    margin-top: 0.15rem;
-    padding-top: 0.6rem;
-    border-top: 1px dashed var(--rule);
+    margin-top: 0.3rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--rule);
   }
   .guests__note {
-    margin-top: 0.65rem;
+    margin-top: 0.8rem;
+    font-style: italic;
   }
   /* Narrow screens: the whole control set drops beneath the name as one block,
      keeping each person's name, attendance, and meal unmistakably together. */
@@ -675,14 +710,20 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
     }
   }
 
+  /* A quiet section break between the reply and the contact details. */
+  .rsvp__rule {
+    border: 0;
+    border-top: 1px solid var(--rule);
+    margin: clamp(2rem, 5.5vw, 3rem) 0;
+  }
+
   .rsvp__summary {
     margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
-    padding: 0.85rem 1.05rem;
+    padding: 0.7rem 0 0.7rem 0.95rem;
     font-size: 0.95rem;
     color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 7%, transparent);
-    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
-    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+    border-left: 2px solid var(--accent);
   }
   .rsvp__summary[hidden] {
     display: none;

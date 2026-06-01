@@ -45,9 +45,11 @@ const heading = household ? t.title : t.noCodeTitle;
         </div>
       ) : (
         <>
-          <p class="lead measure reveal rsvp__intro">{t.intro}</p>
-          <p class="muted reveal rsvp__deadline">{deadlineNote}</p>
-          {response && <p class="reveal rsvp__edit">{t.editNote}</p>}
+          <div data-rsvp-lead>
+            <p class="lead measure reveal rsvp__intro">{t.intro}</p>
+            <p class="muted reveal rsvp__deadline">{deadlineNote}</p>
+            {response && <p class="reveal rsvp__edit">{t.editNote}</p>}
+          </div>
           <div class="reveal">
             <RsvpForm
               locale={locale}
@@ -94,17 +96,16 @@ const heading = household ? t.title : t.noCodeTitle;
     border-left: 2px solid var(--accent);
     max-width: 46ch;
   }
+  /* Boxless, like the rest of the site: a confident oxblood rule marks the
+     result, and the confirmation flows beneath it — no enclosing card. */
   .rsvp__success {
     max-width: 40rem;
-    margin-top: clamp(1.5rem, 4vw, 2.25rem);
-    padding: clamp(1.5rem, 4vw, 2.25rem);
-    border: 1px solid color-mix(in srgb, var(--oxidised-bronze) 45%, transparent);
-    border-radius: var(--radius);
-    background: var(--bg-alt);
+    margin-top: clamp(1.75rem, 4vw, 2.5rem);
+    padding-top: clamp(1.4rem, 3.5vw, 2rem);
+    border-top: 2px solid var(--accent);
   }
-  .rsvp__success:focus-visible {
-    outline: 2px solid var(--focus);
-    outline-offset: 4px;
+  .rsvp__success:focus {
+    outline: none;
   }
   .rsvp__success-title {
     font-size: clamp(1.4rem, 3vw, 1.85rem);
