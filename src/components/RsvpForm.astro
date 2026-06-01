@@ -4,7 +4,7 @@ import { getStrings } from '../i18n';
 import { type Locale } from '../lib/i18n';
 import type { RsvpFieldErrors, SubmittedValues } from '../lib/rsvp';
 import type { RsvpResponse } from '../lib/db';
-import { MEALS, MEALS_ENABLED } from '../data/site';
+import { MEALS, MEALS_ENABLED, CONTACT_EMAIL } from '../data/site';
 import Button from './Button.astro';
 
 interface Props {
@@ -85,7 +85,7 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
   data-err-email={t.errorEmail}
   data-err-attending={t.errorAttending}
   data-err-choose={t.errorChoose}
-  data-err-closed={t.closedBody}
+  data-err-closed={t.closedBody.replace('{email}', CONTACT_EMAIL)}
   data-err-submit={t.submitError}
   data-label-submit={t.submit}
   data-label-submitting={t.submitting}

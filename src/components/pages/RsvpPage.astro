@@ -7,6 +7,7 @@ import type { Household, RsvpResponse } from '../../lib/db';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Chapter from '../Chapter.astro';
 import RsvpForm from '../RsvpForm.astro';
+import ContactText from '../ContactText.astro';
 
 interface Props {
   locale: Locale;
@@ -36,12 +37,12 @@ const heading = household ? t.title : t.noCodeTitle;
     {
       !household ? (
         <div class="reveal rsvp__nocode">
-          <p class="lead measure">{t.noCodeBody}</p>
+          <p class="lead measure"><ContactText text={t.noCodeBody} /></p>
         </div>
       ) : !open ? (
         <div class="reveal rsvp__closed">
           <h2 class="rsvp__closed-title">{t.closedTitle}</h2>
-          <p class="lead measure">{t.closedBody}</p>
+          <p class="lead measure"><ContactText text={t.closedBody} /></p>
         </div>
       ) : (
         <>

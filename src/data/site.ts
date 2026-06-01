@@ -31,6 +31,12 @@ export const SITE = {
   showUtilityBar: false,
 };
 
+/** ⚠ PLACEHOLDER — replace before going live. The address guests are pointed to
+    when they can't find their RSVP link, after the deadline, and on the Questions
+    page. Set COUPLE_NOTIFY_EMAIL (Vercel env) to the SAME inbox so a guest's reply
+    to an invitation also lands there. */
+export const CONTACT_EMAIL = 'WEDDING-EMAIL-TBC@gmail.com';
+
 /** RSVP settings. `deadline` is a PLACEHOLDER — confirm with the couple
     (≈4 weeks before the wedding). Replies are accepted through the end of that
     day; afterwards the form shows a polite "closed" message. Set `enabled` to

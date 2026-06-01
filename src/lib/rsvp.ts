@@ -6,6 +6,7 @@ import { isInputError } from 'astro:actions';
 import { getStrings } from '../i18n';
 import type { Locale } from './i18n';
 import { getHouseholdByCode, getResponseForHousehold, type Household, type RsvpResponse } from './db';
+import { CONTACT_EMAIL } from '../data/site';
 
 export interface RsvpFieldErrors {
   email?: string;
@@ -36,7 +37,8 @@ export function rsvpErrorsFrom(
 
   // Non-field errors (closed deadline, honeypot/captcha, or a server fault).
   const message = (error as { message?: string }).message;
-  if (message === 'closed') return { errors: {}, summary: t.closedBody };
+  if (message === 'closed')
+    return { errors: {}, summary: t.closedBody.replace('{email}', CONTACT_EMAIL) };
   return { errors: {}, summary: t.errorSummary };
 }
 

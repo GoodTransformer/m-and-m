@@ -1,0 +1,25 @@
+---
+// Renders a copy string that contains a single `{email}` token, with the token
+// replaced by a mailto link to the couple's CONTACT_EMAIL. Keeps the address in
+// one place (site.ts) instead of hard-coded into each translation.
+import { CONTACT_EMAIL } from '../data/site';
+
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+const [before, after] = text.split('{email}');
+const hasEmail = after !== undefined;
+---
+
+{
+  hasEmail ? (
+    <Fragment>
+      {before}
+      <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+      {after}
+    </Fragment>
+  ) : (
+    text
+  )
+}

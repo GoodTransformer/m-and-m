@@ -136,6 +136,10 @@ npm run dev
 2. **Email — Resend** (free 3,000/mo, 100/day). Create an API key → `RESEND_API_KEY`.
    **Verify a sending domain** (DNS) and set `RSVP_FROM_EMAIL` to e.g.
    `Mari & Michael <rsvp@yourdomain>`. Set `COUPLE_NOTIFY_EMAIL` to the couple's inbox.
+   Then set **`CONTACT_EMAIL` in `src/data/site.ts`** (currently the obvious
+   placeholder `WEDDING-EMAIL-TBC@gmail.com`) to that **same** inbox — it's the
+   address shown to guests who can't find their link, so replies land where the
+   couple already watch.
 
 3. **Anti-spam — Cloudflare Turnstile** (free): add your domain, copy the
    **site key** → `PUBLIC_TURNSTILE_SITEKEY` and **secret** → `TURNSTILE_SECRET_KEY`.

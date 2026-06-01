@@ -101,7 +101,7 @@ export const en: Strings = {
 
     closedTitle: 'Replies are now closed',
     closedBody:
-      'The date for replies has passed. If you still need to reach us, please get in touch directly — we’ll do our best.',
+      'The date for replies has passed. If you still need to reach us, email us at {email} — we’ll do our best.',
 
     thanksTitle: 'Thank you — your reply is in.',
     thanksBody:
@@ -113,7 +113,7 @@ export const en: Strings = {
       'By sending this you agree we may store these details — including any dietary needs — to plan the day.',
     noCodeTitle: 'Please use your invitation link',
     noCodeBody:
-      'Your RSVP link is personal to you. Please open the link from your invitation. If you can’t find it, reply to your invitation email and we’ll resend it.',
+      'Your RSVP link is personal to you — please open the link from your invitation. If you can’t find it, email us at {email} (or reply to your invitation) and we’ll resend it.',
   },
 
   home: {
@@ -308,7 +308,7 @@ export const en: Strings = {
         a: 'Of course. We simply ask that you keep it subtle during the ceremony, so the moment stays unhurried. Afterwards, photograph as much as you like; we would love to see the evening through your eyes.',
       },
     ],
-    note: 'Still wondering about something? Write to us: the address is on your invitation.',
+    note: 'Still wondering about something? Write to us at {email}.',
   },
 
   gifts: {

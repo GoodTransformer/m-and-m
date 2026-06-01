@@ -102,7 +102,7 @@ export const es: Strings = {
 
     closedTitle: 'Las respuestas están cerradas',
     closedBody:
-      'La fecha para responder ya pasó. Si aún necesitan localizarnos, escríbannos directamente — haremos lo posible.',
+      'La fecha para responder ya pasó. Si aún necesitan localizarnos, escríbannos a {email} — haremos lo posible.',
 
     thanksTitle: 'Gracias — su respuesta quedó registrada.',
     thanksBody:
@@ -114,7 +114,7 @@ export const es: Strings = {
       'Al enviar, aceptan que guardemos estos datos —incluidas las necesidades dietéticas— para planificar el día.',
     noCodeTitle: 'Usen su enlace de invitación',
     noCodeBody:
-      'Su enlace para confirmar es personal. Por favor, abran el enlace de su invitación. Si no lo encuentran, respondan a su correo de invitación y se lo reenviaremos.',
+      'Su enlace para confirmar es personal — abran el enlace de su invitación. Si no lo encuentran, escríbannos a {email} (o respondan a su correo de invitación) y se lo reenviaremos.',
   },
 
   home: {
@@ -309,7 +309,7 @@ export const es: Strings = {
         a: 'Por supuesto. Solo pedimos discreción durante la ceremonia, para que el momento transcurra sin prisa. Después, fotografíen cuanto quieran; nos encantaría ver la velada con sus ojos.',
       },
     ],
-    note: '¿Siguen con alguna duda? Escríbannos: la dirección está en su invitación.',
+    note: '¿Siguen con alguna duda? Escríbannos a {email}.',
   },
 
   gifts: {

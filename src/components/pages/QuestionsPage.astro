@@ -4,6 +4,7 @@ import { getStrings } from '../../i18n';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Chapter from '../Chapter.astro';
 import Faq from '../Faq.astro';
+import ContactText from '../ContactText.astro';
 
 interface Props {
   locale: Locale;
@@ -21,7 +22,7 @@ const t = getStrings(locale);
   >
     <p class="lead measure reveal questions__intro">{t.questions.intro}</p>
     <Faq faqs={t.questions.faqs} class="reveal" />
-    <p class="muted reveal questions__note">{t.questions.note}</p>
+    <p class="muted reveal questions__note"><ContactText text={t.questions.note} /></p>
   </Chapter>
 </BaseLayout>
 
