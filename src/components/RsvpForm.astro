@@ -589,10 +589,15 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
     background-size: 0.7rem;
     cursor: pointer;
   }
+  /* Multi-line fields keep a barely-there hairline box — single-line inputs stay
+     underlines — so a writable area reads as clearly enclosed. */
   textarea {
     resize: vertical;
-    min-height: 2.6rem;
+    min-height: 3.5rem;
     line-height: 1.5;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
   }
   input:focus,
   select:focus,
@@ -606,6 +611,11 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
     box-shadow: inset 0 -2px 0 0 var(--accent);
     /* background-color only — the shorthand would wipe the select's chevron image. */
     background-color: color-mix(in srgb, var(--accent) 4%, transparent);
+  }
+  /* The boxed textareas light their whole border on focus, not just the base. */
+  textarea:focus-visible {
+    border-color: var(--accent);
+    box-shadow: none;
   }
   input[aria-invalid='true'],
   select[aria-invalid='true'],
