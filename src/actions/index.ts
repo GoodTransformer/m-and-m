@@ -9,15 +9,11 @@
 // ============================================================
 import { defineAction, ActionError } from 'astro:actions';
 import { z } from 'astro:schema';
-import {
-  getHouseholdByCode,
-  upsertRsvpForHousehold,
-  getResponseForHousehold,
-  type RosterEntry,
-} from '../lib/db';
+import { getHouseholdByCode, upsertRsvpForHousehold, getResponseForHousehold } from '../lib/db';
+import { buildRoster } from '../lib/roster';
 import { verifyTurnstile } from '../lib/turnstile';
 import { sendGuestConfirmation, sendCoupleNotification } from '../lib/email';
-import { isRsvpOpen, MEAL_IDS, mealLabel } from '../data/site';
+import { isRsvpOpen, mealLabel } from '../data/site';
 
 // Astro forwards empty form fields as null; normalize optional text to ''.
 const optionalText = (max: number) =>
@@ -72,36 +68,19 @@ export const server = {
         if (!ts.ok) throw new ActionError({ code: 'BAD_REQUEST', message: 'captcha' });
       }
 
-      // Build the reply roster server-side. Invited names are the household's, not
-      // the form's; plus-one names are accepted only up to the granted allowance.
-      const invited = household.invitedGuests;
-      const plusCap = Math.max(household.plusOnes, 0);
-      const mealAt = (i: number) => {
-        const m = input.meals[i] ?? '';
-        return MEAL_IDS.has(m) ? m : '';
-      };
-
-      // With two or more named guests, attendance is an explicit per-person choice:
-      // only an outright "yes" counts as coming (blank or "no" → not coming), so no
-      // one is ever marked attending by accident. A lone guest is implied by the
-      // household's "yes" — there is no per-person toggle to leave unanswered.
-      const perGuest = invited.length > 1;
-      const roster: RosterEntry[] = [];
-      if (input.attending === 'yes') {
-        invited.forEach((name, i) => {
-          const coming = perGuest ? input.coming[i] === 'yes' : true;
-          roster.push({ name, coming, meal: coming ? mealAt(i) : '', plusOne: false });
-        });
-        for (let j = 0; j < plusCap; j++) {
-          const name = (input.plusName[j] ?? '').trim().slice(0, 120);
-          const coming = name !== ''; // a plus-one only counts once named
-          roster.push({ name, coming, meal: coming ? mealAt(invited.length + j) : '', plusOne: true });
-        }
-      }
-
-      const partySize = roster.filter((r) => r.coming).length;
-      // Said yes but nobody is actually coming → treat as a decline.
-      const attending = partySize > 0 ? 'yes' : 'no';
+      // Build the reply roster server-side (pure, unit-tested logic in lib/roster).
+      // Invited names are the household's, not the form's; plus-one names are
+      // accepted only up to the granted allowance; attendance for two-or-more named
+      // guests must be an explicit "yes" — so no one is ever marked coming by
+      // accident, and the form can't rename a guest or smuggle in an extra one.
+      const { roster, partySize, attending } = buildRoster({
+        invitedGuests: household.invitedGuests,
+        plusOnes: household.plusOnes,
+        attending: input.attending,
+        coming: input.coming,
+        meals: input.meals,
+        plusName: input.plusName,
+      });
 
       await upsertRsvpForHousehold(household.id, {
         attending,
