@@ -69,7 +69,7 @@ export const en: Strings = {
 
     mealsLabel: 'Who’s coming & meals',
     mealsHint: 'Tell us who can make it and choose each person’s meal — it helps us with the place cards.',
-    mealChoose: '— choose —',
+    mealChoose: '— choose a meal —',
     comingLabel: 'Attending',
     comingYes: 'Coming',
     comingNo: 'Can’t come',

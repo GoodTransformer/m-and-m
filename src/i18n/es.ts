@@ -70,7 +70,7 @@ export const es: Strings = {
 
     mealsLabel: 'Quiénes vienen y menú',
     mealsHint: 'Díganos quién podrá venir y elijan el plato de cada persona — nos ayuda con las tarjetas.',
-    mealChoose: '— elegir —',
+    mealChoose: '— elegir plato —',
     comingLabel: 'Asistencia',
     comingYes: 'Viene',
     comingNo: 'No viene',
