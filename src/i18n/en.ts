@@ -71,6 +71,11 @@ export const en: Strings = {
     messageLabel: 'A message to us',
     messageHint: 'Optional — a note, a song, a word.',
 
+    mealsLabel: 'Meal choices',
+    mealsHint: 'Choose a dish for each guest — you can change it any time before the day.',
+    mealGuest: 'Guest {n}',
+    mealChoose: '— choose —',
+
     required: 'Required',
     optional: 'Optional',
     submit: 'Send your reply',

@@ -42,6 +42,7 @@ export interface RsvpResponse {
   email: string;
   dietary: string;
   message: string;
+  meals: string[]; // one meal id per attending guest ('' = not chosen)
   updatedAt: string;
 }
 
@@ -61,8 +62,8 @@ export interface NewHousehold {
 let _schema: Promise<void> | null = null;
 function ensureSchema(): Promise<void> {
   if (!_schema) {
-    _schema = db()
-      .batch(
+    _schema = (async () => {
+      await db().batch(
         [
           `CREATE TABLE IF NOT EXISTS households (
             id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -89,17 +90,21 @@ function ensureSchema(): Promise<void> {
             email        TEXT    NOT NULL DEFAULT '',
             dietary      TEXT    NOT NULL DEFAULT '',
             message      TEXT    NOT NULL DEFAULT '',
+            meals        TEXT    NOT NULL DEFAULT '[]',
             created_at   TEXT    NOT NULL DEFAULT (datetime('now')),
             updated_at   TEXT    NOT NULL DEFAULT (datetime('now'))
           )`,
         ],
         'write',
-      )
-      .then(() => undefined)
-      .catch((err) => {
-        _schema = null;
-        throw err;
-      });
+      );
+      // Migrations for databases created before a column existed (no-op if present).
+      await db()
+        .execute(`ALTER TABLE rsvps ADD COLUMN meals TEXT NOT NULL DEFAULT '[]'`)
+        .catch(() => undefined);
+    })().catch((err) => {
+      _schema = null;
+      throw err;
+    });
   }
   return _schema;
 }
@@ -125,6 +130,16 @@ function toHousehold(r: any): Household {
   };
 }
 
+function parseMeals(v: unknown): string[] {
+  if (typeof v !== 'string' || !v) return [];
+  try {
+    const a = JSON.parse(v);
+    return Array.isArray(a) ? a.filter((x) => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
 function toResponse(r: any): RsvpResponse | null {
   if (r.attending == null) return null;
   return {
@@ -134,6 +149,7 @@ function toResponse(r: any): RsvpResponse | null {
     email: String(r.r_email ?? ''),
     dietary: String(r.dietary ?? ''),
     message: String(r.message ?? ''),
+    meals: parseMeals(r.meals),
     updatedAt: String(r.r_updated ?? ''),
   };
 }
@@ -235,7 +251,7 @@ export async function listHouseholdsWithResponses(): Promise<HouseholdWithRespon
   const { rows } = await db().execute(
     `SELECT h.*,
             r.attending, r.party_size, r.names AS r_names, r.email AS r_email,
-            r.dietary, r.message, r.updated_at AS r_updated
+            r.dietary, r.message, r.meals, r.updated_at AS r_updated
      FROM households h
      LEFT JOIN rsvps r ON r.household_id = h.id
      ORDER BY h.label COLLATE NOCASE`,
@@ -246,12 +262,20 @@ export async function listHouseholdsWithResponses(): Promise<HouseholdWithRespon
 // --- a guest's reply ----------------------------------------------------------
 export async function upsertRsvpForHousehold(
   householdId: number,
-  data: { attending: Attending; partySize: number; names: string; email: string; dietary: string; message: string },
+  data: {
+    attending: Attending;
+    partySize: number;
+    names: string;
+    email: string;
+    dietary: string;
+    message: string;
+    meals: string[];
+  },
 ): Promise<void> {
   await ensureSchema();
   await db().execute({
-    sql: `INSERT INTO rsvps (household_id, attending, party_size, names, email, dietary, message)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
+    sql: `INSERT INTO rsvps (household_id, attending, party_size, names, email, dietary, message, meals)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(household_id) DO UPDATE SET
             attending  = excluded.attending,
             party_size = excluded.party_size,
@@ -259,8 +283,18 @@ export async function upsertRsvpForHousehold(
             email      = excluded.email,
             dietary    = excluded.dietary,
             message    = excluded.message,
+            meals      = excluded.meals,
             updated_at = datetime('now')`,
-    args: [householdId, data.attending, data.partySize, data.names, data.email, data.dietary, data.message],
+    args: [
+      householdId,
+      data.attending,
+      data.partySize,
+      data.names,
+      data.email,
+      data.dietary,
+      data.message,
+      JSON.stringify(data.meals),
+    ],
   });
 }
 
@@ -268,7 +302,7 @@ export async function getResponseForHousehold(householdId: number): Promise<Rsvp
   await ensureSchema();
   const { rows } = await db().execute({
     sql: `SELECT attending, party_size, names AS r_names, email AS r_email,
-                 dietary, message, updated_at AS r_updated
+                 dietary, message, meals, updated_at AS r_updated
           FROM rsvps WHERE household_id = ? LIMIT 1`,
     args: [householdId],
   });

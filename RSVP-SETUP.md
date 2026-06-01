@@ -165,6 +165,10 @@ notification emails), and you can delete everything after the wedding. That's it
 ## Things you can tune
 
 - **Deadline / on-off:** `RSVP` in [`src/data/site.ts`](src/data/site.ts).
+- **Meal menu:** `MEALS` in [`src/data/site.ts`](src/data/site.ts) — set the two
+  main-course names (the guest picks one per attending person, shown only when
+  they're coming). `MEALS_ENABLED = false` hides the meal section. The couple get a
+  per-meal tally + a "missing a meal" flag in `/admin`, and meals appear in the CSV.
 - **Wording (both languages):** the `rsvp` block in `src/i18n/en.ts` / `es.ts`.
 - **Invitation & reminder emails:** `src/lib/email.ts` (bilingual).
 - **Form fields:** `src/components/RsvpForm.astro`; validation/save in `src/actions/index.ts`.

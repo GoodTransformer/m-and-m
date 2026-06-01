@@ -8,7 +8,7 @@
 import { Resend } from 'resend';
 import type { Household, RsvpResponse } from './db';
 import { householdLink, adminUrl } from './links';
-import { SITE, RSVP } from '../data/site';
+import { SITE, RSVP, mealLabel } from '../data/site';
 
 const API_KEY = import.meta.env.RESEND_API_KEY || '';
 const FROM = import.meta.env.RSVP_FROM_EMAIL || 'Mari & Michael <onboarding@resend.dev>';
@@ -157,6 +157,8 @@ export async function sendGuestConfirmation(
     [es ? 'Nombre(s)' : 'Name(s)', r.names],
     [es ? 'Respuesta' : 'Reply', attendingLine(r, locale)],
   ];
+  const chosenMeals = r.meals.filter(Boolean).map((id) => mealLabel(id, locale));
+  if (chosenMeals.length) rows.push([es ? 'Menú' : 'Meals', chosenMeals.join(', ')]);
   if (r.dietary.trim()) rows.push([es ? 'Dietas / alergias' : 'Dietary / allergies', r.dietary]);
   if (r.message.trim()) rows.push([es ? 'Mensaje' : 'Message', r.message]);
   const table = rows

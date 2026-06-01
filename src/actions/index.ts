@@ -9,7 +9,7 @@ import { z } from 'astro:schema';
 import { getHouseholdByCode, upsertRsvpForHousehold, getResponseForHousehold } from '../lib/db';
 import { verifyTurnstile } from '../lib/turnstile';
 import { sendGuestConfirmation, sendCoupleNotification } from '../lib/email';
-import { isRsvpOpen } from '../data/site';
+import { isRsvpOpen, MEAL_IDS } from '../data/site';
 
 // Astro forwards empty form fields as null; normalize optional text to ''.
 const optionalText = (max: number) =>
@@ -26,6 +26,9 @@ export const server = {
       partySize: z.coerce.number().int().min(0).max(50).catch(1),
       dietary: optionalText(1000),
       message: optionalText(2000),
+      // One meal id per attending guest. A bare z.array makes Astro collect every
+      // same-name <select> via getAll() (a preprocess/effects wrapper would not).
+      meals: z.array(z.string().max(40)).max(30),
       // Anti-spam (not shown to humans):
       website: optionalText(100), // honeypot — must come back empty
       _t: z.coerce.number().catch(0), // epoch ms the form was rendered
@@ -57,6 +60,12 @@ export const server = {
       const cap = Math.max(household.maxSeats, 1);
       const partySize = input.attending === 'yes' ? Math.min(Math.max(input.partySize, 1), cap) : 0;
 
+      // One meal per attending guest; keep only valid ids ('' = not chosen).
+      const meals =
+        input.attending === 'yes'
+          ? input.meals.slice(0, partySize).map((m) => (MEAL_IDS.has(m) ? m : ''))
+          : [];
+
       await upsertRsvpForHousehold(household.id, {
         attending: input.attending,
         partySize,
@@ -64,6 +73,7 @@ export const server = {
         email: input.email,
         dietary: input.dietary,
         message: input.message,
+        meals,
       });
 
       const response = await getResponseForHousehold(household.id);

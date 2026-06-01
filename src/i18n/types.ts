@@ -42,6 +42,11 @@ export interface RsvpStrings {
   messageLabel: string;
   messageHint: string;
 
+  mealsLabel: string;
+  mealsHint: string;
+  mealGuest: string; // "Guest {n}" — {n} is replaced with the seat number
+  mealChoose: string; // the empty "— choose —" option
+
   required: string;
   optional: string;
   submit: string;

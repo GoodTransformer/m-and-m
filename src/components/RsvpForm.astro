@@ -4,6 +4,7 @@ import { getStrings } from '../i18n';
 import { type Locale } from '../lib/i18n';
 import type { RsvpFieldErrors, SubmittedValues } from '../lib/rsvp';
 import type { RsvpResponse } from '../lib/db';
+import { MEALS, MEALS_ENABLED } from '../data/site';
 import Button from './Button.astro';
 
 interface Props {
@@ -45,6 +46,8 @@ const attendingNo = attendingChoice === 'no';
 const seats = Array.from({ length: Math.max(maxSeats, 1) }, (_, i) => i + 1);
 const partyValue = submitted?.partySize ?? response?.partySize ?? 1;
 const selectedSeats = Math.min(Math.max(partyValue, 1), Math.max(maxSeats, 1));
+const showMeals = MEALS_ENABLED;
+const mealPrefill = submitted?.meals ?? response?.meals ?? [];
 ---
 
 <form
@@ -124,6 +127,31 @@ const selectedSeats = Math.min(Math.max(partyValue, 1), Math.max(maxSeats, 1));
             </option>
           ))}
         </select>
+      </div>
+    )
+  }
+
+  {/* Meal choices — one per attending guest; JS shows only party-size of them. */}
+  {
+    showMeals && (
+      <div class="field" data-when-yes data-meal-section>
+        <span class="field__grouplabel">{t.mealsLabel}</span>
+        <p class="field__hint">{t.mealsHint}</p>
+        <div class="meals">
+          {seats.map((n) => (
+            <label class="meal" data-meal-row data-seat={n}>
+              <span class="meal__who">{t.mealGuest.replace('{n}', String(n))}</span>
+              <select name="meals" class="meal__select">
+                <option value="">{t.mealChoose}</option>
+                {MEALS.map((m) => (
+                  <option value={m.id} selected={mealPrefill[n - 1] === m.id}>
+                    {locale === 'es' ? m.es : m.en}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
+        </div>
       </div>
     )
   }
@@ -228,6 +256,18 @@ const selectedSeats = Math.min(Math.max(partyValue, 1), Math.max(maxSeats, 1));
     };
     radios.forEach((r) => r.addEventListener('change', syncConditional));
     syncConditional();
+
+    // Show only as many meal selectors as the chosen party size.
+    const partySelect = form.querySelector<HTMLSelectElement>('#rsvp-party');
+    const mealRows = Array.from(form.querySelectorAll<HTMLElement>('[data-meal-row]'));
+    const syncMeals = () => {
+      const n = partySelect ? Number(partySelect.value) || 1 : Infinity;
+      mealRows.forEach((row) => {
+        row.hidden = Number(row.dataset.seat) > n;
+      });
+    };
+    partySelect?.addEventListener('change', syncMeals);
+    syncMeals();
 
     const fieldError = (name: string) => form.querySelector<HTMLElement>(`[data-error="${name}"]`);
     const fieldInput = (name: string) =>
@@ -440,6 +480,37 @@ const selectedSeats = Math.min(Math.max(partyValue, 1), Math.max(maxSeats, 1));
     margin: 0.5rem 0 0;
     font-size: 0.9rem;
     color: var(--accent);
+  }
+
+  .field__grouplabel {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--text-display);
+  }
+  .meals {
+    display: grid;
+    gap: 0.55rem;
+    margin-top: 0.5rem;
+  }
+  .meal {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .meal[hidden] {
+    display: none;
+  }
+  .meal__who {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    min-width: 4.5rem;
+  }
+  .meal__select {
+    max-width: none;
+    flex: 1 1 14rem;
   }
 
   .rsvp__summary {

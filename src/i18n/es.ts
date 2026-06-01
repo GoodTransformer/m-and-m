@@ -72,6 +72,11 @@ export const es: Strings = {
     messageLabel: 'Un mensaje para nosotros',
     messageHint: 'Opcional — una nota, una canción, unas palabras.',
 
+    mealsLabel: 'Elección de menú',
+    mealsHint: 'Elijan un plato por persona — pueden cambiarlo cuando quieran antes del día.',
+    mealGuest: 'Comensal {n}',
+    mealChoose: '— elegir —',
+
     required: 'Obligatorio',
     optional: 'Opcional',
     submit: 'Enviar respuesta',

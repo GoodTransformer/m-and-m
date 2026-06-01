@@ -50,6 +50,30 @@ export function isRsvpOpen(now: Date = new Date()): boolean {
   return now.getTime() <= end.getTime();
 }
 
+/** Meal choices on the RSVP form. Replace the `en`/`es` labels with your real
+    dish names; the guest picks one per attending person. Set `MEALS_ENABLED`
+    false to hide the meal section. Keep it to ~2 mains + a vegetarian (the
+    catering standard for a plated dinner). */
+export const MEALS_ENABLED = true;
+
+export interface MealOption {
+  id: string;
+  en: string;
+  es: string;
+}
+
+export const MEALS: MealOption[] = [
+  { id: 'main-1', en: 'Main course 1 — set dish name', es: 'Plato principal 1 — poner nombre' },
+  { id: 'main-2', en: 'Main course 2 — set dish name', es: 'Plato principal 2 — poner nombre' },
+  { id: 'vegetarian', en: 'Vegetarian', es: 'Vegetariano' },
+];
+
+export const MEAL_IDS = new Set(MEALS.map((m) => m.id));
+
+export function mealLabel(id: string, locale: 'en' | 'es'): string {
+  return MEALS.find((m) => m.id === id)?.[locale] ?? id;
+}
+
 export const VENUES: Venue[] = [
   {
     id: 'magdalen',
