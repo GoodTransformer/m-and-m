@@ -28,6 +28,7 @@ export const server = {
     accept: 'form',
     input: z.object({
       code: z.string().trim().min(1).max(32),
+      locale: optionalText(2), // the form's language ('en'/'es'); '' falls back to the household's
       email: z.string().trim().email().max(200),
       attending: z.enum(['yes', 'no']),
       dietary: optionalText(1000),
@@ -54,6 +55,12 @@ export const server = {
 
       const household = await getHouseholdByCode(input.code);
       if (!household) throw new ActionError({ code: 'NOT_FOUND', message: 'invalid-code' });
+
+      // The language the guest is actually replying in (they may have switched
+      // EN/ES on the form) — used for the echo + their confirmation email so the
+      // language matches what they saw. Falls back to the household's default.
+      const locale =
+        input.locale === 'es' ? 'es' : input.locale === 'en' ? 'en' : household.locale;
 
       // Turnstile only when a token is present. The widget needs JavaScript, so a
       // no-JS guest produces no token — verifying would block them. The unguessable
@@ -111,7 +118,7 @@ export const server = {
         // entered one only when there is none) — never an arbitrary form value.
         const confirmTo = household.email || response.email;
         try {
-          await sendGuestConfirmation(response, household.locale, confirmTo, household.code);
+          await sendGuestConfirmation(response, locale, confirmTo, household.code);
         } catch (err) {
           console.error('[rsvp] guest confirmation email failed', err);
         }
@@ -123,8 +130,7 @@ export const server = {
       }
 
       // Echo the stored choices back so the success screen can show exactly what
-      // was recorded (meal labels localized to the household's language).
-      const locale = household.locale;
+      // was recorded (meal labels localized to the language the guest replied in).
       return {
         ok: true as const,
         attending,

@@ -31,7 +31,7 @@ const deadlineNote = t.deadlineNote.replace('{date}', deadlineText);
 const heading = household ? t.title : t.noCodeTitle;
 ---
 
-<BaseLayout locale={locale} path="/rsvp" title={heading}>
+<BaseLayout locale={locale} path={household ? `/rsvp/${household.code}` : '/rsvp'} title={heading}>
   <Chapter label={t.label} title={heading} headingLevel="h1" id="rsvp">
     {
       !household ? (
