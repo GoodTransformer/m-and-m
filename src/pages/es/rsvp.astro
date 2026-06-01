@@ -1,0 +1,17 @@
+---
+export const prerender = false;
+import { actions } from 'astro:actions';
+import { localePath } from '../../lib/i18n';
+import { loadRsvp } from '../../lib/rsvp';
+import RsvpPage from '../../components/pages/RsvpPage.astro';
+
+const result = Astro.getActionResult(actions.rsvp);
+let redirect: Response | null = null;
+if (result && !result.error) redirect = Astro.redirect(localePath('/rsvp/thank-you', 'es'));
+if (redirect) return redirect;
+
+const code = Astro.url.searchParams.get('c') || '';
+const { household, response, errors, summary } = await loadRsvp(code, result, 'es');
+---
+
+<RsvpPage locale="es" household={household} response={response} errors={errors} summary={summary} />

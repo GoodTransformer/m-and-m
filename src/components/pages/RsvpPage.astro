@@ -1,0 +1,112 @@
+---
+import { type Locale } from '../../lib/i18n';
+import { getStrings } from '../../i18n';
+import { RSVP, isRsvpOpen } from '../../data/site';
+import type { RsvpFieldErrors } from '../../lib/rsvp';
+import type { Household, RsvpResponse } from '../../lib/db';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Chapter from '../Chapter.astro';
+import RsvpForm from '../RsvpForm.astro';
+
+interface Props {
+  locale: Locale;
+  household?: Household | null;
+  response?: RsvpResponse | null;
+  errors?: RsvpFieldErrors;
+  summary?: string;
+}
+const { locale, household = null, response = null, errors = {}, summary } = Astro.props;
+const t = getStrings(locale).rsvp;
+const open = isRsvpOpen();
+
+const bcp47 = locale === 'es' ? 'es-ES' : 'en-GB';
+const deadlineText = new Intl.DateTimeFormat(bcp47, {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+}).format(new Date(`${RSVP.deadline}T12:00:00`));
+const deadlineNote = t.deadlineNote.replace('{date}', deadlineText);
+
+const heading = household ? t.title : t.noCodeTitle;
+---
+
+<BaseLayout locale={locale} path="/rsvp" title={heading}>
+  <Chapter label={t.label} title={heading} headingLevel="h1" id="rsvp">
+    {
+      !household ? (
+        <div class="reveal rsvp__nocode">
+          <p class="lead measure">{t.noCodeBody}</p>
+        </div>
+      ) : !open ? (
+        <div class="reveal rsvp__closed">
+          <h2 class="rsvp__closed-title">{t.closedTitle}</h2>
+          <p class="lead measure">{t.closedBody}</p>
+        </div>
+      ) : (
+        <>
+          <p class="lead measure reveal rsvp__intro">{t.intro}</p>
+          <p class="muted reveal rsvp__deadline">{deadlineNote}</p>
+          {response && <p class="reveal rsvp__edit">{t.editNote}</p>}
+          <div class="reveal">
+            <RsvpForm
+              locale={locale}
+              code={household.code}
+              invitedNames={household.invitedNames}
+              defaultEmail={household.email ?? ''}
+              maxSeats={household.maxSeats}
+              response={response}
+              errors={errors}
+              summary={summary}
+            />
+          </div>
+          <div class="rsvp__success" data-rsvp-success tabindex="-1" hidden>
+            <h2 class="rsvp__success-title">{t.successTitle}</h2>
+            <p class="rsvp__success-body">{t.successBody}</p>
+          </div>
+        </>
+      )
+    }
+  </Chapter>
+</BaseLayout>
+
+<style>
+  .rsvp__intro {
+    margin-bottom: 0.65rem;
+  }
+  .rsvp__deadline {
+    margin-bottom: 0.25rem;
+    font-style: italic;
+  }
+  .rsvp__edit {
+    margin: 0.75rem 0 0;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.92rem;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+    border-left: 2px solid var(--accent);
+    max-width: 46ch;
+  }
+  .rsvp__success {
+    max-width: 40rem;
+    margin-top: clamp(1.5rem, 4vw, 2.25rem);
+    padding: clamp(1.5rem, 4vw, 2.25rem);
+    border: 1px solid color-mix(in srgb, var(--oxidised-bronze) 45%, transparent);
+    border-radius: var(--radius);
+    background: var(--bg-alt);
+  }
+  .rsvp__success:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 4px;
+  }
+  .rsvp__success-title {
+    font-size: clamp(1.4rem, 3vw, 1.85rem);
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+  }
+  .rsvp__success-body {
+    max-width: 48ch;
+  }
+  .rsvp__closed-title {
+    margin-bottom: 0.75rem;
+  }
+</style>

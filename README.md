@@ -14,12 +14,13 @@ translated from the Wedding Brand Identity Guide. See
 
 ```bash
 npm install
-npm run dev      # http://localhost:4321
-npm run build    # static output to ./dist
-npm run preview  # serve the built site
+npm run dev      # http://localhost:4321  (everything, incl. RSVP, runs here)
+npm run build    # content prerendered; the RSVP routes bundle for Vercel
 ```
 
-Requires Node 18+.
+Requires Node 18+ locally; Vercel runs the deployed site on Node 22. RSVP has
+safe local defaults (a `local.db` file, email off, captcha off) — see
+[`RSVP-SETUP.md`](RSVP-SETUP.md).
 
 ## How it's organised
 
@@ -56,6 +57,7 @@ no markup change needed.
 Placeholders currently in the site — replace before sharing widely:
 
 - [x] **Wedding date** — Wednesday, 23 September 2026 (confirmed; midweek, so no "weekend" copy)
+- [ ] **RSVP deadline** (currently 26 August 2026 placeholder) — `data/site.ts` (`RSVP.deadline`)
 - [ ] **Ceremony & reception times** (currently 3:00 pm / 6:30 pm — 3 pm not yet firmly confirmed) — `i18n/*.ts` (`weekend`, `today`)
 - [ ] **Running order** of the day — `i18n/*.ts` (`weekend.events`)
 - [ ] **Dress code** wording (currently *Black tie*) — `i18n/*.ts`
@@ -84,9 +86,12 @@ components. To swap one, replace the file (keep the name) — no markup change.
 Regenerate the social-share card after changing the date/photos:
 `Google Chrome --headless --screenshot=public/og.png --window-size=1200,630 scripts/og.html`
 
-> **RSVP** is intentionally not on this site — the couple use a separate RSVP
-> system. (If you ever want a discreet outbound "RSVP" link to it, it can be
-> added to the masthead/quick-actions in minutes.)
+> **RSVP** is built into the site as a **guest list**: each household gets a personal
+> link (`/rsvp/?c=…`), so replies can't be duplicated and +1s are capped, with a
+> private inbox at `/admin` where the couple read replies and **send invitations &
+> reminders automatically** (idempotent — no one is emailed twice). It needs a
+> server, so the site is hosted on Vercel — see [`RSVP-SETUP.md`](RSVP-SETUP.md) for
+> the full flow, the guest-list CSV format, the safe send workflow, and the env vars.
 
 ## Privacy
 
@@ -96,27 +101,25 @@ GitHub Pages that meta tag is the control (Pages can't send the stronger
 
 ## Deployment
 
-### Now — GitHub Pages (preview)
+The full site is hosted on **Vercel** (free Hobby tier). Adding RSVP introduced a
+server (the form action, the `/admin` inbox, and the auth middleware), which
+GitHub Pages can't run — so Vercel is now the home of the site.
+[`RSVP-SETUP.md`](RSVP-SETUP.md) is the step-by-step.
 
-Published under the **GoodTransformer** GitHub account. A workflow at
-`.github/workflows/deploy.yml` builds and deploys on every push to `main`; it
-sets `BASE_PATH` to `/<repo>/` so links resolve under the project-pages URL.
+### Vercel (host)
 
-After the repo is created and pushed, enable **Settings → Pages → Source:
-GitHub Actions**. The site goes live at:
+1. Import the repo in Vercel (it detects Astro and the adapter).
+2. Leave `BASE_PATH` unset — the site serves from `/`.
+3. Add the RSVP environment variables (see [`RSVP-SETUP.md`](RSVP-SETUP.md)).
+4. Optionally add an `X-Robots-Tag: noindex` response header for stronger privacy,
+   then attach the custom domain.
 
-```
-https://goodtransformer.github.io/<repo>/
-```
+Internal links are base-aware, so nothing in the site itself needs changing.
 
-### Later — Vercel + custom domain
+### Note on the old GitHub Pages workflow
 
-The build is portable. To move:
-
-1. Import the repo in Vercel (framework: Astro).
-2. Remove `BASE_PATH` (the site serves from `/`).
-3. Add an `X-Robots-Tag: noindex` response header (and an optional shared
-   passcode) for stronger privacy.
-4. Attach the custom domain.
-
-No changes to the site itself are required — internal links are base-aware.
+`.github/workflows/deploy.yml` predates RSVP and deploys a **static** build to the
+GoodTransformer Pages account. It can no longer serve the whole site (no server →
+no RSVP), and the Vercel adapter changes the build output it expects. **Disable it
+on cutover** (delete the file, or Settings → Pages → Source: None) so it doesn't
+publish a broken copy on push to `main`.

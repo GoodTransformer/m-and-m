@@ -21,6 +21,7 @@ export const en: Strings = {
     gifts: 'A Note on Gifts',
     story: 'Our Story',
     today: 'Essentials',
+    rsvp: 'RSVP',
     menu: 'Menu',
     close: 'Close',
   },
@@ -46,6 +47,61 @@ export const en: Strings = {
     travel: 'Travel & Stay',
     questions: 'Questions',
     today: 'Essentials',
+    rsvp: 'RSVP',
+  },
+
+  rsvp: {
+    label: 'Reply',
+    title: 'Will you join us?',
+    intro:
+      'We would be glad of your reply. A few short questions below — tell us whether you can come, who is in your party, and anything we should know.',
+    deadlineNote: 'Kindly send your reply by {date}.',
+
+    namesLabel: 'Your name(s)',
+    namesHint: 'Everyone replying together, as you’d like them written.',
+    emailLabel: 'Email',
+    emailHint: 'So we can send your confirmation.',
+    attendingLegend: 'Will you be there?',
+    attendingYes: 'Joyfully, yes',
+    attendingNo: 'Sadly, no',
+    partyLabel: 'How many in your party?',
+    partyHint: 'Including yourself.',
+    dietaryLabel: 'Dietary needs or allergies',
+    dietaryHint: 'Anything the kitchen should know.',
+    messageLabel: 'A message to us',
+    messageHint: 'Optional — a note, a song, a word.',
+
+    required: 'Required',
+    optional: 'Optional',
+    submit: 'Send your reply',
+    submitting: 'Sending…',
+    noscriptNote:
+      'This form works without JavaScript — once you submit, a confirmation page will appear.',
+
+    successTitle: 'Thank you — your reply is in.',
+    successBody:
+      'We’ve noted it, and a confirmation is on its way to your inbox. We can’t wait to celebrate with you.',
+    errorSummary: 'Please check the highlighted fields and try again.',
+    errorNames: 'Please tell us who is replying.',
+    errorEmail: 'Please enter a valid email address.',
+    errorAttending: 'Please let us know if you can come.',
+    errorParty: 'Please enter a number between 1 and 30.',
+
+    closedTitle: 'Replies are now closed',
+    closedBody:
+      'The date for replies has passed. If you still need to reach us, please get in touch directly — we’ll do our best.',
+
+    thanksTitle: 'Thank you — your reply is in.',
+    thanksBody:
+      'We’ve received it, and a confirmation is on its way to your inbox. We can’t wait to celebrate with you.',
+    thanksBackHome: 'Back to the invitation',
+
+    editNote: 'You’ve already replied — update your answer below and resend.',
+    consentNote:
+      'By sending this you agree we may store these details — including any dietary needs — to plan the day.',
+    noCodeTitle: 'Please use your invitation link',
+    noCodeBody:
+      'Your RSVP link is personal to you. Please open the link from your invitation. If you can’t find it, reply to your invitation email and we’ll resend it.',
   },
 
   home: {

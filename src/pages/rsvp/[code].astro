@@ -1,0 +1,19 @@
+---
+export const prerender = false;
+import { actions } from 'astro:actions';
+import { localePath } from '../../lib/i18n';
+import { loadRsvp } from '../../lib/rsvp';
+import RsvpPage from '../../components/pages/RsvpPage.astro';
+
+// The robust personal link: /rsvp/CODE/ (a path segment survives forwarding
+// better than a ?query). The static /rsvp/thank-you/ route takes precedence,
+// so it is never matched as a code.
+const result = Astro.getActionResult(actions.rsvp);
+let redirect: Response | null = null;
+if (result && !result.error) redirect = Astro.redirect(localePath('/rsvp/thank-you', 'en'));
+if (redirect) return redirect;
+
+const { household, response, errors, summary } = await loadRsvp(Astro.params.code ?? '', result, 'en');
+---
+
+<RsvpPage locale="en" household={household} response={response} errors={errors} summary={summary} />

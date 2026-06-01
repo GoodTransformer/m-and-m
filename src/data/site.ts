@@ -31,6 +31,25 @@ export const SITE = {
   showUtilityBar: false,
 };
 
+/** RSVP settings. `deadline` is a PLACEHOLDER — confirm with the couple
+    (≈4 weeks before the wedding). Replies are accepted through the end of that
+    day; afterwards the form shows a polite "closed" message. Set `enabled` to
+    false to take the form down entirely. */
+export const RSVP = {
+  deadline: '2026-08-26',
+  enabled: true,
+};
+
+/** Whether the RSVP form is currently accepting replies. Closes at the end of the
+    deadline day "Anywhere on Earth" (UTC-12), so no guest is cut off early by their
+    timezone — a guest in Bolivia or the US gets the full calendar day. */
+export function isRsvpOpen(now: Date = new Date()): boolean {
+  if (!RSVP.enabled) return false;
+  const end = new Date(`${RSVP.deadline}T23:59:59-12:00`);
+  if (Number.isNaN(end.getTime())) return true; // misconfigured date → stay open
+  return now.getTime() <= end.getTime();
+}
+
 export const VENUES: Venue[] = [
   {
     id: 'magdalen',

@@ -21,6 +21,7 @@ export const es: Strings = {
     gifts: 'Sobre los regalos',
     story: 'Nuestra historia',
     today: 'Esencial',
+    rsvp: 'Confirmar',
     menu: 'Menú',
     close: 'Cerrar',
   },
@@ -47,6 +48,61 @@ export const es: Strings = {
     travel: 'Cómo llegar',
     questions: 'Preguntas',
     today: 'Esencial',
+    rsvp: 'Confirmar',
+  },
+
+  rsvp: {
+    label: 'Respuesta',
+    title: '¿Nos acompañan?',
+    intro:
+      'Nos alegraría recibir su respuesta. Unas pocas preguntas abajo: díganos si pueden venir, quién los acompaña y cualquier cosa que debamos saber.',
+    deadlineNote: 'Por favor, envíen su respuesta antes del {date}.',
+
+    namesLabel: 'Su nombre (o nombres)',
+    namesHint: 'Quienes responden juntos, como quieran que aparezcan escritos.',
+    emailLabel: 'Correo electrónico',
+    emailHint: 'Para enviarles la confirmación.',
+    attendingLegend: '¿Estarán?',
+    attendingYes: 'Sí, con alegría',
+    attendingNo: 'No podremos, lo sentimos',
+    partyLabel: '¿Cuántos son?',
+    partyHint: 'Inclúyanse en la cuenta.',
+    dietaryLabel: 'Alergias o necesidades dietéticas',
+    dietaryHint: 'Lo que la cocina deba saber.',
+    messageLabel: 'Un mensaje para nosotros',
+    messageHint: 'Opcional — una nota, una canción, unas palabras.',
+
+    required: 'Obligatorio',
+    optional: 'Opcional',
+    submit: 'Enviar respuesta',
+    submitting: 'Enviando…',
+    noscriptNote:
+      'Este formulario funciona sin JavaScript: al enviarlo verán una página de confirmación.',
+
+    successTitle: 'Gracias — su respuesta quedó registrada.',
+    successBody:
+      'La anotamos y les enviamos una confirmación por correo. Tenemos muchas ganas de celebrar con ustedes.',
+    errorSummary: 'Por favor, revisen los campos marcados e inténtenlo de nuevo.',
+    errorNames: 'Díganos quién responde, por favor.',
+    errorEmail: 'Introduzcan un correo electrónico válido.',
+    errorAttending: 'Indíquennos si pueden venir, por favor.',
+    errorParty: 'Introduzcan un número entre 1 y 30.',
+
+    closedTitle: 'Las respuestas están cerradas',
+    closedBody:
+      'La fecha para responder ya pasó. Si aún necesitan localizarnos, escríbannos directamente — haremos lo posible.',
+
+    thanksTitle: 'Gracias — su respuesta quedó registrada.',
+    thanksBody:
+      'La recibimos, y les enviamos una confirmación por correo. Tenemos muchas ganas de celebrar con ustedes.',
+    thanksBackHome: 'Volver a la invitación',
+
+    editNote: 'Ya respondieron — actualicen su respuesta abajo y vuelvan a enviarla.',
+    consentNote:
+      'Al enviar, aceptan que guardemos estos datos —incluidas las necesidades dietéticas— para planificar el día.',
+    noCodeTitle: 'Usen su enlace de invitación',
+    noCodeBody:
+      'Su enlace para confirmar es personal. Por favor, abran el enlace de su invitación. Si no lo encuentran, respondan a su correo de invitación y se lo reenviaremos.',
   },
 
   home: {

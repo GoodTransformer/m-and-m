@@ -1,0 +1,467 @@
+---
+import { actions } from 'astro:actions';
+import { getStrings } from '../i18n';
+import { type Locale } from '../lib/i18n';
+import type { RsvpFieldErrors } from '../lib/rsvp';
+import type { RsvpResponse } from '../lib/db';
+import Button from './Button.astro';
+
+interface Props {
+  locale: Locale;
+  code: string;
+  invitedNames: string;
+  defaultEmail: string;
+  maxSeats: number;
+  response?: RsvpResponse | null;
+  errors?: RsvpFieldErrors;
+  summary?: string;
+}
+const { locale, code, invitedNames, defaultEmail, maxSeats, response = null, errors = {}, summary } =
+  Astro.props;
+const t = getStrings(locale).rsvp;
+
+const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY || '';
+const dby = (id: string, hasErr: boolean) => (hasErr ? `${id}-hint ${id}-error` : `${id}-hint`);
+
+// Pre-fill from a prior reply (edit mode) or the invitation.
+const nameValue = response?.names || invitedNames;
+const emailValue = response?.email || defaultEmail;
+const messageValue = response?.message ?? '';
+const dietaryValue = response?.dietary ?? '';
+const attendingYes = response?.attending === 'yes';
+const attendingNo = response?.attending === 'no';
+const seats = Array.from({ length: Math.max(maxSeats, 1) }, (_, i) => i + 1);
+const selectedSeats = Math.min(Math.max(response?.partySize ?? 1, 1), Math.max(maxSeats, 1));
+---
+
+<form
+  class="rsvp"
+  method="POST"
+  action={actions.rsvp}
+  data-rsvp
+  data-err-summary={t.errorSummary}
+  data-err-names={t.errorNames}
+  data-err-email={t.errorEmail}
+  data-err-attending={t.errorAttending}
+  data-err-party={t.errorParty}
+  data-label-submit={t.submit}
+  data-label-submitting={t.submitting}
+>
+  <div class="rsvp__summary" role="alert" data-error-summary hidden={!summary}>{summary}</div>
+
+  {/* Honeypot: hidden from people and assistive tech; bots fill it. */}
+  <div class="rsvp__hp" aria-hidden="true">
+    <label for="rsvp-website">Leave this field blank</label>
+    <input id="rsvp-website" type="text" name="website" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <input type="hidden" name="code" value={code} />
+  <input type="hidden" name="_t" value="" data-rendered-at />
+
+  {/* Name(s) */}
+  <div class="field">
+    <label for="rsvp-names">{t.namesLabel} <span class="req">{t.required}</span></label>
+    <p class="field__hint" id="rsvp-names-hint">{t.namesHint}</p>
+    <input
+      id="rsvp-names"
+      name="names"
+      type="text"
+      required
+      maxlength="200"
+      autocomplete="name"
+      value={nameValue}
+      aria-describedby={dby('rsvp-names', Boolean(errors.names))}
+      aria-invalid={errors.names ? 'true' : undefined}
+    />
+    <p class="field__error" id="rsvp-names-error" data-error="names" hidden={!errors.names}>
+      {errors.names}
+    </p>
+  </div>
+
+  {/* Attending */}
+  <fieldset class="field" aria-describedby={errors.attending ? 'rsvp-attending-error' : undefined}>
+    <legend>{t.attendingLegend} <span class="req">{t.required}</span></legend>
+    <div class="radios">
+      <label class="radio">
+        <input type="radio" name="attending" value="yes" required checked={attendingYes} />
+        <span>{t.attendingYes}</span>
+      </label>
+      <label class="radio">
+        <input type="radio" name="attending" value="no" checked={attendingNo} />
+        <span>{t.attendingNo}</span>
+      </label>
+    </div>
+    <p class="field__error" id="rsvp-attending-error" data-error="attending" hidden={!errors.attending}>
+      {errors.attending}
+    </p>
+  </fieldset>
+
+  {/* Party size — only when more than one seat; JS hides it on "no". */}
+  {
+    maxSeats > 1 && (
+      <div class="field" data-when-yes>
+        <label for="rsvp-party">{t.partyLabel}</label>
+        <p class="field__hint" id="rsvp-party-hint">{t.partyHint}</p>
+        <select id="rsvp-party" name="partySize" aria-describedby="rsvp-party-hint">
+          {seats.map((n) => (
+            <option value={n} selected={n === selectedSeats}>
+              {n}
+            </option>
+          ))}
+        </select>
+      </div>
+    )
+  }
+
+  {/* Email */}
+  <div class="field">
+    <label for="rsvp-email">{t.emailLabel} <span class="req">{t.required}</span></label>
+    <p class="field__hint" id="rsvp-email-hint">{t.emailHint}</p>
+    <input
+      id="rsvp-email"
+      name="email"
+      type="email"
+      required
+      maxlength="200"
+      autocomplete="email"
+      inputmode="email"
+      value={emailValue}
+      aria-describedby={dby('rsvp-email', Boolean(errors.email))}
+      aria-invalid={errors.email ? 'true' : undefined}
+    />
+    <p class="field__error" id="rsvp-email-error" data-error="email" hidden={!errors.email}>
+      {errors.email}
+    </p>
+  </div>
+
+  {/* Dietary — only relevant when attending; JS hides it on "no". */}
+  <div class="field" data-when-yes>
+    <label for="rsvp-dietary">{t.dietaryLabel} <span class="opt">{t.optional}</span></label>
+    <p class="field__hint" id="rsvp-dietary-hint">{t.dietaryHint}</p>
+    <textarea id="rsvp-dietary" name="dietary" rows="2" maxlength="1000" aria-describedby="rsvp-dietary-hint"
+      >{dietaryValue}</textarea
+    >
+  </div>
+
+  {/* Message */}
+  <div class="field">
+    <label for="rsvp-message">{t.messageLabel} <span class="opt">{t.optional}</span></label>
+    <p class="field__hint" id="rsvp-message-hint">{t.messageHint}</p>
+    <textarea id="rsvp-message" name="message" rows="3" maxlength="2000" aria-describedby="rsvp-message-hint"
+      >{messageValue}</textarea
+    >
+  </div>
+
+  {
+    sitekey && (
+      <div class="field rsvp__turnstile">
+        <div class="cf-turnstile" data-sitekey={sitekey} data-theme="light" data-language={locale} />
+      </div>
+    )
+  }
+
+  <p class="rsvp__consent">{t.consentNote}</p>
+
+  <div class="rsvp__actions">
+    <Button variant="primary" class="rsvp__submit">{t.submit}</Button>
+  </div>
+
+  <noscript>
+    <p class="field__hint rsvp__noscript">{t.noscriptNote}</p>
+  </noscript>
+</form>
+
+{
+  sitekey && (
+    <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+  )
+}
+
+<script>
+  import { actions, isInputError } from 'astro:actions';
+
+  const form = document.querySelector<HTMLFormElement>('[data-rsvp]');
+  if (form) {
+    const d = form.dataset;
+    const labels = {
+      summary: d.errSummary || '',
+      submit: d.labelSubmit || 'Send',
+      submitting: d.labelSubmitting || '…',
+      fields: {
+        names: d.errNames || '',
+        email: d.errEmail || '',
+        attending: d.errAttending || '',
+        partySize: d.errParty || '',
+      } as Record<string, string>,
+    };
+
+    const summaryEl = form.querySelector<HTMLElement>('[data-error-summary]');
+    const submitBtn = form.querySelector<HTMLButtonElement>('.rsvp__submit');
+    const submitLabel = submitBtn?.querySelector<HTMLElement>('.btn__label') ?? submitBtn;
+
+    const stamp = form.querySelector<HTMLInputElement>('[data-rendered-at]');
+    if (stamp) stamp.value = String(Date.now());
+
+    const conditional = Array.from(form.querySelectorAll<HTMLElement>('[data-when-yes]'));
+    const radios = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="attending"]'));
+    const syncConditional = () => {
+      const chosen = radios.find((r) => r.checked);
+      const show = !chosen || chosen.value === 'yes';
+      conditional.forEach((el) => (el.hidden = !show));
+    };
+    radios.forEach((r) => r.addEventListener('change', syncConditional));
+    syncConditional();
+
+    const fieldError = (name: string) => form.querySelector<HTMLElement>(`[data-error="${name}"]`);
+    const fieldInput = (name: string) =>
+      form.querySelector<HTMLInputElement | HTMLSelectElement>(`[name="${name}"]`);
+
+    const applyErrorAria = (name: string, on: boolean) => {
+      const err = fieldError(name);
+      if (!err) return;
+      const hintId = err.id.replace(/-error$/, '-hint');
+      const hasHint = Boolean(document.getElementById(hintId));
+      const isGroup = name === 'attending';
+      const target: HTMLElement | null = isGroup ? err.closest('fieldset') : fieldInput(name);
+      if (!target) return;
+      if (on) {
+        target.setAttribute(
+          'aria-describedby',
+          [hasHint ? hintId : '', err.id].filter(Boolean).join(' '),
+        );
+        if (!isGroup) target.setAttribute('aria-invalid', 'true');
+      } else {
+        if (hasHint) target.setAttribute('aria-describedby', hintId);
+        else target.removeAttribute('aria-describedby');
+        target.removeAttribute('aria-invalid');
+      }
+    };
+
+    const clearErrors = () => {
+      if (summaryEl) {
+        summaryEl.hidden = true;
+        summaryEl.textContent = '';
+      }
+      (['names', 'email', 'attending', 'partySize'] as const).forEach((name) => {
+        const err = fieldError(name);
+        if (err) {
+          err.hidden = true;
+          err.textContent = '';
+        }
+        applyErrorAria(name, false);
+      });
+    };
+
+    const showFieldError = (name: string, message: string) => {
+      const err = fieldError(name);
+      if (err) {
+        err.textContent = message;
+        err.hidden = false;
+      }
+      applyErrorAria(name, true);
+    };
+
+    const showSummary = (message: string) => {
+      if (summaryEl) {
+        summaryEl.textContent = message;
+        summaryEl.hidden = false;
+      }
+    };
+
+    const setBusy = (busy: boolean) => {
+      if (!submitBtn) return;
+      submitBtn.disabled = busy;
+      if (busy) submitBtn.setAttribute('aria-busy', 'true');
+      else submitBtn.removeAttribute('aria-busy');
+      if (submitLabel) submitLabel.textContent = busy ? labels.submitting : labels.submit;
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearErrors();
+      setBusy(true);
+
+      const { data, error } = await actions.rsvp(new FormData(form));
+
+      if (!error && data?.ok) {
+        const success = document.querySelector<HTMLElement>('[data-rsvp-success]');
+        form.hidden = true;
+        if (success) {
+          success.hidden = false;
+          success.focus();
+          success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+
+      setBusy(false);
+      (window as unknown as { turnstile?: { reset?: () => void } }).turnstile?.reset?.();
+
+      if (error && isInputError(error)) {
+        const fields = error.fields as Record<string, string[] | undefined>;
+        let firstInvalid: string | null = null;
+        (['names', 'attending', 'partySize', 'email'] as const).forEach((name) => {
+          if (fields[name]) {
+            showFieldError(name, labels.fields[name]);
+            if (!firstInvalid) firstInvalid = name;
+          }
+        });
+        showSummary(labels.summary);
+        if (firstInvalid) fieldInput(firstInvalid)?.focus();
+        else summaryEl?.focus();
+      } else {
+        showSummary(labels.summary);
+        summaryEl?.focus();
+      }
+    });
+  }
+</script>
+
+<style>
+  .rsvp {
+    max-width: 34rem;
+    margin-top: clamp(1.25rem, 3vw, 1.75rem);
+  }
+
+  .field {
+    margin: 0 0 clamp(1.25rem, 3.5vw, 1.85rem);
+    border: 0;
+    padding: 0;
+    min-inline-size: 0;
+  }
+
+  label,
+  legend {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--text-display);
+    padding: 0;
+  }
+
+  .req,
+  .opt {
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-inline-start: 0.4rem;
+    vertical-align: 0.08em;
+  }
+
+  .field__hint {
+    margin: 0.3rem 0 0.6rem;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    max-width: 46ch;
+  }
+
+  input[type='text'],
+  input[type='email'],
+  select,
+  textarea {
+    display: block;
+    width: 100%;
+    padding: 0.7rem 0.85rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--text);
+    background: color-mix(in srgb, var(--candle-ivory) 55%, var(--old-parchment));
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius);
+    transition: border-color 0.25s var(--ease-soft), box-shadow 0.25s var(--ease-soft);
+  }
+  select {
+    max-width: 8rem;
+  }
+  textarea {
+    resize: vertical;
+    min-height: 3rem;
+  }
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    border-color: var(--accent);
+  }
+  input[aria-invalid='true'],
+  select[aria-invalid='true'],
+  textarea[aria-invalid='true'] {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+
+  .radios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.5rem;
+    margin-top: 0.65rem;
+  }
+  .radio {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 430;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .radio input {
+    accent-color: var(--accent);
+    width: 1.05rem;
+    height: 1.05rem;
+    flex: none;
+    translate: 0 0.15rem;
+  }
+
+  .field__error {
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    color: var(--accent);
+  }
+
+  .rsvp__summary {
+    margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
+    padding: 0.85rem 1.05rem;
+    font-size: 0.95rem;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 7%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    border-radius: var(--radius);
+  }
+  .rsvp__summary[hidden] {
+    display: none;
+  }
+
+  .rsvp__turnstile {
+    min-height: 65px;
+  }
+
+  .rsvp__consent {
+    margin: 0 0 1rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    max-width: 52ch;
+  }
+
+  .rsvp__actions {
+    margin-top: clamp(1.25rem, 3vw, 1.5rem);
+  }
+
+  .rsvp__noscript {
+    margin-top: 1rem;
+  }
+
+  /* Honeypot — present in the DOM, invisible to people and assistive tech. */
+  .rsvp__hp {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+</style>

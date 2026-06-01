@@ -1,0 +1,417 @@
+---
+export const prerender = false;
+import { listHouseholdsWithResponses } from '../lib/db';
+import { householdLink } from '../lib/links';
+import '../styles/tokens.css';
+
+const households = await listHouseholdsWithResponses();
+const responded = households.filter((h) => h.response);
+const attending = responded.filter((h) => h.response!.attending === 'yes');
+const headcount = attending.reduce((n, h) => n + h.response!.partySize, 0);
+const declined = responded.filter((h) => h.response!.attending === 'no').length;
+const pendingInvite = households.filter((h) => h.inviteStatus !== 'sent' && h.email).length;
+const outstanding = households.filter((h) => h.inviteStatus === 'sent' && !h.response).length;
+const dietaryCount = attending.filter((h) => h.response!.dietary.trim()).length;
+
+const stats = [
+  [headcount, 'guests attending'],
+  [attending.length, 'parties coming'],
+  [declined, 'unable to come'],
+  [outstanding, 'awaiting reply'],
+  [dietaryCount, 'dietary notes'],
+];
+
+function statusLabel(s: string): string {
+  return s === 'sent' ? 'invited' : s;
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>RSVP admin · Mari &amp; Michael</title>
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="head">
+        <h1>RSVP admin</h1>
+        <a class="link" href="export.csv">Download CSV</a>
+      </header>
+
+      <ul class="stats">
+        {
+          stats.map(([n, label]) => (
+            <li>
+              <span class="stat__n">{n}</span>
+              <span class="stat__l">{label}</span>
+            </li>
+          ))
+        }
+      </ul>
+
+      {/* ---- Sending ---- */}
+      <section class="card">
+        <h2>Send</h2>
+        <p class="muted">
+          Always <strong>Test</strong> to yourselves first, then <strong>Preview</strong>, then send.
+          Sending is idempotent — no one is ever emailed twice. Verify your domain in Resend before a
+          real send, and start with a small batch to check inbox placement.
+        </p>
+
+        <div class="panel" data-panel data-count={pendingInvite}>
+          <p class="panel__head"><strong>Invitations</strong> — {pendingInvite} not yet sent</p>
+          <div class="btns">
+            <button type="button" data-send data-type="invite" data-mode="test">Test to us</button>
+            <button type="button" data-send data-type="invite" data-mode="dryRun">Preview</button>
+            <button type="button" class="btn-go" data-send data-type="invite" data-mode="live">
+              Send invitations
+            </button>
+          </div>
+          <p class="result" data-result aria-live="polite"></p>
+        </div>
+
+        <div class="panel" data-panel data-count={outstanding}>
+          <p class="panel__head"><strong>Reminders</strong> — {outstanding} invited, awaiting reply</p>
+          <div class="btns">
+            <button type="button" data-send data-type="reminder" data-mode="test">Test to us</button>
+            <button type="button" data-send data-type="reminder" data-mode="dryRun">Preview</button>
+            <button type="button" class="btn-go" data-send data-type="reminder" data-mode="live">
+              Send reminders
+            </button>
+          </div>
+          <p class="result" data-result aria-live="polite"></p>
+        </div>
+      </section>
+
+      {/* ---- Guest list ---- */}
+      <section class="card">
+        <h2>Guest list ({households.length})</h2>
+        {
+          households.length === 0 ? (
+            <p class="muted">No households yet — import your list below.</p>
+          ) : (
+            <div class="tablewrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Household</th>
+                    <th>Personal link</th>
+                    <th>Email</th>
+                    <th>Seats</th>
+                    <th>Lang</th>
+                    <th>Invite</th>
+                    <th>Reply</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {households.map((h) => (
+                    <tr class={h.inviteStatus === 'sent' && !h.response ? 'awaiting' : ''}>
+                      <td>{h.label}</td>
+                      <td>
+                        <button type="button" class="copy" data-copy={householdLink(h.code, h.locale)}>
+                          Copy
+                        </button>
+                        <code class="code">{h.code}</code>
+                      </td>
+                      <td>{h.email ?? '—'}</td>
+                      <td>{h.maxSeats}</td>
+                      <td>{h.locale}</td>
+                      <td>{statusLabel(h.inviteStatus)}</td>
+                      <td>
+                        {h.response
+                          ? h.response.attending === 'yes'
+                            ? `Yes · ${h.response.partySize}`
+                            : 'No'
+                          : '— not yet'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        }
+      </section>
+
+      {/* ---- Import ---- */}
+      <section class="card">
+        <h2>Import guest list</h2>
+        <p class="muted">
+          Paste a CSV with a header row. Columns: <code>household, email, seats, language, names</code>
+          — only <code>household</code> is required. Re-importing updates existing rows (matched by
+          email). Each new household gets its own unguessable link.
+        </p>
+        <textarea
+          data-csv
+          rows="6"
+          placeholder="household,email,seats,language,names&#10;The Whitfields,eleanor@example.com,2,en,Eleanor & James"
+></textarea>
+        <div class="btns">
+          <button type="button" data-import-preview>Preview</button>
+          <button type="button" class="btn-go" data-import-go>Import</button>
+        </div>
+        <p class="result" data-import-result aria-live="polite"></p>
+      </section>
+    </main>
+
+    <script>
+      const postJSON = async (url: string, body: unknown) => {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        let data: any = {};
+        try {
+          data = await res.json();
+        } catch {
+          /* ignore */
+        }
+        return { ok: res.ok, data };
+      };
+      const esc = (s: unknown) =>
+        String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] || c);
+
+      // Send panels
+      document.querySelectorAll<HTMLButtonElement>('[data-send]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const type = btn.dataset.type!;
+          const mode = btn.dataset.mode!;
+          const panel = btn.closest<HTMLElement>('[data-panel]')!;
+          const out = panel.querySelector<HTMLElement>('[data-result]')!;
+          if (mode === 'live') {
+            const n = Math.min(Number(panel.dataset.count || '0'), 90);
+            if (n === 0) {
+              out.textContent = 'No one to send to.';
+              return;
+            }
+            const word = type === 'invite' ? 'invitations' : 'reminders';
+            if (!confirm(`Send ${word} to up to ${n} people now? This sends real email and can't be undone.`))
+              return;
+          }
+          out.textContent = 'Working…';
+          const { ok, data } = await postJSON('send/', { type, mode });
+          if (!ok || data.error) {
+            out.textContent = 'Error: ' + (data.error || 'failed');
+            return;
+          }
+          if (data.tested) {
+            out.textContent = `Test sent to ${data.to}. Check that inbox before a real send.`;
+            return;
+          }
+          if (data.dryRun) {
+            out.innerHTML =
+              `<strong>Would send ${data.willSend.length}</strong> of ${data.totalPending} outstanding:<br>` +
+              data.willSend.map((w: any) => `${esc(w.label)} — ${esc(w.to)}`).join('<br>');
+            return;
+          }
+          out.textContent =
+            `Sent ${data.sent}, failed ${data.failed}, ${data.remaining} remaining.` +
+            (data.failed ? ' Check failures below and retry.' : '');
+          setTimeout(() => location.reload(), 1800);
+        });
+      });
+
+      // Import
+      const csv = () => document.querySelector<HTMLTextAreaElement>('[data-csv]')!.value;
+      const importOut = () => document.querySelector<HTMLElement>('[data-import-result]')!;
+      document.querySelector('[data-import-preview]')?.addEventListener('click', async () => {
+        importOut().textContent = 'Checking…';
+        const { ok, data } = await postJSON('import/', { csv: csv(), dryRun: true });
+        if (!ok || data.error) {
+          importOut().textContent = 'Error: ' + (data.error || 'failed');
+          return;
+        }
+        const bad = (data.preview as any[]).filter((r) => !r.valid);
+        importOut().innerHTML =
+          `<strong>${data.validCount} valid</strong> of ${data.total}.` +
+          (bad.length
+            ? `<br>${bad.length} to fix:<br>` +
+              bad.map((r) => `line ${r.line}: ${esc(r.issue)} — ${esc(r.label)}`).join('<br>')
+            : ' Ready to import.');
+      });
+      document.querySelector('[data-import-go]')?.addEventListener('click', async () => {
+        if (!confirm('Import this list now? Existing households (matched by email) are updated.')) return;
+        importOut().textContent = 'Importing…';
+        const { ok, data } = await postJSON('import/', { csv: csv() });
+        if (!ok || data.error) {
+          importOut().textContent = 'Error: ' + (data.error || 'failed');
+          return;
+        }
+        importOut().textContent = `Imported ${data.inserted} new, ${data.updated} updated, ${data.skipped.length} skipped.`;
+        setTimeout(() => location.reload(), 1800);
+      });
+
+      // Copy personal links
+      document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(btn.dataset.copy!);
+            const t = btn.textContent;
+            btn.textContent = 'Copied';
+            setTimeout(() => (btn.textContent = t), 1200);
+          } catch {
+            /* ignore */
+          }
+        });
+      });
+    </script>
+
+    <style>
+      body {
+        background: var(--bg, #f2e8d8);
+        color: var(--text, #24140f);
+        font-family: var(--font-body, Georgia, 'Times New Roman', serif);
+        margin: 0;
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: 74rem;
+        margin-inline: auto;
+        padding: clamp(1.5rem, 4vw, 3rem);
+      }
+      .head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        border-bottom: 1px solid var(--rule, #d8c9b0);
+        padding-bottom: 1rem;
+      }
+      h1 {
+        font-family: var(--font-display, Georgia, serif);
+        font-weight: 500;
+        margin: 0;
+      }
+      h2 {
+        font-family: var(--font-display, Georgia, serif);
+        font-weight: 500;
+        font-size: 1.3rem;
+        margin: 0 0 0.75rem;
+      }
+      .link,
+      a {
+        color: var(--accent, #5b1215);
+      }
+      .muted {
+        color: var(--text-muted, #6b5a4f);
+        font-size: 0.92rem;
+        max-width: 70ch;
+      }
+      .stats {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: clamp(1rem, 4vw, 2.5rem);
+        padding: 0;
+        margin: 1.5rem 0 2rem;
+      }
+      .stat__n {
+        display: block;
+        font-family: var(--font-display, serif);
+        font-size: 2rem;
+        color: var(--accent, #5b1215);
+        line-height: 1.1;
+      }
+      .stat__l {
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-muted, #6b5a4f);
+      }
+      .card {
+        margin: 1.75rem 0;
+        padding: clamp(1rem, 3vw, 1.5rem);
+        background: color-mix(in srgb, var(--candle-ivory, #f2e8d8) 55%, #fff);
+        border: 1px solid var(--rule, #e3d6c0);
+        border-radius: var(--radius, 6px);
+      }
+      .panel {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--rule, #e3d6c0);
+      }
+      .panel__head {
+        margin: 0 0 0.6rem;
+      }
+      .btns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 0.5rem 0;
+      }
+      button {
+        font: inherit;
+        font-size: 0.9rem;
+        padding: 0.45rem 0.9rem;
+        border: 1px solid var(--rule-strong, #c9b79a);
+        border-radius: var(--radius, 6px);
+        background: #fff;
+        color: var(--text, #24140f);
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: var(--accent, #5b1215);
+      }
+      .btn-go {
+        background: var(--accent, #5b1215);
+        color: #f2e8d8;
+        border-color: var(--accent, #5b1215);
+      }
+      .copy {
+        font-size: 0.72rem;
+        padding: 0.2rem 0.5rem;
+        margin-right: 0.4rem;
+      }
+      .code {
+        font-size: 0.78rem;
+        color: var(--text-muted, #6b5a4f);
+      }
+      .result {
+        margin: 0.5rem 0 0;
+        font-size: 0.9rem;
+        color: var(--text, #24140f);
+        min-height: 1.2em;
+      }
+      textarea {
+        width: 100%;
+        font: inherit;
+        font-size: 0.88rem;
+        padding: 0.7rem;
+        border: 1px solid var(--rule-strong, #c9b79a);
+        border-radius: var(--radius, 6px);
+        background: #fff;
+        resize: vertical;
+      }
+      .tablewrap {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.9rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.5rem 0.65rem;
+        border-bottom: 1px solid var(--rule, #e3d6c0);
+        vertical-align: top;
+      }
+      th {
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-muted, #6b5a4f);
+        white-space: nowrap;
+      }
+      tr.awaiting td {
+        background: color-mix(in srgb, var(--accent, #5b1215) 6%, transparent);
+      }
+    </style>
+  </body>
+</html>

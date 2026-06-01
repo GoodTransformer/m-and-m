@@ -15,8 +15,58 @@ export interface NavStrings {
   gifts: string;
   story: string;
   today: string;
+  rsvp: string;
   menu: string;
   close: string;
+}
+
+// The RSVP page + form. Paired blocks (intro/closing, success/thanks) are
+// length-matched across languages for balanced rendering.
+export interface RsvpStrings {
+  label: string;
+  title: string;
+  intro: string;
+  deadlineNote: string; // contains a {date} token, filled in at render time
+
+  namesLabel: string;
+  namesHint: string;
+  emailLabel: string;
+  emailHint: string;
+  attendingLegend: string;
+  attendingYes: string;
+  attendingNo: string;
+  partyLabel: string;
+  partyHint: string;
+  dietaryLabel: string;
+  dietaryHint: string;
+  messageLabel: string;
+  messageHint: string;
+
+  required: string;
+  optional: string;
+  submit: string;
+  submitting: string;
+  noscriptNote: string;
+
+  successTitle: string;
+  successBody: string;
+  errorSummary: string;
+  errorNames: string;
+  errorEmail: string;
+  errorAttending: string;
+  errorParty: string;
+
+  closedTitle: string;
+  closedBody: string;
+
+  thanksTitle: string;
+  thanksBody: string;
+  thanksBackHome: string;
+
+  editNote: string;
+  consentNote: string;
+  noCodeTitle: string;
+  noCodeBody: string;
 }
 
 export interface ScheduleEvent {
@@ -62,6 +112,7 @@ export interface Strings {
     travel: string;
     questions: string;
     today: string;
+    rsvp: string;
   };
 
   // Homepage chapter previews. The four `intro` strings are length-matched.
@@ -143,6 +194,8 @@ export interface Strings {
     weather: string;
     closing: string;
   };
+
+  rsvp: RsvpStrings;
 
   footer: {
     closing: string;

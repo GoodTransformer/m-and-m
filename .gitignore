@@ -1,6 +1,12 @@
 # build output
 dist/
 .output/
+.vercel/
+
+# local RSVP database (dev only; production data lives in Turso)
+local.db
+local.db-*
+*.sqlite
 
 # dependencies
 node_modules/

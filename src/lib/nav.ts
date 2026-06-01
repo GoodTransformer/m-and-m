@@ -8,7 +8,8 @@ export interface NavItem {
 }
 
 /** Primary navigation (masthead) — compact labels, kept to one elegant line.
-    Questions intentionally omitted; it lives in the footer. */
+    Questions intentionally omitted; it lives in the footer. RSVP sits last, as
+    the culminating call to action. */
 export function mainNav(locale: Locale): NavItem[] {
   const t = getStrings(locale).nav;
   const entries: Array<[string, string]> = [
@@ -16,6 +17,7 @@ export function mainNav(locale: Locale): NavItem[] {
     ['/venues', t.venues],
     ['/travel', t.travelShort],
     ['/today', t.today],
+    ['/rsvp', t.rsvp],
   ];
   return entries.map(([path, label]) => ({ path, href: localePath(path, locale), label }));
 }
@@ -32,6 +34,7 @@ export function footerNav(locale: Locale): NavItem[] {
     ['/gifts', t.gifts],
     ['/our-story', t.story],
     ['/today', t.today],
+    ['/rsvp', t.rsvp],
   ];
   return entries.map(([path, label]) => ({ path, href: localePath(path, locale), label }));
 }

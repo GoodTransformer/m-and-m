@@ -1,0 +1,29 @@
+---
+import { localePath, type Locale } from '../../lib/i18n';
+import { getStrings } from '../../i18n';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Chapter from '../Chapter.astro';
+import Button from '../Button.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = getStrings(locale).rsvp;
+---
+
+<BaseLayout locale={locale} path="/rsvp" title={t.thanksTitle}>
+  <Chapter label={t.label} title={t.thanksTitle} headingLevel="h1" id="rsvp-thanks" center>
+    <p class="lead measure center reveal">{t.thanksBody}</p>
+    <div class="reveal rsvp-thanks__actions">
+      <Button href={localePath('/', locale)} variant="ghost">{t.thanksBackHome}</Button>
+    </div>
+  </Chapter>
+</BaseLayout>
+
+<style>
+  .rsvp-thanks__actions {
+    margin-top: clamp(1.75rem, 5vw, 2.5rem);
+    text-align: center;
+  }
+</style>

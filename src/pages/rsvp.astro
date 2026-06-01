@@ -1,0 +1,19 @@
+---
+export const prerender = false;
+import { actions } from 'astro:actions';
+import { localePath } from '../lib/i18n';
+import { loadRsvp } from '../lib/rsvp';
+import RsvpPage from '../components/pages/RsvpPage.astro';
+
+// Fallback route: the personal link is normally /rsvp/CODE/ (see [code].astro),
+// but ?c=CODE still works, and bare /rsvp/ shows the "use your link" nudge.
+const result = Astro.getActionResult(actions.rsvp);
+let redirect: Response | null = null;
+if (result && !result.error) redirect = Astro.redirect(localePath('/rsvp/thank-you', 'en'));
+if (redirect) return redirect;
+
+const code = Astro.url.searchParams.get('c') || '';
+const { household, response, errors, summary } = await loadRsvp(code, result, 'en');
+---
+
+<RsvpPage locale="en" household={household} response={response} errors={errors} summary={summary} />
