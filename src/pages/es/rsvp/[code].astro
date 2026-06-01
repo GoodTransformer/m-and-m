@@ -10,7 +10,19 @@ let redirect: Response | null = null;
 if (result && !result.error) redirect = Astro.redirect(localePath('/rsvp/thank-you', 'es'));
 if (redirect) return redirect;
 
-const { household, response, errors, summary } = await loadRsvp(Astro.params.code ?? '', result, 'es');
+const { household, response, errors, summary, submitted } = await loadRsvp(
+  Astro.params.code ?? '',
+  result,
+  'es',
+  Astro.request,
+);
 ---
 
-<RsvpPage locale="es" household={household} response={response} errors={errors} summary={summary} />
+<RsvpPage
+  locale="es"
+  household={household}
+  response={response}
+  submitted={submitted}
+  errors={errors}
+  summary={summary}
+/>

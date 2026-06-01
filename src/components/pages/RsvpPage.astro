@@ -2,7 +2,7 @@
 import { type Locale } from '../../lib/i18n';
 import { getStrings } from '../../i18n';
 import { RSVP, isRsvpOpen } from '../../data/site';
-import type { RsvpFieldErrors } from '../../lib/rsvp';
+import type { RsvpFieldErrors, SubmittedValues } from '../../lib/rsvp';
 import type { Household, RsvpResponse } from '../../lib/db';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Chapter from '../Chapter.astro';
@@ -12,10 +12,11 @@ interface Props {
   locale: Locale;
   household?: Household | null;
   response?: RsvpResponse | null;
+  submitted?: SubmittedValues;
   errors?: RsvpFieldErrors;
   summary?: string;
 }
-const { locale, household = null, response = null, errors = {}, summary } = Astro.props;
+const { locale, household = null, response = null, submitted, errors = {}, summary } = Astro.props;
 const t = getStrings(locale).rsvp;
 const open = isRsvpOpen();
 
@@ -55,6 +56,7 @@ const heading = household ? t.title : t.noCodeTitle;
               defaultEmail={household.email ?? ''}
               maxSeats={household.maxSeats}
               response={response}
+              submitted={submitted}
               errors={errors}
               summary={summary}
             />

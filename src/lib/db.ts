@@ -194,25 +194,38 @@ export async function updateHouseholdDetails(id: number, h: NewHousehold): Promi
   });
 }
 
-/** Bulk insert/update households in a single transaction (used by CSV import). */
+/** Bulk insert/update households in a single transaction (used by CSV import).
+    `resetInvite` on an update re-queues the invitation (used when an email is
+    corrected). INSERT OR IGNORE means a stray unique-constraint hit skips just
+    that row rather than rolling back the whole import. */
 export async function importHouseholds(
   inserts: Array<NewHousehold & { code: string }>,
-  updates: Array<NewHousehold & { id: number }>,
+  updates: Array<NewHousehold & { id: number; resetInvite?: boolean }>,
 ): Promise<void> {
   if (!inserts.length && !updates.length) return;
   await ensureSchema();
   const stmts = [
     ...inserts.map((h) => ({
-      sql: `INSERT INTO households (code, label, invited_names, email, max_seats, locale)
+      sql: `INSERT OR IGNORE INTO households (code, label, invited_names, email, max_seats, locale)
             VALUES (?, ?, ?, ?, ?, ?)`,
       args: [h.code, h.label, h.invitedNames, h.email, h.maxSeats, h.locale],
     })),
-    ...updates.map((h) => ({
-      sql: `UPDATE households
-            SET label = ?, invited_names = ?, email = ?, max_seats = ?, locale = ?
-            WHERE id = ?`,
-      args: [h.label, h.invitedNames, h.email, h.maxSeats, h.locale, h.id],
-    })),
+    ...updates.map((h) =>
+      h.resetInvite
+        ? {
+            sql: `UPDATE households
+                  SET label = ?, invited_names = ?, email = ?, max_seats = ?, locale = ?,
+                      invite_status = 'pending', invited_at = NULL, invite_error = NULL
+                  WHERE id = ?`,
+            args: [h.label, h.invitedNames, h.email, h.maxSeats, h.locale, h.id],
+          }
+        : {
+            sql: `UPDATE households
+                  SET label = ?, invited_names = ?, email = ?, max_seats = ?, locale = ?
+                  WHERE id = ?`,
+            args: [h.label, h.invitedNames, h.email, h.maxSeats, h.locale, h.id],
+          },
+    ),
   ];
   await db().batch(stmts, 'write');
 }
@@ -274,7 +287,10 @@ export async function householdsPendingInvite(): Promise<Household[]> {
   return rows.map(toHousehold);
 }
 
-/** Invited households that haven't replied yet (reminder targets). */
+/** Invited households that haven't replied yet AND haven't been reminded in the
+    last 12h (reminder targets). The cooldown makes "send reminders" safe to click
+    again — already-reminded households drop out, so no one is reminded twice even
+    if some guests reply between sends. A deliberate later wave still works. */
 export async function invitedNonResponders(): Promise<Household[]> {
   await ensureSchema();
   const { rows } = await db().execute(
@@ -282,6 +298,7 @@ export async function invitedNonResponders(): Promise<Household[]> {
      LEFT JOIN rsvps r ON r.household_id = h.id
      WHERE h.invite_status = 'sent' AND r.id IS NULL
        AND h.email IS NOT NULL AND trim(h.email) != ''
+       AND (h.reminded_at IS NULL OR h.reminded_at <= datetime('now', '-12 hours'))
      ORDER BY h.id`,
   );
   return rows.map(toHousehold);

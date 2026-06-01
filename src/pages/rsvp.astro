@@ -5,15 +5,33 @@ import { localePath } from '../lib/i18n';
 import { loadRsvp } from '../lib/rsvp';
 import RsvpPage from '../components/pages/RsvpPage.astro';
 
-// Fallback route: the personal link is normally /rsvp/CODE/ (see [code].astro),
-// but ?c=CODE still works, and bare /rsvp/ shows the "use your link" nudge.
+// On a successful no-JS submit, go to the thank-you page.
 const result = Astro.getActionResult(actions.rsvp);
 let redirect: Response | null = null;
 if (result && !result.error) redirect = Astro.redirect(localePath('/rsvp/thank-you', 'en'));
+
+// Send any ?c=CODE link to the canonical path form (/rsvp/CODE/). A path segment
+// survives a no-JS submit (the action POST would drop a ?query), so all replies
+// come from the path route. A bare /rsvp/ shows the "use your link" nudge.
+const c = Astro.url.searchParams.get('c');
+if (!redirect && c && Astro.request.method === 'GET') {
+  redirect = Astro.redirect(localePath(`/rsvp/${encodeURIComponent(c)}`, 'en'));
+}
 if (redirect) return redirect;
 
-const code = Astro.url.searchParams.get('c') || '';
-const { household, response, errors, summary } = await loadRsvp(code, result, 'en');
+const { household, response, errors, summary, submitted } = await loadRsvp(
+  '',
+  result,
+  'en',
+  Astro.request,
+);
 ---
 
-<RsvpPage locale="en" household={household} response={response} errors={errors} summary={summary} />
+<RsvpPage
+  locale="en"
+  household={household}
+  response={response}
+  submitted={submitted}
+  errors={errors}
+  summary={summary}
+/>

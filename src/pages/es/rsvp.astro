@@ -8,10 +8,26 @@ import RsvpPage from '../../components/pages/RsvpPage.astro';
 const result = Astro.getActionResult(actions.rsvp);
 let redirect: Response | null = null;
 if (result && !result.error) redirect = Astro.redirect(localePath('/rsvp/thank-you', 'es'));
+
+const c = Astro.url.searchParams.get('c');
+if (!redirect && c && Astro.request.method === 'GET') {
+  redirect = Astro.redirect(localePath(`/rsvp/${encodeURIComponent(c)}`, 'es'));
+}
 if (redirect) return redirect;
 
-const code = Astro.url.searchParams.get('c') || '';
-const { household, response, errors, summary } = await loadRsvp(code, result, 'es');
+const { household, response, errors, summary, submitted } = await loadRsvp(
+  '',
+  result,
+  'es',
+  Astro.request,
+);
 ---
 
-<RsvpPage locale="es" household={household} response={response} errors={errors} summary={summary} />
+<RsvpPage
+  locale="es"
+  household={household}
+  response={response}
+  submitted={submitted}
+  errors={errors}
+  summary={summary}
+/>

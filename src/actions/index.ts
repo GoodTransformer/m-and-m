@@ -34,20 +34,28 @@ export const server = {
     handler: async (input, context) => {
       if (!isRsvpOpen()) throw new ActionError({ code: 'FORBIDDEN', message: 'closed' });
       if (input.website) throw new ActionError({ code: 'BAD_REQUEST', message: 'spam' });
-      if (input._t && Date.now() - input._t < 2500) {
+      // Time-trap: only meaningful when JS stamped _t. 1.2s is plenty to beat a
+      // bot without flagging a returning guest who re-confirms a pre-filled form.
+      if (input._t && Date.now() - input._t < 1200) {
         throw new ActionError({ code: 'BAD_REQUEST', message: 'spam' });
       }
 
       const household = await getHouseholdByCode(input.code);
       if (!household) throw new ActionError({ code: 'NOT_FOUND', message: 'invalid-code' });
 
-      const ip = context.request.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
-      const ts = await verifyTurnstile(input['cf-turnstile-response'], ip);
-      if (!ts.ok) throw new ActionError({ code: 'BAD_REQUEST', message: 'captcha' });
+      // Turnstile only when a token is present. The widget needs JavaScript, so a
+      // no-JS guest produces no token — verifying would block them. The unguessable
+      // code + honeypot + time-trap already gate the form, so skip gracefully.
+      const token = input['cf-turnstile-response'];
+      if (token) {
+        const ip = context.request.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
+        const ts = await verifyTurnstile(token, ip);
+        if (!ts.ok) throw new ActionError({ code: 'BAD_REQUEST', message: 'captcha' });
+      }
 
-      // Cap the party size to this household's allowance.
-      const partySize =
-        input.attending === 'yes' ? Math.min(Math.max(input.partySize, 1), household.maxSeats) : 0;
+      // Cap the party size to this household's allowance (never below 1 seat).
+      const cap = Math.max(household.maxSeats, 1);
+      const partySize = input.attending === 'yes' ? Math.min(Math.max(input.partySize, 1), cap) : 0;
 
       await upsertRsvpForHousehold(household.id, {
         attending: input.attending,

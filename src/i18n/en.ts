@@ -85,7 +85,8 @@ export const en: Strings = {
     errorNames: 'Please tell us who is replying.',
     errorEmail: 'Please enter a valid email address.',
     errorAttending: 'Please let us know if you can come.',
-    errorParty: 'Please enter a number between 1 and 30.',
+    errorParty: 'Please choose how many will attend.',
+    submitError: 'Sorry — that didn’t go through. Please try again, or get in touch with us.',
 
     closedTitle: 'Replies are now closed',
     closedBody:

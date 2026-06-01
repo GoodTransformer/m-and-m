@@ -55,6 +55,7 @@ export interface RsvpStrings {
   errorEmail: string;
   errorAttending: string;
   errorParty: string;
+  submitError: string;
 
   closedTitle: string;
   closedBody: string;

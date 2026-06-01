@@ -33,15 +33,17 @@ export const POST: APIRoute = async ({ request }) => {
   const existing = await listHouseholdsWithResponses();
   const byEmail = new Map<string, number>();
   const byLabel = new Map<string, number>();
+  const emailById = new Map<number, string | null>();
   const codes = new Set<string>();
   for (const h of existing) {
     if (h.email) byEmail.set(h.email.toLowerCase(), h.id);
     byLabel.set(h.label.toLowerCase(), h.id);
+    emailById.set(h.id, h.email ? h.email.toLowerCase() : null);
     codes.add(h.code);
   }
 
   const inserts: Array<NewHousehold & { code: string }> = [];
-  const updates: Array<NewHousehold & { id: number }> = [];
+  const updates: Array<NewHousehold & { id: number; resetInvite?: boolean }> = [];
   for (const row of parsed.rows) {
     if (!row.valid) continue;
     const base: NewHousehold = {
@@ -51,9 +53,15 @@ export const POST: APIRoute = async ({ request }) => {
       maxSeats: row.maxSeats,
       locale: row.locale,
     };
-    const existingId = row.email ? byEmail.get(row.email) : byLabel.get(row.label.toLowerCase());
+    // Match an existing household by email, else by name — so correcting a typo'd
+    // email updates the same household instead of inserting a duplicate.
+    const existingId =
+      (row.email ? byEmail.get(row.email) : undefined) ?? byLabel.get(row.label.toLowerCase());
     if (existingId != null) {
-      updates.push({ ...base, id: existingId });
+      const oldEmail = emailById.get(existingId) ?? null;
+      const newEmail = row.email ?? null;
+      // A changed address re-queues the invitation to the corrected email.
+      updates.push({ ...base, id: existingId, resetInvite: oldEmail !== newEmail });
     } else {
       let code = generateCode();
       while (codes.has(code)) code = generateCode();

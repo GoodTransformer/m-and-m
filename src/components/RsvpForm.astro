@@ -2,7 +2,7 @@
 import { actions } from 'astro:actions';
 import { getStrings } from '../i18n';
 import { type Locale } from '../lib/i18n';
-import type { RsvpFieldErrors } from '../lib/rsvp';
+import type { RsvpFieldErrors, SubmittedValues } from '../lib/rsvp';
 import type { RsvpResponse } from '../lib/db';
 import Button from './Button.astro';
 
@@ -13,25 +13,38 @@ interface Props {
   defaultEmail: string;
   maxSeats: number;
   response?: RsvpResponse | null;
+  submitted?: SubmittedValues;
   errors?: RsvpFieldErrors;
   summary?: string;
 }
-const { locale, code, invitedNames, defaultEmail, maxSeats, response = null, errors = {}, summary } =
-  Astro.props;
+const {
+  locale,
+  code,
+  invitedNames,
+  defaultEmail,
+  maxSeats,
+  response = null,
+  submitted,
+  errors = {},
+  summary,
+} = Astro.props;
 const t = getStrings(locale).rsvp;
 
 const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY || '';
 const dby = (id: string, hasErr: boolean) => (hasErr ? `${id}-hint ${id}-error` : `${id}-hint`);
 
-// Pre-fill from a prior reply (edit mode) or the invitation.
-const nameValue = response?.names || invitedNames;
-const emailValue = response?.email || defaultEmail;
-const messageValue = response?.message ?? '';
-const dietaryValue = response?.dietary ?? '';
-const attendingYes = response?.attending === 'yes';
-const attendingNo = response?.attending === 'no';
+// Pre-fill order: what the guest just typed (no-JS error re-render) > a prior
+// reply (edit mode) > the invitation defaults.
+const nameValue = submitted?.names || response?.names || invitedNames;
+const emailValue = submitted?.email || response?.email || defaultEmail;
+const messageValue = submitted?.message ?? response?.message ?? '';
+const dietaryValue = submitted?.dietary ?? response?.dietary ?? '';
+const attendingChoice = submitted?.attending ?? response?.attending;
+const attendingYes = attendingChoice === 'yes';
+const attendingNo = attendingChoice === 'no';
 const seats = Array.from({ length: Math.max(maxSeats, 1) }, (_, i) => i + 1);
-const selectedSeats = Math.min(Math.max(response?.partySize ?? 1, 1), Math.max(maxSeats, 1));
+const partyValue = submitted?.partySize ?? response?.partySize ?? 1;
+const selectedSeats = Math.min(Math.max(partyValue, 1), Math.max(maxSeats, 1));
 ---
 
 <form
@@ -44,6 +57,8 @@ const selectedSeats = Math.min(Math.max(response?.partySize ?? 1, 1), Math.max(m
   data-err-email={t.errorEmail}
   data-err-attending={t.errorAttending}
   data-err-party={t.errorParty}
+  data-err-closed={t.closedBody}
+  data-err-submit={t.submitError}
   data-label-submit={t.submit}
   data-label-submitting={t.submitting}
 >
@@ -187,6 +202,8 @@ const selectedSeats = Math.min(Math.max(response?.partySize ?? 1, 1), Math.max(m
       summary: d.errSummary || '',
       submit: d.labelSubmit || 'Send',
       submitting: d.labelSubmitting || '…',
+      closed: d.errClosed || '',
+      submitError: d.errSubmit || '',
       fields: {
         names: d.errNames || '',
         email: d.errEmail || '',
@@ -310,7 +327,9 @@ const selectedSeats = Math.min(Math.max(response?.partySize ?? 1, 1), Math.max(m
         if (firstInvalid) fieldInput(firstInvalid)?.focus();
         else summaryEl?.focus();
       } else {
-        showSummary(labels.summary);
+        // Non-field error: closed deadline, or spam/captcha/server issue.
+        const code = (error as { code?: string } | null)?.code;
+        showSummary(code === 'FORBIDDEN' ? labels.closed : labels.submitError);
         summaryEl?.focus();
       }
     });

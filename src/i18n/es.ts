@@ -86,7 +86,8 @@ export const es: Strings = {
     errorNames: 'Díganos quién responde, por favor.',
     errorEmail: 'Introduzcan un correo electrónico válido.',
     errorAttending: 'Indíquennos si pueden venir, por favor.',
-    errorParty: 'Introduzcan un número entre 1 y 30.',
+    errorParty: 'Por favor, elijan cuántos asistirán.',
+    submitError: 'Lo sentimos — no se pudo enviar. Inténtenlo de nuevo o escríbannos.',
 
     closedTitle: 'Las respuestas están cerradas',
     closedBody:

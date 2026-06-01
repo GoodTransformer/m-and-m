@@ -44,11 +44,21 @@ export function rsvpErrorsFrom(
   return { errors: {}, summary: t.errorSummary };
 }
 
+export interface SubmittedValues {
+  names?: string;
+  email?: string;
+  attending?: 'yes' | 'no';
+  partySize?: number;
+  dietary?: string;
+  message?: string;
+}
+
 export interface RsvpContext {
   household: Household | null;
   response: RsvpResponse | null;
   errors: RsvpFieldErrors;
   summary?: string;
+  submitted?: SubmittedValues;
 }
 
 /** Load the household for a code (from a path segment or ?c=) plus any prior
@@ -57,10 +67,37 @@ export async function loadRsvp(
   code: string,
   result: { error?: unknown } | undefined,
   locale: Locale,
+  request?: Request,
 ): Promise<RsvpContext> {
   const trimmed = code.trim();
   const household = trimmed ? await getHouseholdByCode(trimmed) : null;
   const response = household ? await getResponseForHousehold(household.id) : null;
   const { errors, summary } = rsvpErrorsFrom(result, locale);
-  return { household, response, errors, summary };
+
+  // On a no-JS error re-render, recover what the guest just typed so the form
+  // isn't reset to defaults. Best-effort: if the body was already consumed, skip.
+  let submitted: SubmittedValues | undefined;
+  if (result?.error && request && request.method === 'POST') {
+    try {
+      const fd = await request.formData();
+      const str = (k: string) => {
+        const v = fd.get(k);
+        return typeof v === 'string' ? v : undefined;
+      };
+      const att = str('attending');
+      const party = str('partySize');
+      submitted = {
+        names: str('names'),
+        email: str('email'),
+        attending: att === 'yes' || att === 'no' ? att : undefined,
+        partySize: party ? Number(party) : undefined,
+        dietary: str('dietary'),
+        message: str('message'),
+      };
+    } catch {
+      submitted = undefined;
+    }
+  }
+
+  return { household, response, errors, summary, submitted };
 }

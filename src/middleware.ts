@@ -16,7 +16,7 @@ function challenge(): Response {
 }
 
 export const onRequest = defineMiddleware((context, next) => {
-  if (/\/admin(\/|$)/.test(context.url.pathname)) {
+  if (/\/admin(\/|$)/i.test(context.url.pathname)) {
     if (!PASS) {
       return new Response('Admin is disabled until ADMIN_PASSCODE is set.', { status: 503 });
     }
