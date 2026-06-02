@@ -1,0 +1,151 @@
+---
+// Branded passcode login for the RSVP admin. The middleware redirects any
+// unauthenticated /admin request here; the form posts to /admin/auth.
+export const prerender = false;
+// Self-hosted brand fonts (same Fontsource faces the site uses) + the design
+// tokens, so the gate looks like part of the wedding site, not a browser dialog.
+import '@fontsource-variable/fraunces/standard.css';
+import '@fontsource-variable/eb-garamond/index.css';
+import frauncesNormal from '@fontsource-variable/fraunces/files/fraunces-latin-standard-normal.woff2?url';
+import ebGaramondNormal from '@fontsource-variable/eb-garamond/files/eb-garamond-latin-wght-normal.woff2?url';
+import '../../styles/tokens.css';
+
+const error = Astro.url.searchParams.has('error');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f2e8d8" />
+    <title>RSVP admin · Mari &amp; Michael</title>
+    <link rel="preload" href={frauncesNormal} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={ebGaramondNormal} as="font" type="font/woff2" crossorigin />
+  </head>
+  <body>
+    <main class="card">
+      <p class="eyebrow">Mari &amp; Michael</p>
+      <h1>RSVP admin</h1>
+      <p class="sub">Private — for the couple</p>
+      <form method="POST" action="/admin/auth/">
+        <label for="passcode">Passcode</label>
+        <input
+          id="passcode"
+          name="passcode"
+          type="password"
+          autocomplete="current-password"
+          autofocus
+          required
+        />
+        {error && <p class="err" role="alert">That passcode didn’t match — please try again.</p>}
+        <button type="submit">Enter</button>
+      </form>
+      <hr class="rule" />
+      <p class="foot">Your guest list and replies live safely behind here.</p>
+    </main>
+  </body>
+</html>
+
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: var(--bg, #f2e8d8);
+    color: var(--text, #24140f);
+    font-family: var(--font-body, Georgia, serif);
+    line-height: 1.5;
+  }
+  .card {
+    width: 100%;
+    max-width: 23rem;
+    padding: clamp(2rem, 6vw, 3rem) clamp(1.75rem, 6vw, 2.5rem);
+    background: var(--bg-card, #efe4cf);
+    border: 1px solid var(--rule, #c9b48f);
+    border-radius: 6px;
+    text-align: center;
+  }
+  .eyebrow {
+    margin: 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--text-muted, #6b5a4f);
+  }
+  h1 {
+    margin: 0.55rem 0 0.2rem;
+    font-family: var(--font-display, Georgia, serif);
+    font-weight: 500;
+    font-size: 2rem;
+    color: var(--accent, #5b1215);
+  }
+  .sub {
+    margin: 0 0 1.9rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted, #6b5a4f);
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    text-align: left;
+  }
+  label {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted, #6b5a4f);
+  }
+  input {
+    font-family: inherit;
+    font-size: 1.05rem;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--rule-strong, #6c4f36);
+    border-radius: 4px;
+    background: #fff;
+    color: var(--text, #24140f);
+  }
+  input:focus-visible {
+    outline: none;
+    border-color: var(--accent, #5b1215);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #5b1215) 16%, transparent);
+  }
+  .err {
+    margin: 0.6rem 0 0;
+    font-size: 0.92rem;
+    color: var(--accent, #5b1215);
+  }
+  button {
+    margin-top: 1.1rem;
+    padding: 0.72rem 1rem;
+    font-family: var(--font-display, Georgia, serif);
+    font-size: 1.02rem;
+    letter-spacing: 0.04em;
+    color: var(--accent-text, #f2e8d8);
+    background: var(--accent, #5b1215);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  button:hover {
+    background: var(--accent-hover, #4a0f12);
+  }
+  .rule {
+    border: none;
+    border-top: 1px solid var(--rule, #c9b48f);
+    margin: 1.7rem 0 0;
+  }
+  .foot {
+    margin: 1.1rem 0 0;
+    font-size: 0.85rem;
+    color: var(--text-muted, #6b5a4f);
+  }
+</style>

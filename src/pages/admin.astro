@@ -167,7 +167,10 @@ const bannerText = !hasList
     <main class="wrap">
       <header class="head">
         <h1>RSVP admin</h1>
-        <a class="link" href="export.csv">Download CSV</a>
+        <span class="head__links">
+          <a class="link" href="export.csv">Download CSV</a>
+          <a class="link" href="/admin/logout/">Sign out</a>
+        </span>
       </header>
 
       {/* The one line that orients everything: what to do next. */}
@@ -219,8 +222,8 @@ const bannerText = !hasList
           <p class="step__hint">
             {step1 === 'done' ? (
               <Fragment>
-                Your guest list is in — <strong>{households.length} households, {guestCount} guests</strong>. This
-                is the home for everyone you’re inviting; to add someone or fix a detail later, open
+                This is where your whole guest list lives — <strong>{households.length} households, {guestCount}
+                {' '}guests</strong> in all. To add anyone or fix a detail later, open
                 <em> Update the guest list</em> below.
               </Fragment>
             ) : (
@@ -676,6 +679,11 @@ const bannerText = !hasList
         flex-wrap: wrap;
         border-bottom: 1px solid var(--rule, #d8c9b0);
         padding-bottom: 1rem;
+      }
+      .head__links {
+        display: flex;
+        gap: 1.4rem;
+        align-items: baseline;
       }
       h1 {
         font-family: var(--font-display, Georgia, serif);
