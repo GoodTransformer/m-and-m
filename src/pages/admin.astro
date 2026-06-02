@@ -134,14 +134,14 @@ const step5: StepState = // 5 · Give the caterer the numbers
 function stepPill(s: StepState): string {
   if (s === 'now') return '👈 Do this now';
   if (s === 'done') return '✓ Done';
-  if (s === 'waiting') return 'In cooldown';
+  if (s === 'waiting') return 'Recently reminded';
   if (s === 'ready') return 'Anytime';
   return 'Later';
 }
 
 // The single most important line on the page: what to do next.
 const bannerText = !hasList
-  ? '👉 Start here — paste your guest list into Step 1 below.'
+  ? '👉 Start here — add your guest list in Step 1 below.'
   : !rsvpOpen
     ? '⏰ The RSVP deadline has passed. The final numbers are ready for your caterer in Step 5.'
     : pendingInvite > 0
@@ -176,7 +176,7 @@ const bannerText = !hasList
       {/* The one line that orients everything: what to do next. */}
       <p class="banner">{bannerText}</p>
       <p class="headline">
-        {responded.length} of {households.length} replied · {headcount} coming
+        {responded.length} of {households.length} replied · {headcount} guests coming
         {daysUntilDeadline !== null &&
           rsvpOpen &&
           ` · ${daysUntilDeadline} ${daysUntilDeadline === 1 ? 'day' : 'days'} until the RSVP deadline`}
@@ -226,15 +226,14 @@ const bannerText = !hasList
                 Step 3. Need to add someone or fix a detail? Open <em>Update the guest list</em> below.
               </Fragment>
             ) : (
-              'This is where you add everyone you’re inviting — as a simple spreadsheet. The guide below shows exactly how; paste your list in and press Import. Each household then gets its own private invitation link.'
+              'This is where you add everyone you’re inviting — as a simple spreadsheet. The guide below shows exactly how. Each household then gets its own private invitation link.'
             )}
           </p>
           <details class="fold" open={step1 !== 'done'}>
             <summary>{step1 === 'done' ? 'Update the guest list' : 'How to add your list'}</summary>
             <p class="muted">
-              Make the list in a spreadsheet — Excel, Numbers or Google Sheets — then copy the cells
-              and paste them into the box below. (You can also just type the rows straight in.) The
-              first row names the columns; every row after it is one household.
+              Make the list in a spreadsheet — Excel, Numbers or Google Sheets. The first row names
+              the columns; every row after it is one household. You’ll upload or paste it at the bottom.
             </p>
             <p class="muted">
               Put these columns <strong>in this order</strong> — only the first one is required:
@@ -496,7 +495,7 @@ const bannerText = !hasList
                 <div class="panel" data-panel data-count={remindable}>
                   <p class="panel__head">
                     <strong>{remindable}</strong> ready to remind{
-                      outstanding > remindable && ` (${outstanding - remindable} in cooldown)`
+                      outstanding > remindable && ` (${outstanding - remindable} reminded in the last 12h)`
                     }
                   </p>
                   <div class="btns">
