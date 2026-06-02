@@ -6,6 +6,11 @@ export function parseCsv(text: string): string[][] {
   let field = '';
   let inQuotes = false;
   const s = text.replace(/\r\n?/g, '\n');
+  // A list pasted straight from Excel / Numbers / Google Sheets arrives TAB-
+  // separated; typed text is comma-separated. Pick the delimiter accordingly so
+  // "copy the cells and paste" works exactly as the guide promises — and so a
+  // comma inside a pasted cell (e.g. "Smith, Jones") isn't split by mistake.
+  const delimiter = s.includes('\t') ? '\t' : ',';
 
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
@@ -22,7 +27,7 @@ export function parseCsv(text: string): string[][] {
       }
     } else if (c === '"') {
       inQuotes = true;
-    } else if (c === ',') {
+    } else if (c === delimiter) {
       row.push(field);
       field = '';
     } else if (c === '\n') {

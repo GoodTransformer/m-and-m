@@ -13,6 +13,20 @@ describe('parseCsv', () => {
       ['e', 'f'],
     ]);
   });
+
+  it('parses tab-separated rows pasted from a spreadsheet', () => {
+    expect(parseCsv('household\tguests\nThe Whitfields\tEleanor Whitfield; James Whitfield')).toEqual([
+      ['household', 'guests'],
+      ['The Whitfields', 'Eleanor Whitfield; James Whitfield'],
+    ]);
+  });
+
+  it('does NOT split on a comma inside a cell when the paste is tab-separated', () => {
+    expect(parseCsv('name\tnote\nSmith, Jones\thello')).toEqual([
+      ['name', 'note'],
+      ['Smith, Jones', 'hello'],
+    ]);
+  });
 });
 
 describe('csvCell (spreadsheet formula-injection guard)', () => {
