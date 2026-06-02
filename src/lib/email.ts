@@ -59,26 +59,76 @@ function button(href: string, label: string): string {
 }
 
 // --- invitations & reminders --------------------------------------------------
+/** The people this invitation is for, named — with the plus-one allowance shown
+    as "& guest" (the extra seat isn't named, because the host doesn't yet know who
+    it will be). e.g. "Eleanor Whitfield & James Whitfield", "Lizzie Thornton & guest". */
+function invitedDisplay(h: Household, es: boolean): string {
+  const names = h.invitedNames || h.label;
+  if (h.plusOnes === 1) return `${names} & ${es ? 'acompañante' : 'guest'}`;
+  if (h.plusOnes > 1) return `${names} & ${h.plusOnes} ${es ? 'acompañantes' : 'guests'}`;
+  return names;
+}
+
+/** A designed, centred invitation card. HTML email best practice: nested tables
+    + inline styles + a web-safe serif, so it renders the same in Gmail, Outlook
+    and Apple Mail. The named guests are the centrepiece. */
+function invitationHtml(o: {
+  eyebrow: string;
+  date: string;
+  venue: string;
+  forLabel: string;
+  names: string;
+  intro: string;
+  link: string;
+  cta: string;
+  note: string;
+  signoff: string;
+}): string {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f2e8d8;margin:0;padding:24px 12px"><tr><td align="center">
+  <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;max-width:520px;background:#fbf6ec;border:1px solid #e3d6c0;border-radius:4px"><tr><td style="padding:38px 40px;font-family:Georgia,'Times New Roman',serif;color:#24140f;text-align:center">
+    <div style="font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:#6b5a4f">${esc(o.eyebrow)}</div>
+    <div style="margin:14px 0 8px;font-size:30px;line-height:1.15;color:#5b1215">Mari &amp; Michael</div>
+    <div style="font-size:14px;color:#6b5a4f">${esc(o.date)} &middot; ${esc(o.venue)}</div>
+    <hr style="border:none;border-top:1px solid #e3d6c0;margin:24px 0" />
+    <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#6b5a4f">${esc(o.forLabel)}</div>
+    <div style="margin:7px 0 0;font-size:19px;color:#24140f">${esc(o.names)}</div>
+    <p style="margin:22px 0 26px;font-size:15px;line-height:1.55">${esc(o.intro)}</p>
+    <a href="${o.link}" style="display:inline-block;background:#5b1215;color:#f2e8d8;text-decoration:none;padding:12px 32px;border-radius:4px;font-size:14px;letter-spacing:0.06em">${esc(o.cta)}</a>
+    <p style="margin:26px 0 0;font-size:12px;line-height:1.5;color:#6b5a4f">${esc(o.note)}</p>
+  </td></tr></table>
+  <div style="margin:16px 0 0;font-family:Georgia,serif;font-size:12px;color:#6b5a4f">${esc(o.signoff)}</div>
+</td></tr></table>`;
+}
+
 export function buildInvite(h: Household): EmailPayload | null {
   if (!h.email) return null;
   const es = h.locale === 'es';
   const link = householdLink(h.code, h.locale);
   const date = fmtDate(SITE.date, h.locale, true);
+  const venue = es ? 'Oxford y Bicester' : 'Oxford & Bicester';
   const by = fmtDate(RSVP.deadline, h.locale);
+  const names = invitedDisplay(h, es);
   const subject = es ? 'Están invitados · Mari & Michael' : 'You’re invited · Mari & Michael';
-  const inner = es
-    ? `<p>Hola ${esc(h.label)},</p>
-       <p>Nos encantaría que nos acompañaran en Oxford y Bicester el <strong>${date}</strong>. Por favor, díganos si pueden venir — solo toma un minuto.</p>
-       ${button(link, 'Confirmar asistencia')}
-       <p style="color:#6b5a4f;font-size:0.9rem">Este enlace es personal de su invitación; por favor, no lo reenvíen. Agradeceríamos su respuesta antes del ${by}.</p>`
-    : `<p>Dear ${esc(h.label)},</p>
-       <p>We would be so glad if you could join us in Oxford and Bicester on <strong>${date}</strong>. Please let us know whether you can come — it only takes a minute.</p>
-       ${button(link, 'RSVP')}
-       <p style="color:#6b5a4f;font-size:0.9rem">This link is personal to your invitation, so please don’t forward it. We’d be grateful for your reply by ${by}.</p>`;
+  const html = invitationHtml({
+    eyebrow: es ? 'Están invitados' : 'You’re invited',
+    date,
+    venue,
+    forLabel: es ? 'Esta invitación es para' : 'This invitation is for',
+    names,
+    intro: es
+      ? 'Nos encantaría que nos acompañaran. Por favor, díganos si pueden venir — solo toma un minuto.'
+      : 'We would be so glad if you could join us. Please let us know whether you can come — it only takes a minute.',
+    link,
+    cta: es ? 'Confirmar asistencia' : 'RSVP',
+    note: es
+      ? `Este enlace es personal de su invitación; por favor, no lo reenvíen. Agradeceríamos su respuesta antes del ${by}.`
+      : `This link is personal to your invitation, so please don’t forward it. We’d be grateful for your reply by ${by}.`,
+    signoff: es ? 'Con cariño, Mari & Michael' : 'With love, Mari & Michael',
+  });
   const text = es
-    ? `Hola ${h.label},\n\nNos encantaría que nos acompañaran en Oxford y Bicester el ${date}. Por favor, díganos si pueden venir:\n\n${link}\n\nEste enlace es personal de su invitación; por favor, no lo reenvíen. Agradeceríamos su respuesta antes del ${by}.\n\n— Mari & Michael`
-    : `Dear ${h.label},\n\nWe would be so glad if you could join us in Oxford and Bicester on ${date}. Please let us know whether you can come:\n\n${link}\n\nThis link is personal to your invitation, so please don’t forward it. We’d be grateful for your reply by ${by}.\n\n— Mari & Michael`;
-  return { from: FROM, to: h.email, replyTo: COUPLE || undefined, subject, html: shell(inner), text };
+    ? `Están invitados — Mari & Michael\n${date} · ${venue}\n\nPara: ${names}\n\nNos encantaría que nos acompañaran. Por favor, díganos si pueden venir:\n${link}\n\nEste enlace es personal de su invitación; por favor, no lo reenvíen. Agradeceríamos su respuesta antes del ${by}.\n\n— Mari & Michael`
+    : `You’re invited — Mari & Michael\n${date} · ${venue}\n\nFor: ${names}\n\nWe would be so glad if you could join us. Please let us know whether you can come:\n${link}\n\nThis link is personal to your invitation, so please don’t forward it. We’d be grateful for your reply by ${by}.\n\n— Mari & Michael`;
+  return { from: FROM, to: h.email, replyTo: COUPLE || undefined, subject, html, text };
 }
 
 export function buildReminder(h: Household): EmailPayload | null {
@@ -86,21 +136,30 @@ export function buildReminder(h: Household): EmailPayload | null {
   const es = h.locale === 'es';
   const link = householdLink(h.code, h.locale);
   const date = fmtDate(SITE.date, h.locale, true);
+  const venue = es ? 'Oxford y Bicester' : 'Oxford & Bicester';
   const by = fmtDate(RSVP.deadline, h.locale);
+  const names = invitedDisplay(h, es);
   const subject = es ? 'Un recordatorio · Mari & Michael' : 'A gentle reminder · Mari & Michael';
-  const inner = es
-    ? `<p>Hola ${esc(h.label)},</p>
-       <p>Solo un recordatorio: aún no sabemos si podrán acompañarnos el <strong>${date}</strong>. Cuando tengan un momento, nos encantaría saberlo.</p>
-       ${button(link, 'Confirmar asistencia')}
-       <p style="color:#6b5a4f;font-size:0.9rem">Por favor, respondan antes del ${by}. Si ya respondieron, pueden ignorar este mensaje.</p>`
-    : `<p>Dear ${esc(h.label)},</p>
-       <p>Just a gentle note — we haven’t yet heard whether you can join us on <strong>${date}</strong>. When you have a moment, we’d love to know.</p>
-       ${button(link, 'RSVP')}
-       <p style="color:#6b5a4f;font-size:0.9rem">Kindly reply by ${by}. If you’ve already responded, please ignore this.</p>`;
+  const html = invitationHtml({
+    eyebrow: es ? 'Un recordatorio' : 'A gentle reminder',
+    date,
+    venue,
+    forLabel: es ? 'Esta invitación es para' : 'This invitation is for',
+    names,
+    intro: es
+      ? 'Aún no sabemos si podrán acompañarnos. Cuando tengan un momento, nos encantaría saberlo.'
+      : 'We haven’t yet heard whether you can join us. When you have a moment, we’d love to know.',
+    link,
+    cta: es ? 'Confirmar asistencia' : 'RSVP',
+    note: es
+      ? `Por favor, respondan antes del ${by}. Si ya respondieron, pueden ignorar este mensaje.`
+      : `Kindly reply by ${by}. If you’ve already responded, please ignore this.`,
+    signoff: es ? 'Con cariño, Mari & Michael' : 'With love, Mari & Michael',
+  });
   const text = es
-    ? `Hola ${h.label},\n\nSolo un recordatorio: aún no sabemos si podrán acompañarnos el ${date}. Cuando tengan un momento, nos encantaría saberlo:\n\n${link}\n\nPor favor, respondan antes del ${by}. Si ya respondieron, pueden ignorar este mensaje.\n\n— Mari & Michael`
-    : `Dear ${h.label},\n\nJust a gentle note — we haven’t yet heard whether you can join us on ${date}. When you have a moment, we’d love to know:\n\n${link}\n\nKindly reply by ${by}. If you’ve already responded, please ignore this.\n\n— Mari & Michael`;
-  return { from: FROM, to: h.email, replyTo: COUPLE || undefined, subject, html: shell(inner), text };
+    ? `Un recordatorio — Mari & Michael\n${date} · ${venue}\n\nPara: ${names}\n\nAún no sabemos si podrán acompañarnos. Cuando tengan un momento, nos encantaría saberlo:\n${link}\n\nPor favor, respondan antes del ${by}. Si ya respondieron, pueden ignorar este mensaje.\n\n— Mari & Michael`
+    : `A gentle reminder — Mari & Michael\n${date} · ${venue}\n\nFor: ${names}\n\nWe haven’t yet heard whether you can join us. When you have a moment, we’d love to know:\n${link}\n\nKindly reply by ${by}. If you’ve already responded, please ignore this.\n\n— Mari & Michael`;
+  return { from: FROM, to: h.email, replyTo: COUPLE || undefined, subject, html, text };
 }
 
 /**
