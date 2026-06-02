@@ -2,7 +2,7 @@
 export const prerender = false;
 import { listHouseholdsWithResponses, type HouseholdWithResponse } from '../lib/db';
 import { householdLink, siteOriginLooksUnset } from '../lib/links';
-import { MEALS, MEALS_ENABLED, rosterLines, notComingNames } from '../data/site';
+import { MEALS, MEALS_ENABLED, rosterLines, notComingNames, RSVP, isRsvpOpen } from '../data/site';
 import '../styles/tokens.css';
 
 const households = await listHouseholdsWithResponses();
@@ -48,8 +48,8 @@ const linkWarning = import.meta.env.PROD && siteOriginLooksUnset();
 // confirmation and invitations/reminders can't go out.
 const emailWarning = import.meta.env.PROD && !import.meta.env.RESEND_API_KEY;
 
+// Headcount + replied live in the headline line, so the tiles cover the rest.
 const stats: Array<[number, string]> = [
-  [headcount, 'guests attending'],
   [attending.length, 'parties coming'],
   [declined, 'unable to come'],
   [outstanding, 'awaiting reply'],
@@ -84,6 +84,75 @@ function replyIsStale(h: HouseholdWithResponse): boolean {
     JSON.stringify(rosterInvited) !== JSON.stringify(h.invitedGuests) || rosterPlus !== h.plusOnes
   );
 }
+
+// ---------------------------------------------------------------------------
+// Guided, step-by-step workflow state. The dashboard is laid out as numbered
+// steps in the order the couple actually work; these values decide what's done,
+// what's the current thing to do, and the one-line "what's next" banner.
+// ---------------------------------------------------------------------------
+const hasList = households.length > 0;
+const someInvited = households.some((h) => h.inviteStatus === 'sent');
+const guestCount = households.reduce((n, h) => n + h.invitedGuests.length + h.plusOnes, 0);
+// "Paper guests" have no email: they can't be auto-invited or reminded (every send
+// filters on email), so the couple hand them their link themselves. They'd vanish
+// from every count otherwise — track them, and never say "everyone replied" while
+// one is still outstanding.
+const paperGuests = households.filter((h) => !h.email);
+const paperOutstanding = paperGuests.filter((h) => !h.response).length;
+const allReplied =
+  hasList && outstanding === 0 && pendingInvite === 0 && paperOutstanding === 0;
+
+// Days until the RSVP deadline, from the SAME Anywhere-on-Earth boundary as
+// isRsvpOpen() so the countdown and the open/closed copy can never disagree.
+const rsvpOpen = isRsvpOpen();
+const deadlineMs = Date.parse(`${RSVP.deadline}T23:59:59-12:00`);
+const daysUntilDeadline = Number.isNaN(deadlineMs)
+  ? null
+  : Math.ceil((deadlineMs - Date.now()) / 86_400_000);
+
+// Allergy / dietary lines for the caterer step.
+const dietaryNotes = attending
+  .filter((h) => h.response!.dietary.trim())
+  .map((h) => ({ label: h.label, dietary: h.response!.dietary.trim() }));
+
+type StepState = 'now' | 'done' | 'later' | 'waiting' | 'ready';
+const step1: StepState = hasList ? 'done' : 'now';
+const step2: StepState = hasList ? 'ready' : 'later';
+const step3: StepState = !hasList ? 'later' : pendingInvite > 0 ? 'now' : 'done';
+const step5: StepState = !someInvited
+  ? 'later'
+  : outstanding === 0
+    ? 'done'
+    : remindable > 0
+      ? 'now'
+      : 'waiting';
+const step6: StepState =
+  !rsvpOpen || allReplied || (daysUntilDeadline !== null && daysUntilDeadline <= 7)
+    ? 'now'
+    : 'ready';
+
+function stepPill(s: StepState): string {
+  if (s === 'now') return '👈 Do this now';
+  if (s === 'done') return '✓ Done';
+  if (s === 'waiting') return 'In cooldown';
+  if (s === 'ready') return 'Anytime';
+  return 'Later';
+}
+
+// The single most important line on the page: what to do next.
+const bannerText = !hasList
+  ? '👉 Start here — paste your guest list into Step 1 below.'
+  : !rsvpOpen
+    ? '⏰ The RSVP deadline has passed. The final numbers are ready for your caterer in Step 6.'
+    : pendingInvite > 0
+      ? `👉 Next: send your invitations (Step 3). ${pendingInvite} ready — test to yourselves first.`
+      : allReplied
+        ? '🎉 Everyone has replied! When you’re ready, send the caterer the numbers (Step 6).'
+        : remindable > 0
+          ? `👉 Next: ${remindable} ${remindable === 1 ? 'guest hasn’t' : 'guests haven’t'} replied — send a reminder (Step 5).`
+          : outstanding > 0
+            ? '✓ Reminders are up to date — nothing to do right now. New replies appear in Step 2.'
+            : '✓ You’re all set.';
 ---
 
 <!doctype html>
@@ -100,6 +169,16 @@ function replyIsStale(h: HouseholdWithResponse): boolean {
         <h1>RSVP admin</h1>
         <a class="link" href="export.csv">Download CSV</a>
       </header>
+
+      {/* The one line that orients everything: what to do next. */}
+      <p class="banner">{bannerText}</p>
+      <p class="headline">
+        {responded.length} of {households.length} replied · {headcount} coming
+        {daysUntilDeadline !== null &&
+          rsvpOpen &&
+          ` · ${daysUntilDeadline} ${daysUntilDeadline === 1 ? 'day' : 'days'} until the RSVP deadline`}
+        {daysUntilDeadline !== null && !rsvpOpen && ' · the RSVP deadline has passed'}
+      </p>
 
       {
         linkWarning && (
@@ -129,56 +208,64 @@ function replyIsStale(h: HouseholdWithResponse): boolean {
         }
       </ul>
 
-      {/* ---- Sending ---- */}
-      <section class="card">
-        <h2>Send</h2>
-        <p class="muted">
-          Always <strong>Test</strong> to yourselves first, then <strong>Preview</strong>, then send.
-          Sending is idempotent — no one is ever emailed twice. Verify your domain in Resend before a
-          real send, and start with a small batch to check inbox placement.
-        </p>
-
-        <div class="panel" data-panel data-count={pendingInvite}>
-          <p class="panel__head"><strong>Invitations</strong> — {pendingInvite} not yet sent</p>
-          <div class="btns">
-            <button type="button" data-send data-type="invite" data-mode="test">Test to us</button>
-            <button type="button" data-send data-type="invite" data-mode="dryRun">Preview</button>
-            <button type="button" class="btn-go" data-send data-type="invite" data-mode="live">
-              Send invitations
-            </button>
+      <ol class="steps">
+        {/* ---- Step 1 — Add your guest list ---- */}
+        <li class:list={['step', `is-${step1}`]}>
+          <div class="step__bar">
+            <span class="step__num">1</span>
+            <h2 class="step__title">Add your guest list</h2>
+            <span class="pill">{step1 === 'done' ? '✓ Done' : 'Start here'}</span>
           </div>
-          <p class="result" data-result aria-live="polite"></p>
-        </div>
-
-        <div class="panel" data-panel data-count={remindable}>
-          <p class="panel__head">
-            <strong>Reminders</strong> — {remindable} ready to remind{
-              outstanding > remindable && ` (${outstanding - remindable} in cooldown)`
-            }
+          <p class="step__hint">
+            {step1 === 'done'
+              ? `${households.length} households · ${guestCount} guests on the list. Need to change it? Paste an updated list — it updates, never duplicates.`
+              : 'Paste your guest list below and press Import. Each household gets its own private link. Only the household name is required.'}
           </p>
-          <div class="btns">
-            <button type="button" data-send data-type="reminder" data-mode="test">Test to us</button>
-            <button type="button" data-send data-type="reminder" data-mode="dryRun">Preview</button>
-            <button type="button" class="btn-go" data-send data-type="reminder" data-mode="live">
-              Send reminders
-            </button>
-          </div>
-          <p class="result" data-result aria-live="polite"></p>
-        </div>
-      </section>
+          <details class="fold" open={step1 !== 'done'}>
+            <summary>{step1 === 'done' ? 'Update the guest list' : 'Paste your list'}</summary>
+            <p class="muted">
+              Columns: <code>household, guests, email, plus, language</code> — only
+              <code>household</code> is required. List each household's people in
+              <code>guests</code>, separated by semicolons — those are the seats. <code>plus</code> is
+              how many extra “+ guest” seats they may bring (default 0). Anyone with no email is a
+              “paper guest” you invite by hand. Re-importing updates existing rows (matched by email).
+            </p>
+            <textarea
+              data-csv
+              rows="6"
+              placeholder="household,guests,email,plus,language&#10;The Whitfields,Eleanor Whitfield; James Whitfield,eleanor@example.com,0,en"
+></textarea>
+            <div class="btns">
+              <button type="button" data-import-preview>Preview</button>
+              <button type="button" class="btn-go" data-import-go>Import</button>
+            </div>
+            <p class="result" data-import-result aria-live="polite"></p>
+          </details>
+        </li>
 
-      {/* ---- Guest list ---- */}
-      <section class="card">
-        <h2>Guest list ({households.length})</h2>
-        {
-          MEALS_ENABLED && attending.length > 0 && (
-            <p class="muted">Meals — {mealTally.map((m) => `${m.label}: ${m.count}`).join('  ·  ')}</p>
-          )
-        }
-        {
-          households.length === 0 ? (
-            <p class="muted">No households yet — import your list below.</p>
-          ) : (
+        {/* ---- Step 2 — Check it looks right ---- */}
+        <li class:list={['step', `is-${step2}`]}>
+          <div class="step__bar">
+            <span class="step__num">2</span>
+            <h2 class="step__title">Check it looks right</h2>
+            <span class="pill">{stepPill(step2)}</span>
+          </div>
+          <p class="step__hint">
+            {hasList
+              ? 'Skim the names and seats. Replies, meals and allergies appear here as they come in.'
+              : 'Your guests will appear here once you’ve added the list in Step 1.'}
+            {paperGuests.length > 0 &&
+              ` ${paperGuests.length} ${paperGuests.length === 1 ? 'household has' : 'households have'} no email — invite them by hand with the Copy button: ${paperGuests.map((h) => h.label).join(', ')}.`}
+            {MEALS_ENABLED &&
+              missingMeals > 0 &&
+              ` ${missingMeals} ${missingMeals === 1 ? 'reply is' : 'replies are'} missing a meal (highlighted below).`}
+          </p>
+          {
+            MEALS_ENABLED && attending.length > 0 && (
+              <p class="muted">Meals — {mealTally.map((m) => `${m.label}: ${m.count}`).join('  ·  ')}</p>
+            )
+          }
+          {hasList && (
             <div class="tablewrap">
               <table>
                 <thead>
@@ -264,32 +351,138 @@ function replyIsStale(h: HouseholdWithResponse): boolean {
                 </tbody>
               </table>
             </div>
-          )
-        }
-      </section>
+          )}
+        </li>
 
-      {/* ---- Import ---- */}
-      <section class="card">
-        <h2>Import guest list</h2>
-        <p class="muted">
-          Paste a CSV with a header row. Columns:
-          <code>household, guests, email, plus, language</code> — only <code>household</code> is
-          required. List each household's people in <code>guests</code>, separated by semicolons —
-          those are the seats. <code>plus</code> is how many extra “+ guest” seats they may bring
-          (default 0). Re-importing updates existing rows (matched by email). Each new household gets
-          its own unguessable link.
-        </p>
-        <textarea
-          data-csv
-          rows="6"
-          placeholder="household,guests,email,plus,language&#10;The Whitfields,Eleanor Whitfield; James Whitfield,eleanor@example.com,0,en"
-></textarea>
-        <div class="btns">
-          <button type="button" data-import-preview>Preview</button>
-          <button type="button" class="btn-go" data-import-go>Import</button>
-        </div>
-        <p class="result" data-import-result aria-live="polite"></p>
-      </section>
+        {/* ---- Step 3 — Send the invitations ---- */}
+        <li class:list={['step', `is-${step3}`]}>
+          <div class="step__bar">
+            <span class="step__num">3</span>
+            <h2 class="step__title">Send the invitations</h2>
+            <span class="pill">{stepPill(step3)}</span>
+          </div>
+          {
+            step3 === 'later' ? (
+              <p class="step__hint">Add your guest list first (Step 1), then come back here to invite everyone.</p>
+            ) : step3 === 'done' ? (
+              <p class="step__hint">
+                ✓ Everyone with an email has been invited.
+                {paperGuests.length > 0 &&
+                  ` Hand the ${paperGuests.length} paper guest${paperGuests.length === 1 ? '' : 's'} their link from Step 2.`}
+              </p>
+            ) : (
+              <Fragment>
+                <p class="step__hint">
+                  Do these in order: <strong>① Test</strong> to yourselves and open it,
+                  <strong> ② Preview</strong> who’ll get it, then <strong>③ Send</strong>. No one is
+                  ever emailed twice.
+                </p>
+                <div class="panel" data-panel data-count={pendingInvite}>
+                  <p class="panel__head"><strong>{pendingInvite}</strong> ready to invite</p>
+                  <div class="btns">
+                    <button type="button" data-send data-type="invite" data-mode="test">① Test to us</button>
+                    <button type="button" data-send data-type="invite" data-mode="dryRun">② Preview</button>
+                    <button type="button" class="btn-go" data-send data-type="invite" data-mode="live">
+                      ③ Send invitations
+                    </button>
+                  </div>
+                  <p class="result" data-result aria-live="polite"></p>
+                </div>
+              </Fragment>
+            )
+          }
+        </li>
+
+        {/* ---- Step 4 — While you wait (passive; only once invited) ---- */}
+        {someInvited && (
+          <li class="step step--passive">
+            <div class="step__bar">
+              <span class="step__num">4</span>
+              <h2 class="step__title">While you wait</h2>
+            </div>
+            <p class="step__hint">
+              {outstanding === 0
+                ? 'Everyone invited has replied — nothing waiting here.'
+                : `${outstanding} still to reply · ${responded.length} in so far. Nothing to do here — replies save themselves and show in Step 2. Come back to send a reminder when you’re ready.`}
+            </p>
+          </li>
+        )}
+
+        {/* ---- Step 5 — Send a reminder ---- */}
+        <li class:list={['step', `is-${step5}`]}>
+          <div class="step__bar">
+            <span class="step__num">5</span>
+            <h2 class="step__title">Send a reminder</h2>
+            <span class="pill">{stepPill(step5)}</span>
+          </div>
+          {
+            step5 === 'later' ? (
+              <p class="step__hint">This opens up once your invitations have gone out.</p>
+            ) : step5 === 'done' ? (
+              <p class="step__hint">✓ Everyone has replied — no reminders needed.</p>
+            ) : (
+              <Fragment>
+                <p class="step__hint">
+                  About a week before the deadline, nudge anyone who hasn’t replied — same
+                  <strong> ① Test ② Preview ③ Send</strong>. Anyone reminded in the last 12 hours is
+                  skipped automatically.
+                </p>
+                <div class="panel" data-panel data-count={remindable}>
+                  <p class="panel__head">
+                    <strong>{remindable}</strong> ready to remind{
+                      outstanding > remindable && ` (${outstanding - remindable} in cooldown)`
+                    }
+                  </p>
+                  <div class="btns">
+                    <button type="button" data-send data-type="reminder" data-mode="test">① Test to us</button>
+                    <button type="button" data-send data-type="reminder" data-mode="dryRun">② Preview</button>
+                    <button type="button" class="btn-go" data-send data-type="reminder" data-mode="live">
+                      ③ Send reminders
+                    </button>
+                  </div>
+                  <p class="result" data-result aria-live="polite"></p>
+                </div>
+              </Fragment>
+            )
+          }
+        </li>
+
+        {/* ---- Step 6 — Give the caterer the numbers ---- */}
+        <li class:list={['step', `is-${step6}`]}>
+          <div class="step__bar">
+            <span class="step__num">6</span>
+            <h2 class="step__title">Give the caterer the numbers</h2>
+            <span class="pill">{stepPill(step6)}</span>
+          </div>
+          <p class="step__hint">
+            Download the spreadsheet for your caterer and venue — it lists every guest, their meal,
+            and any allergies. Grab it whenever you need a headcount.
+          </p>
+          <p><a class="dl" href="export.csv">Download the spreadsheet (CSV)</a></p>
+          {
+            MEALS_ENABLED && attending.length > 0 && (
+              <p class="muted">Meals — {mealTally.map((m) => `${m.label}: ${m.count}`).join('  ·  ')}</p>
+            )
+          }
+          {
+            dietaryNotes.length > 0 && (
+              <details class="fold">
+                <summary>
+                  {dietaryNotes.length}{' '}
+                  {dietaryNotes.length === 1 ? 'allergy / dietary note' : 'allergy / dietary notes'}
+                </summary>
+                <ul class="diet">
+                  {dietaryNotes.map((d) => (
+                    <li>
+                      <strong>{d.label}:</strong> {d.dietary}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )
+          }
+        </li>
+      </ol>
     </main>
 
     <script>
@@ -619,6 +812,130 @@ function replyIsStale(h: HouseholdWithResponse): boolean {
         font-variant: small-caps;
         letter-spacing: 0.04em;
         color: var(--text, #24140f);
+      }
+
+      /* ---- Guided step-by-step workflow ---- */
+      .banner {
+        margin: 1.25rem 0 0.4rem;
+        padding: 0.85rem 1.1rem;
+        font-family: var(--font-display, Georgia, serif);
+        font-size: 1.1rem;
+        line-height: 1.4;
+        background: color-mix(in srgb, var(--accent, #5b1215) 8%, #fff);
+        border-left: 3px solid var(--accent, #5b1215);
+        border-radius: var(--radius, 2px);
+        color: var(--text, #24140f);
+      }
+      .headline {
+        margin: 0 0 0.5rem;
+        color: var(--text-muted, #6b5a4f);
+        font-size: 0.95rem;
+      }
+      .steps {
+        list-style: none;
+        padding: 0;
+        margin: 1.5rem 0 0;
+      }
+      .step {
+        margin: 1rem 0;
+        padding: clamp(1rem, 3vw, 1.5rem);
+        background: color-mix(in srgb, var(--candle-ivory, #f2e8d8) 55%, #fff);
+        border: 1px solid var(--rule, #e3d6c0);
+        border-radius: var(--radius, 2px);
+        transition:
+          opacity 0.2s var(--ease, ease),
+          border-color 0.2s var(--ease, ease);
+      }
+      .step__bar {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        flex-wrap: wrap;
+      }
+      .step__num {
+        flex: none;
+        width: 1.9rem;
+        height: 1.9rem;
+        display: grid;
+        place-items: center;
+        font-family: var(--font-display, serif);
+        font-size: 1rem;
+        border-radius: 50%;
+        border: 1px solid var(--rule-strong, #c9b79a);
+        background: #fff;
+        color: var(--text-muted, #6b5a4f);
+      }
+      .step__title {
+        margin: 0;
+      }
+      .step__hint {
+        margin: 0.55rem 0 0.9rem;
+        max-width: 72ch;
+        color: var(--text-muted, #6b5a4f);
+        font-size: 0.95rem;
+      }
+      .pill {
+        margin-left: auto;
+        padding: 0.18rem 0.6rem;
+        border: 1px solid var(--rule, #e3d6c0);
+        border-radius: 999px;
+        background: #fff;
+        color: var(--text-muted, #6b5a4f);
+        font-size: 0.68rem;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      /* current step — quiet oxblood emphasis */
+      .step.is-now {
+        border-color: var(--accent, #5b1215);
+        box-shadow: var(--shadow-soft, 0 1px 3px rgba(0, 0, 0, 0.08));
+      }
+      .step.is-now .step__num,
+      .step.is-now .pill {
+        background: var(--accent, #5b1215);
+        border-color: var(--accent, #5b1215);
+        color: var(--accent-text, #f2e8d8);
+      }
+      /* not yet actionable — dimmed but still on the map */
+      .step.is-later,
+      .step.is-waiting {
+        opacity: 0.6;
+      }
+      /* passive status strip (Step 4) */
+      .step--passive {
+        background: transparent;
+        border-style: dashed;
+      }
+      .step--passive .step__hint {
+        margin-bottom: 0;
+      }
+      .fold > summary {
+        margin-bottom: 0.6rem;
+        cursor: pointer;
+        font-size: 0.8rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--accent, #5b1215);
+      }
+      .diet {
+        margin: 0.3rem 0 0;
+        padding-left: 1.1rem;
+        color: var(--text-muted, #6b5a4f);
+        font-size: 0.9rem;
+      }
+      a.dl {
+        display: inline-block;
+        margin: 0.2rem 0 0.6rem;
+        padding: 0.5rem 1rem;
+        background: var(--accent, #5b1215);
+        border-radius: var(--radius, 2px);
+        color: var(--accent-text, #f2e8d8);
+        text-decoration: none;
+        font-size: 0.95rem;
+      }
+      a.dl:hover {
+        background: var(--accent-hover, #4a0e11);
       }
     </style>
   </body>
