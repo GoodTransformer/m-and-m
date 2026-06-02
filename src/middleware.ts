@@ -15,11 +15,15 @@ function challenge(): Response {
   });
 }
 
-/** Length-aware constant-time string compare (avoids a passcode timing oracle). */
+/** Constant-time string compare. We fold the length difference into the result
+    and always walk the longer string (no early-out on a length mismatch), so a
+    wrong guess of the right length and one of the wrong length take the same
+    path. The duration still scales with the compared lengths, but that leaks
+    nothing useful here: the passcode is high-entropy and served over HTTPS. */
 function safeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  let diff = a.length ^ b.length;
+  const n = Math.max(a.length, b.length);
+  for (let i = 0; i < n; i++) diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
   return diff === 0;
 }
 

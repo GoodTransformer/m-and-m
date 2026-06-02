@@ -27,8 +27,18 @@ describe('csvCell (spreadsheet formula-injection guard)', () => {
     }
   });
 
+  it('neutralises a trigger hidden behind leading whitespace', () => {
+    // Some importers strip leading spaces/tabs before parsing, so " =cmd" would
+    // still execute — it must be prefixed too.
+    expect(csvCell('  =SUM(A1)')).toBe(`"'  =SUM(A1)"`);
+    expect(csvCell('\t-2+3')).toBe(`"'\t-2+3"`);
+    expect(csvCell('\n@cmd')).toBe(`"'\n@cmd"`);
+  });
+
   it('leaves a safe value unprefixed', () => {
     expect(csvCell('Eleanor')).toBe('"Eleanor"');
     expect(csvCell(4)).toBe('"4"');
+    // Leading spaces with no trigger after them must NOT be mangled.
+    expect(csvCell('  Eleanor')).toBe('"  Eleanor"');
   });
 });

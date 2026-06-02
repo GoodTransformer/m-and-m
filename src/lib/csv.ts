@@ -44,8 +44,11 @@ export function parseCsv(text: string): string[][] {
 
 export function csvCell(v: unknown): string {
   let s = String(v ?? '');
-  // Prevent spreadsheet formula injection: a cell beginning with one of these is
-  // executed as a formula by Excel/Sheets. Prefix with ' so it stays plain text.
-  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+  // Prevent spreadsheet formula injection. Excel/Sheets execute a cell as a
+  // formula when its first non-space character is = + - @ — and some importers
+  // strip leading whitespace first, so " =cmd" is dangerous too. Look PAST any
+  // leading spaces/tabs/newlines, not just position 0. A bare leading tab/CR/LF
+  // is also quoted (it can confuse parsers). Prefix with ' to force plain text.
+  if (/^\s*[=+\-@]/.test(s) || /^[\t\r\n]/.test(s)) s = `'${s}`;
   return `"${s.replace(/"/g, '""')}"`;
 }

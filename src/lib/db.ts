@@ -394,13 +394,18 @@ export async function getResponseForHousehold(householdId: number): Promise<Rsvp
 }
 
 // --- sending (invites + reminders) -------------------------------------------
-/** Households that still need their invitation sent and have an email. */
+/** Households that still need their invitation sent, have an email, AND haven't
+    already replied. The last clause matters after a re-import: correcting an
+    email re-queues the invite (invite_status → 'pending'), but if that household
+    has already RSVP'd we must NOT send them a fresh invitation. */
 export async function householdsPendingInvite(): Promise<Household[]> {
   await ensureSchema();
   const { rows } = await db().execute(
-    `SELECT * FROM households
-     WHERE invite_status != 'sent' AND email IS NOT NULL AND trim(email) != ''
-     ORDER BY id`,
+    `SELECT h.* FROM households h
+     LEFT JOIN rsvps r ON r.household_id = h.id
+     WHERE h.invite_status != 'sent' AND h.email IS NOT NULL AND trim(h.email) != ''
+       AND r.id IS NULL
+     ORDER BY h.id`,
   );
   return rows.map(toHousehold);
 }

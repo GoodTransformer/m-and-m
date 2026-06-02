@@ -34,16 +34,22 @@ export const POST: APIRoute = async ({ request }) => {
   const byEmail = new Map<string, number>();
   const byLabel = new Map<string, number>();
   const emailById = new Map<number, string | null>();
+  const byId = new Map<number, (typeof existing)[number]>();
   const codes = new Set<string>();
   for (const h of existing) {
     if (h.email) byEmail.set(h.email.toLowerCase(), h.id);
     byLabel.set(h.label.toLowerCase(), h.id);
     emailById.set(h.id, h.email ? h.email.toLowerCase() : null);
+    byId.set(h.id, h);
     codes.add(h.code);
   }
 
   const inserts: Array<NewHousehold & { code: string }> = [];
   const updates: Array<NewHousehold & { id: number; resetInvite?: boolean }> = [];
+  // Households that already replied but whose people/allowance changed in this
+  // import — their saved roster (names + meals) may no longer line up, so the
+  // couple should re-check that reply rather than trust a stale headcount.
+  const changedAfterReply: Array<{ line: number; label: string }> = [];
   for (const row of parsed.rows) {
     if (!row.valid) continue;
     const base: NewHousehold = {
@@ -63,6 +69,14 @@ export const POST: APIRoute = async ({ request }) => {
       const newEmail = row.email ?? null;
       // A changed address re-queues the invitation to the corrected email.
       updates.push({ ...base, id: existingId, resetInvite: oldEmail !== newEmail });
+      const old = byId.get(existingId);
+      if (
+        old?.response &&
+        (JSON.stringify(old.invitedGuests) !== JSON.stringify(row.invitedGuests) ||
+          old.plusOnes !== row.plusOnes)
+      ) {
+        changedAfterReply.push({ line: row.line, label: row.label });
+      }
     } else {
       let code = generateCode();
       while (codes.has(code)) code = generateCode();
@@ -76,5 +90,11 @@ export const POST: APIRoute = async ({ request }) => {
     .filter((r) => !r.valid)
     .map((r) => ({ line: r.line, label: r.label, issue: r.issue }));
 
-  return json({ inserted: inserts.length, updated: updates.length, skipped, total: parsed.rows.length });
+  return json({
+    inserted: inserts.length,
+    updated: updates.length,
+    skipped,
+    changedAfterReply,
+    total: parsed.rows.length,
+  });
 };

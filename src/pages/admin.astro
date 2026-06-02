@@ -12,6 +12,17 @@ const headcount = attending.reduce((n, h) => n + h.response!.partySize, 0);
 const declined = responded.filter((h) => h.response!.attending === 'no').length;
 const pendingInvite = households.filter((h) => h.inviteStatus !== 'sent' && h.email).length;
 const outstanding = households.filter((h) => h.inviteStatus === 'sent' && !h.response).length;
+// How many of those would actually be reminded right now: invitedNonResponders
+// skips anyone reminded in the last 12h, so the panel must not promise more.
+const TWELVE_H_MS = 12 * 60 * 60 * 1000;
+const nowMs = Date.now();
+const remindable = households.filter(
+  (h) =>
+    h.inviteStatus === 'sent' &&
+    !h.response &&
+    h.email &&
+    (!h.remindedAt || nowMs - Date.parse(`${h.remindedAt.replace(' ', 'T')}Z`) >= TWELVE_H_MS),
+).length;
 const dietaryCount = attending.filter((h) => h.response!.dietary.trim()).length;
 
 // Meal tally for the caterer + count of households where a coming guest has no meal.
@@ -29,6 +40,9 @@ const missingMeals = attending.filter((h) =>
 // Safety net: warn if the live origin looks unset, which would bake broken
 // personal links into every invitation (only flags in production).
 const linkWarning = import.meta.env.PROD && siteOriginLooksUnset();
+// Warn (in production) if email sending isn't configured — guests would get no
+// confirmation and invitations/reminders can't go out.
+const emailWarning = import.meta.env.PROD && !import.meta.env.RESEND_API_KEY;
 
 const stats: Array<[number, string]> = [
   [headcount, 'guests attending'],
@@ -76,6 +90,14 @@ function isMissingMeals(h: HouseholdWithResponse): boolean {
           </p>
         )
       }
+      {
+        emailWarning && (
+          <p class="warn">
+            ⚠ RESEND_API_KEY looks unset — confirmation emails and invitations/reminders will NOT be
+            sent. Add it in Vercel and redeploy before sending anything.
+          </p>
+        )
+      }
 
       <ul class="stats">
         {
@@ -109,8 +131,12 @@ function isMissingMeals(h: HouseholdWithResponse): boolean {
           <p class="result" data-result aria-live="polite"></p>
         </div>
 
-        <div class="panel" data-panel data-count={outstanding}>
-          <p class="panel__head"><strong>Reminders</strong> — {outstanding} invited, awaiting reply</p>
+        <div class="panel" data-panel data-count={remindable}>
+          <p class="panel__head">
+            <strong>Reminders</strong> — {remindable} ready to remind{
+              outstanding > remindable && ` (${outstanding - remindable} in cooldown)`
+            }
+          </p>
           <div class="btns">
             <button type="button" data-send data-type="reminder" data-mode="test">Test to us</button>
             <button type="button" data-send data-type="reminder" data-mode="dryRun">Preview</button>
@@ -316,7 +342,19 @@ function isMissingMeals(h: HouseholdWithResponse): boolean {
           importOut().textContent = 'Error: ' + (data.error || 'failed');
           return;
         }
-        importOut().textContent = `Imported ${data.inserted} new, ${data.updated} updated, ${data.skipped.length} skipped.`;
+        let msg = `Imported ${data.inserted} new, ${data.updated} updated, ${data.skipped.length} skipped.`;
+        const changed = data.changedAfterReply ?? [];
+        if (changed.length) {
+          // A household that already RSVP'd had its people/allowance changed — its
+          // saved roster may now be stale. Keep this on screen instead of reloading.
+          msg +=
+            ` ⚠ ${changed.length} already-replied household${changed.length > 1 ? 's' : ''} changed (` +
+            changed.map((c: { label: string }) => c.label).join(', ') +
+            ') — reload and re-check their RSVP.';
+          importOut().textContent = msg;
+          return;
+        }
+        importOut().textContent = msg;
         setTimeout(() => location.reload(), 1800);
       });
 
