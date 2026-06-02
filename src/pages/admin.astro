@@ -253,17 +253,20 @@ const bannerText = !hasList
                 hand the link to in person.
               </li>
               <li>
-                <code>plus</code> — how many extra “+ guest” seats they may bring. A number; leave
-                blank or <em>0</em> for none.
+                <code>plus</code> — any extra, <em>unnamed</em> “+ guest” seats they may bring (a single
+                guest’s partner, say). Usually <em>0</em> — you’ve already named everyone you know in
+                <code>guests</code>.
               </li>
               <li>
                 <code>language</code> — <em>en</em> for English or <em>es</em> for Spanish.
               </li>
             </ol>
-            <p class="muted">Here’s what it looks like — the first row, then one household:</p>
+            <p class="muted">Here’s what it looks like — the first row names the columns, then one row per household:</p>
             <div class="example">
               <code>household, guests, email, plus, language</code>
-              <code>The Whitfields, Eleanor Whitfield; James Whitfield, eleanor@example.com, 1, en</code>
+              <code>The Whitfields, Eleanor Whitfield; James Whitfield, eleanor@example.com, 0, en</code>
+              <code>Lizzie Thornton, Lizzie Thornton, lizzie@example.com, 1, en</code>
+              <code>Tomás Herrera, Tomás Herrera, tomas@example.com, 0, es</code>
             </div>
             <p class="muted">
               Pasting an updated list later is safe — it updates people who are already there and
