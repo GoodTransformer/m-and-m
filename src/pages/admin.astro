@@ -289,6 +289,23 @@ const bannerText = !hasList
               Pasting an updated list later is safe — it updates people who are already there and
               never makes duplicates.
             </p>
+            <p class="muted">
+              Now add your list — <strong>upload a <code>.csv</code> file</strong> or <strong>paste the
+              rows</strong> below. (To make a CSV from your spreadsheet: <em>File → Save as / Download →
+              CSV</em>.)
+            </p>
+            <div class="upload-row">
+              <label class="file-btn">
+                Choose a CSV file…
+                <input
+                  type="file"
+                  accept=".csv,.tsv,.txt,text/csv,text/plain,text/tab-separated-values"
+                  data-csv-file
+                  hidden
+                />
+              </label>
+              <span class="file-name" data-csv-file-name aria-live="polite"></span>
+            </div>
             <textarea
               data-csv
               rows="6"
@@ -610,6 +627,33 @@ const bannerText = !hasList
       // Import
       const csv = () => document.querySelector<HTMLTextAreaElement>('[data-csv]')!.value;
       const importOut = () => document.querySelector<HTMLElement>('[data-import-result]')!;
+
+      // Upload a .csv (or .tsv/.txt) file → drop its text into the paste box and run
+      // Preview automatically. Both feed the same parser (commas or tabs), so a CSV
+      // export and a spreadsheet copy both work.
+      const fileInput = document.querySelector<HTMLInputElement>('[data-csv-file]');
+      const fileNameEl = document.querySelector<HTMLElement>('[data-csv-file-name]');
+      fileInput?.addEventListener('change', () => {
+        const file = fileInput.files?.[0];
+        if (!file) return;
+        if (/\.(xlsx|xls|numbers|ods)$/i.test(file.name)) {
+          if (fileNameEl)
+            fileNameEl.textContent = `“${file.name}” is a spreadsheet file — save it as CSV first (File → Save as / Download → CSV), then choose that.`;
+          fileInput.value = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+          document.querySelector<HTMLTextAreaElement>('[data-csv]')!.value = String(reader.result ?? '');
+          if (fileNameEl) fileNameEl.textContent = `Loaded ${file.name}`;
+          document.querySelector<HTMLButtonElement>('[data-import-preview]')?.click();
+        };
+        reader.onerror = () => {
+          if (fileNameEl) fileNameEl.textContent = 'Could not read that file — try pasting instead.';
+        };
+        reader.readAsText(file);
+      });
+
       document.querySelector('[data-import-preview]')?.addEventListener('click', async () => {
         importOut().textContent = 'Checking…';
         const { ok, data } = await postJSON('import/', { csv: csv(), dryRun: true });
@@ -783,6 +827,30 @@ const bannerText = !hasList
       }
       button:hover {
         border-color: var(--accent, #5b1215);
+      }
+      .upload-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.6rem;
+        margin: 0.5rem 0;
+      }
+      .file-btn {
+        display: inline-block;
+        font-size: 0.9rem;
+        padding: 0.45rem 0.9rem;
+        border: 1px solid var(--rule-strong, #c9b79a);
+        border-radius: var(--radius, 6px);
+        background: #fff;
+        color: var(--text, #24140f);
+        cursor: pointer;
+      }
+      .file-btn:hover {
+        border-color: var(--accent, #5b1215);
+      }
+      .file-name {
+        font-size: 0.85rem;
+        color: var(--text-muted, #6b5a4f);
       }
       .btn-go {
         background: var(--accent, #5b1215);
