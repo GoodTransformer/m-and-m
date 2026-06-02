@@ -217,9 +217,15 @@ const bannerText = !hasList
             <span class="pill">{step1 === 'done' ? '✓ Done' : 'Start here'}</span>
           </div>
           <p class="step__hint">
-            {step1 === 'done'
-              ? `${households.length} households · ${guestCount} guests on the list. Need to change it? Paste an updated list below — it updates the people already there and never makes duplicates.`
-              : 'This is where you add everyone you’re inviting — as a simple spreadsheet. The guide below shows exactly how; paste your list in and press Import. Each household then gets its own private invitation link.'}
+            {step1 === 'done' ? (
+              <Fragment>
+                Your guest list is in — <strong>{households.length} households, {guestCount} guests</strong>. This
+                is the home for everyone you’re inviting; to add someone or fix a detail later, open
+                <em> Update the guest list</em> below.
+              </Fragment>
+            ) : (
+              'This is where you add everyone you’re inviting — as a simple spreadsheet. The guide below shows exactly how; paste your list in and press Import. Each household then gets its own private invitation link.'
+            )}
           </p>
           <details class="fold" open={step1 !== 'done'}>
             <summary>{step1 === 'done' ? 'Update the guest list' : 'How to add your list'}</summary>
