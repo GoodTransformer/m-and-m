@@ -116,17 +116,17 @@ const dietaryNotes = attending
   .map((h) => ({ label: h.label, dietary: h.response!.dietary.trim() }));
 
 type StepState = 'now' | 'done' | 'later' | 'waiting' | 'ready';
-const step1: StepState = hasList ? 'done' : 'now';
-const step2: StepState = hasList ? 'ready' : 'later';
-const step3: StepState = !hasList ? 'later' : pendingInvite > 0 ? 'now' : 'done';
-const step5: StepState = !someInvited
+const step1: StepState = hasList ? 'done' : 'now'; // 1 · Add the guest list
+const step2: StepState = !hasList ? 'later' : pendingInvite > 0 ? 'now' : 'done'; // 2 · Send invitations
+const step3: StepState = hasList ? 'ready' : 'later'; // 3 · Track the replies
+const step4: StepState = !someInvited // 4 · Send a reminder
   ? 'later'
   : outstanding === 0
     ? 'done'
     : remindable > 0
       ? 'now'
       : 'waiting';
-const step6: StepState =
+const step5: StepState = // 5 · Give the caterer the numbers
   !rsvpOpen || allReplied || (daysUntilDeadline !== null && daysUntilDeadline <= 7)
     ? 'now'
     : 'ready';
@@ -143,15 +143,15 @@ function stepPill(s: StepState): string {
 const bannerText = !hasList
   ? '👉 Start here — paste your guest list into Step 1 below.'
   : !rsvpOpen
-    ? '⏰ The RSVP deadline has passed. The final numbers are ready for your caterer in Step 6.'
+    ? '⏰ The RSVP deadline has passed. The final numbers are ready for your caterer in Step 5.'
     : pendingInvite > 0
-      ? `👉 Next: send your invitations (Step 3). ${pendingInvite} ready — test to yourselves first.`
+      ? `👉 Next: send your invitations (Step 2). ${pendingInvite} ready — test to yourselves first.`
       : allReplied
-        ? '🎉 Everyone has replied! When you’re ready, send the caterer the numbers (Step 6).'
+        ? '🎉 Everyone has replied! When you’re ready, send the caterer the numbers (Step 5).'
         : remindable > 0
-          ? `👉 Next: ${remindable} ${remindable === 1 ? 'guest hasn’t' : 'guests haven’t'} replied — send a reminder (Step 5).`
+          ? `👉 Next: ${remindable} ${remindable === 1 ? 'guest hasn’t' : 'guests haven’t'} replied — send a reminder (Step 4).`
           : outstanding > 0
-            ? '✓ Reminders are up to date — nothing to do right now. New replies appear in Step 2.'
+            ? '✓ Reminders are up to date — nothing to do right now. New replies appear in Step 3.'
             : '✓ You’re all set.';
 ---
 
@@ -283,17 +283,61 @@ const bannerText = !hasList
           </details>
         </li>
 
-        {/* ---- Step 2 — Check it looks right ---- */}
+        {/* ---- Step 2 — Send the invitations ---- */}
         <li class:list={['step', `is-${step2}`]}>
           <div class="step__bar">
             <span class="step__num">2</span>
-            <h2 class="step__title">Check it looks right</h2>
+            <h2 class="step__title">Send the invitations</h2>
             <span class="pill">{stepPill(step2)}</span>
+          </div>
+          {
+            step2 === 'later' ? (
+              <p class="step__hint">This is where you’ll email everyone their invitation. Add your guest list in Step 1 first, then come back and send them all at once.</p>
+            ) : step2 === 'done' ? (
+              <p class="step__hint">
+                ✓ Everyone with an email has been invited.
+                {paperGuests.length > 0 &&
+                  ` Hand the ${paperGuests.length} paper guest${paperGuests.length === 1 ? '' : 's'} their link from Step 3.`}
+              </p>
+            ) : (
+              <Fragment>
+                <p class="step__hint">
+                  This emails everyone their invitation, in three calm steps.
+                  <strong>① Test</strong> sends one to you — open it and check it looks right.
+                  <strong> ② Preview</strong> shows exactly who’ll get it.
+                  <strong> ③ Send</strong> sends the real thing. No one is ever emailed twice, so you
+                  can’t double up.
+                </p>
+                <div class="panel" data-panel data-count={pendingInvite}>
+                  <p class="panel__head"><strong>{pendingInvite}</strong> ready to invite</p>
+                  <div class="btns">
+                    <button type="button" data-send data-type="invite" data-mode="test">① Test to us</button>
+                    <button type="button" data-send data-type="invite" data-mode="dryRun">② Preview</button>
+                    <button type="button" class="btn-go" data-send data-type="invite" data-mode="live">
+                      ③ Send invitations
+                    </button>
+                  </div>
+                  <p class="result" data-result aria-live="polite"></p>
+                </div>
+              </Fragment>
+            )
+          }
+        </li>
+
+        {/* ---- Step 3 — Track the replies ---- */}
+        <li class:list={['step', `is-${step3}`]}>
+          <div class="step__bar">
+            <span class="step__num">3</span>
+            <h2 class="step__title">Track the replies</h2>
+            <span class="pill">{stepPill(step3)}</span>
           </div>
           <p class="step__hint">
             {hasList
-              ? 'This is your guest list — and where replies appear as they come in. For now, just check the names are spelled right and the seats look correct. Each household also has its own private link: press Copy to send it again by hand whenever you need to. Once people reply, who’s coming, their meals and any allergies all show up here.'
-              : 'Your guests will appear here as a table once you’ve added the list in Step 1 — and it’s where their replies will land, too.'}
+              ? 'This is your guest list — and every reply lands here on its own, so there’s nothing to chase. Each household has its own private link (press Copy to re-send it by hand). As people reply you’ll see who’s coming, their meals and any allergies right here.'
+              : 'Your guests will appear here once you’ve added the list in Step 1 — and it’s where their replies will land, too.'}
+            {someInvited && outstanding > 0 &&
+              ` ${responded.length} replied so far, ${outstanding} still to come — they save themselves, so just check back now and then.`}
+            {someInvited && hasList && outstanding === 0 && ' Everyone you invited has replied. 🎉'}
             {paperGuests.length > 0 &&
               ` ${paperGuests.length} ${paperGuests.length === 1 ? 'household has' : 'households have'} no email — invite them by hand with the Copy button: ${paperGuests.map((h) => h.label).join(', ')}.`}
             {MEALS_ENABLED &&
@@ -394,73 +438,18 @@ const bannerText = !hasList
           )}
         </li>
 
-        {/* ---- Step 3 — Send the invitations ---- */}
-        <li class:list={['step', `is-${step3}`]}>
-          <div class="step__bar">
-            <span class="step__num">3</span>
-            <h2 class="step__title">Send the invitations</h2>
-            <span class="pill">{stepPill(step3)}</span>
-          </div>
-          {
-            step3 === 'later' ? (
-              <p class="step__hint">This is where you’ll email everyone their invitation. Add your guest list in Step 1 first, then come back and you can send them all at once.</p>
-            ) : step3 === 'done' ? (
-              <p class="step__hint">
-                ✓ Everyone with an email has been invited.
-                {paperGuests.length > 0 &&
-                  ` Hand the ${paperGuests.length} paper guest${paperGuests.length === 1 ? '' : 's'} their link from Step 2.`}
-              </p>
-            ) : (
-              <Fragment>
-                <p class="step__hint">
-                  This emails everyone their invitation, in three calm steps.
-                  <strong>① Test</strong> sends one to you — open it and check it looks right.
-                  <strong> ② Preview</strong> shows exactly who’ll get it.
-                  <strong> ③ Send</strong> sends the real thing. No one is ever emailed twice, so you
-                  can’t double up.
-                </p>
-                <div class="panel" data-panel data-count={pendingInvite}>
-                  <p class="panel__head"><strong>{pendingInvite}</strong> ready to invite</p>
-                  <div class="btns">
-                    <button type="button" data-send data-type="invite" data-mode="test">① Test to us</button>
-                    <button type="button" data-send data-type="invite" data-mode="dryRun">② Preview</button>
-                    <button type="button" class="btn-go" data-send data-type="invite" data-mode="live">
-                      ③ Send invitations
-                    </button>
-                  </div>
-                  <p class="result" data-result aria-live="polite"></p>
-                </div>
-              </Fragment>
-            )
-          }
-        </li>
 
-        {/* ---- Step 4 — While you wait (passive; only once invited) ---- */}
-        {someInvited && (
-          <li class="step step--passive">
-            <div class="step__bar">
-              <span class="step__num">4</span>
-              <h2 class="step__title">While you wait</h2>
-            </div>
-            <p class="step__hint">
-              {outstanding === 0
-                ? 'Everyone you invited has replied — nothing waiting here. 🎉'
-                : `Now you just wait — the nice bit. Replies save themselves and appear in Step 2 the moment guests send them, so there’s nothing to do here. ${responded.length} in so far, ${outstanding} still to come. Ready to chase the ones who haven’t replied? That’s Step 5.`}
-            </p>
-          </li>
-        )}
-
-        {/* ---- Step 5 — Send a reminder ---- */}
-        <li class:list={['step', `is-${step5}`]}>
+        {/* ---- Step 4 — Send a reminder ---- */}
+        <li class:list={['step', `is-${step4}`]}>
           <div class="step__bar">
-            <span class="step__num">5</span>
+            <span class="step__num">4</span>
             <h2 class="step__title">Send a reminder</h2>
-            <span class="pill">{stepPill(step5)}</span>
+            <span class="pill">{stepPill(step4)}</span>
           </div>
           {
-            step5 === 'later' ? (
-              <p class="step__hint">This is where you’ll nudge anyone who hasn’t replied. It unlocks once your invitations have gone out in Step 3.</p>
-            ) : step5 === 'done' ? (
+            step4 === 'later' ? (
+              <p class="step__hint">This is where you’ll nudge anyone who hasn’t replied. It unlocks once your invitations have gone out in Step 2.</p>
+            ) : step4 === 'done' ? (
               <p class="step__hint">✓ Everyone has replied — no reminders needed.</p>
             ) : (
               <Fragment>
@@ -491,12 +480,12 @@ const bannerText = !hasList
           }
         </li>
 
-        {/* ---- Step 6 — Give the caterer the numbers ---- */}
-        <li class:list={['step', `is-${step6}`]}>
+        {/* ---- Step 5 — Give the caterer the numbers ---- */}
+        <li class:list={['step', `is-${step5}`]}>
           <div class="step__bar">
-            <span class="step__num">6</span>
+            <span class="step__num">5</span>
             <h2 class="step__title">Give the caterer the numbers</h2>
-            <span class="pill">{stepPill(step6)}</span>
+            <span class="pill">{stepPill(step5)}</span>
           </div>
           <p class="step__hint">
             When it’s time to brief your caterer or venue, download the spreadsheet here. It lists
