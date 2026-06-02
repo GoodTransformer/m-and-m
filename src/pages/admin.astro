@@ -10,7 +10,11 @@ const responded = households.filter((h) => h.response);
 const attending = responded.filter((h) => h.response!.attending === 'yes');
 const headcount = attending.reduce((n, h) => n + h.response!.partySize, 0);
 const declined = responded.filter((h) => h.response!.attending === 'no').length;
-const pendingInvite = households.filter((h) => h.inviteStatus !== 'sent' && h.email).length;
+// Exclude already-replied households so this matches householdsPendingInvite()
+// (which won't re-invite a responder) — the panel must not promise more than a send.
+const pendingInvite = households.filter(
+  (h) => h.inviteStatus !== 'sent' && h.email && !h.response,
+).length;
 const outstanding = households.filter((h) => h.inviteStatus === 'sent' && !h.response).length;
 // How many of those would actually be reminded right now: invitedNonResponders
 // skips anyone reminded in the last 12h, so the panel must not promise more.
@@ -63,6 +67,21 @@ function isMissingMeals(h: HouseholdWithResponse): boolean {
       h.response &&
       h.response.attending === 'yes' &&
       h.response.roster.some((r) => r.coming && !r.meal),
+  );
+}
+
+// A reply is "stale" if the household's named people or plus-one allowance were
+// changed (e.g. a later re-import) AFTER the guest replied, so their saved roster
+// no longer matches the current guest list. Recomputed every render, so the flag
+// persists in the dashboard until the reply is re-checked. Only meaningful for a
+// "yes" reply (a decline stores no roster).
+function replyIsStale(h: HouseholdWithResponse): boolean {
+  const r = h.response;
+  if (!r || r.attending !== 'yes') return false;
+  const rosterInvited = r.roster.filter((e) => !e.plusOne).map((e) => e.name);
+  const rosterPlus = r.roster.filter((e) => e.plusOne).length;
+  return (
+    JSON.stringify(rosterInvited) !== JSON.stringify(h.invitedGuests) || rosterPlus !== h.plusOnes
   );
 }
 ---
@@ -176,51 +195,71 @@ function isMissingMeals(h: HouseholdWithResponse): boolean {
                 </thead>
                 <tbody>
                   {households.map((h) => (
-                    <tr
-                      class:list={[
-                        h.inviteStatus === 'sent' && !h.response && 'awaiting',
-                        isMissingMeals(h) && 'missing',
-                      ]}
-                    >
-                      <td>{h.label}</td>
-                      <td>
-                        <button type="button" class="copy" data-copy={householdLink(h.code, h.locale)}>
-                          Copy
-                        </button>
-                        <code class="code">{h.code}</code>
-                      </td>
-                      <td>{h.email ?? '—'}</td>
-                      <td>
-                        {h.invitedGuests.length}
-                        {h.plusOnes > 0 && <span class="muted-inline"> +{h.plusOnes}</span>}
-                      </td>
-                      <td>{h.locale}</td>
-                      <td>{statusLabel(h.inviteStatus)}</td>
-                      <td>
-                        {h.response
-                          ? h.response.attending === 'yes'
-                            ? `Yes · ${h.response.partySize}`
-                            : 'No'
-                          : '— not yet'}
-                      </td>
-                      {MEALS_ENABLED && (
+                    <Fragment>
+                      <tr
+                        class:list={[
+                          h.inviteStatus === 'sent' && !h.response && 'awaiting',
+                          isMissingMeals(h) && 'missing',
+                          replyIsStale(h) && 'stale',
+                        ]}
+                      >
+                        <td>{h.label}</td>
                         <td>
-                          {h.response && h.response.attending === 'yes' ? (
-                            <>
-                              {rosterLines(h.response.roster, 'en').join(', ') || '—'}
-                              {notComingNames(h.response.roster).length > 0 && (
-                                <span class="declined">
-                                  {'  ·  '}
-                                  {notComingNames(h.response.roster).join(', ')} can’t come
-                                </span>
-                              )}
-                            </>
-                          ) : (
-                            '—'
+                          <button type="button" class="copy" data-copy={householdLink(h.code, h.locale)}>
+                            Copy
+                          </button>
+                          <code class="code">{h.code}</code>
+                        </td>
+                        <td>{h.email ?? '—'}</td>
+                        <td>
+                          {h.invitedGuests.length}
+                          {h.plusOnes > 0 && <span class="muted-inline"> +{h.plusOnes}</span>}
+                        </td>
+                        <td>{h.locale}</td>
+                        <td>{statusLabel(h.inviteStatus)}</td>
+                        <td>
+                          {h.response
+                            ? h.response.attending === 'yes'
+                              ? `Yes · ${h.response.partySize}`
+                              : 'No'
+                            : '— not yet'}
+                          {replyIsStale(h) && (
+                            <span class="flag" title="The guest list changed after this reply — re-check it.">
+                              ⚠ list changed
+                            </span>
                           )}
                         </td>
+                        {MEALS_ENABLED && (
+                          <td>
+                            {h.response && h.response.attending === 'yes' ? (
+                              <>
+                                {rosterLines(h.response.roster, 'en').join(', ') || '—'}
+                                {notComingNames(h.response.roster).length > 0 && (
+                                  <span class="declined">
+                                    {'  ·  '}
+                                    {notComingNames(h.response.roster).join(', ')} can’t come
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              '—'
+                            )}
+                          </td>
+                        )}
+                      </tr>
+                      {h.response && (h.response.dietary.trim() || h.response.message.trim()) && (
+                        <tr class="notes-row">
+                          <td colspan={MEALS_ENABLED ? 8 : 7}>
+                            {h.response.dietary.trim() && (
+                              <span class="note"><strong>Dietary</strong> {h.response.dietary.trim()}</span>
+                            )}
+                            {h.response.message.trim() && (
+                              <span class="note"><strong>Message</strong> {h.response.message.trim()}</span>
+                            )}
+                          </td>
+                        </tr>
                       )}
-                    </tr>
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
@@ -335,7 +374,13 @@ function isMissingMeals(h: HouseholdWithResponse): boolean {
             : ' Ready to import.');
       });
       document.querySelector('[data-import-go]')?.addEventListener('click', async () => {
-        if (!confirm('Import this list now? Existing households (matched by email) are updated.')) return;
+        if (
+          !confirm(
+            'Import this list now? Rows with errors are skipped — Preview first to review them. ' +
+              'Existing households (matched by email) are updated.',
+          )
+        )
+          return;
         importOut().textContent = 'Importing…';
         const { ok, data } = await postJSON('import/', { csv: csv() });
         if (!ok || data.error) {
@@ -367,7 +412,9 @@ function isMissingMeals(h: HouseholdWithResponse): boolean {
             btn.textContent = 'Copied';
             setTimeout(() => (btn.textContent = t), 1200);
           } catch {
-            /* ignore */
+            // Clipboard can fail (denied permission / insecure context) — don't
+            // leave the couple thinking it copied. Offer the link to copy by hand.
+            window.prompt('Copy this link:', btn.dataset.copy!);
           }
         });
       });
@@ -544,6 +591,34 @@ function isMissingMeals(h: HouseholdWithResponse): boolean {
       }
       .declined {
         font-size: 0.85em;
+      }
+      tr.stale td {
+        background: color-mix(in srgb, #b8860b 14%, transparent);
+      }
+      .flag {
+        display: inline-block;
+        margin-left: 0.4rem;
+        font-size: 0.78em;
+        white-space: nowrap;
+        color: #8a5a00;
+      }
+      /* Dietary / message detail line, visually attached to the row above. */
+      .notes-row td {
+        border-top: 0;
+        padding-top: 0;
+        padding-bottom: 0.7rem;
+        font-size: 0.9em;
+        color: var(--text-muted, #6b5a4f);
+      }
+      .note {
+        display: inline-block;
+        margin-right: 1.4rem;
+      }
+      .note strong {
+        margin-right: 0.35rem;
+        font-variant: small-caps;
+        letter-spacing: 0.04em;
+        color: var(--text, #24140f);
       }
     </style>
   </body>

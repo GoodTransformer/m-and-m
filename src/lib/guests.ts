@@ -67,6 +67,7 @@ export function parseGuestCsv(text: string): ParsedGuestList {
   }
 
   const seenEmail = new Set<string>();
+  const seenLabelNoEmail = new Set<string>();
   const rows: ParsedGuestRow[] = [];
   for (let i = 1; i < table.length; i++) {
     const r = table[i];
@@ -93,6 +94,10 @@ export function parseGuestCsv(text: string): ParsedGuestList {
     if (!label) issue = 'Missing household name';
     else if (email && !EMAIL_RE.test(email)) issue = 'Invalid email';
     else if (email && seenEmail.has(email)) issue = 'Duplicate email in list';
+    // Two no-email rows with the same name can't be told apart on re-import
+    // (matching falls back to label), so they'd collide — flag the duplicate.
+    else if (!email && seenLabelNoEmail.has(label.toLowerCase()))
+      issue = 'Duplicate name — add an email to tell them apart';
     else if (invitedGuests.length > MAX_GUESTS) issue = `Too many guests (max ${MAX_GUESTS})`;
     else if (rawPlus && !/^\d+$/.test(rawPlus)) issue = 'Plus-ones must be a whole number';
     else if (rawPlus && Number(rawPlus) > MAX_PLUS) issue = `Plus-ones must be 0–${MAX_PLUS}`;
@@ -101,6 +106,7 @@ export function parseGuestCsv(text: string): ParsedGuestList {
     if (rawPlus && /^\d+$/.test(rawPlus)) plusOnes = Math.min(Number(rawPlus), MAX_PLUS);
     if (rawLocale === 'es') locale = 'es';
     if (email) seenEmail.add(email);
+    else if (label) seenLabelNoEmail.add(label.toLowerCase());
 
     rows.push({
       line: i + 1,

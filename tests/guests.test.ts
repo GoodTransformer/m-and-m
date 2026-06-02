@@ -50,6 +50,21 @@ describe('parseGuestCsv', () => {
     expect(res.rows[1].issue).toMatch(/duplicate/i);
   });
 
+  it('flags a second no-email household with the same name (would collide on re-import)', () => {
+    const res = parseGuestCsv('household,guests\nPaper Guest,A\nPaper Guest,B');
+    expect(res.rows[0].valid).toBe(true);
+    expect(res.rows[1].valid).toBe(false);
+    expect(res.rows[1].issue).toMatch(/duplicate name/i);
+  });
+
+  it('allows the same name twice when emails tell them apart', () => {
+    const res = parseGuestCsv(
+      'household,guests,email\nThe Smiths,A,a@example.com\nThe Smiths,B,b@example.com',
+    );
+    expect(res.rows[0].valid).toBe(true);
+    expect(res.rows[1].valid).toBe(true);
+  });
+
   it('rejects a non-numeric or out-of-range plus value', () => {
     expect(first('household,guests,plus\nA,X,abc').valid).toBe(false);
     expect(first('household,guests,plus\nA,X,99').valid).toBe(false);

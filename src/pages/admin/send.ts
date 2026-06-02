@@ -27,9 +27,24 @@ function json(data: unknown, status = 200): Response {
   });
 }
 
-// Stable key for a recipient set, so a retried live send dedupes at Resend.
-function stableKey(prefix: string, ids: number[]): string {
-  const s = ids.slice().sort((a, b) => a - b).join(',');
+// Stable key for a recipient set, so a double-clicked live send dedupes at Resend
+// — but a *genuinely new* send must NOT collide inside Resend's 24h idempotency
+// window. We fold each recipient's email and their invited/reminded timestamps
+// into the key: a corrected address (email changed) or a later reminder wave
+// (reminded_at advanced past the 12h cooldown) yields a fresh key and sends,
+// while a rapid retry of the same wave (identical fields) repeats the key and
+// dedupes. Without this, the same IDs hashed to the same key for 24h, so a
+// corrected invite or a same-day second reminder could be marked sent yet never
+// actually delivered.
+function stableKey(
+  prefix: string,
+  recipients: Array<Pick<Household, 'id' | 'email' | 'invitedAt' | 'remindedAt'>>,
+): string {
+  const s = recipients
+    .slice()
+    .sort((a, b) => a.id - b.id)
+    .map((r) => `${r.id}:${r.email ?? ''}:${r.invitedAt ?? ''}:${r.remindedAt ?? ''}`)
+    .join(',');
   let h = 5381;
   for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
   return `${prefix}:${h.toString(36)}`;
@@ -83,7 +98,11 @@ export const POST: APIRoute = async ({ request }) => {
   if (mode === 'test') {
     const couple = import.meta.env.COUPLE_NOTIFY_EMAIL || '';
     if (!couple) return json({ error: 'Set COUPLE_NOTIFY_EMAIL to receive a test send.' }, 400);
-    const sample = { ...(recipients[0] ?? sampleHousehold(couple)), email: couple };
+    // Always a synthetic sample — never a real household. Its link carries the
+    // fake SAMPLE00 code, so clicking through lands on the invalid-code page and
+    // can never overwrite a real guest's RSVP. (Deliverability + rendering is
+    // what a test checks; it doesn't need a live, submittable code.)
+    const sample = sampleHousehold(couple);
     const payload = build(sample);
     if (!payload) return json({ error: 'Could not build a test email.' }, 400);
     const res = await sendBatch([payload], crypto.randomUUID()); // unique → always sends
@@ -96,11 +115,13 @@ export const POST: APIRoute = async ({ request }) => {
   const slice = recipients.slice(0, limit);
   const payloads: EmailPayload[] = [];
   const ids: number[] = [];
+  const targets: Household[] = [];
   for (const h of slice) {
     const p = build(h);
     if (p) {
       payloads.push(p);
       ids.push(h.id);
+      targets.push(h);
     }
   }
 
@@ -118,7 +139,7 @@ export const POST: APIRoute = async ({ request }) => {
   // --- live -----------------------------------------------------------------
   if (payloads.length === 0) return json({ type, attempted: 0, sent: 0, failed: 0, remaining: 0 });
 
-  const result = await sendBatch(payloads, stableKey(type, ids));
+  const result = await sendBatch(payloads, stableKey(type, targets));
 
   if (!result.ok && result.error) {
     // Whole call failed (network/auth). Flag invites as failed so they retry.
