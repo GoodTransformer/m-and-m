@@ -283,8 +283,8 @@ const bannerText = !hasList
           </div>
           <p class="step__hint">
             {hasList
-              ? 'Skim the names and seats. Replies, meals and allergies appear here as they come in.'
-              : 'Your guests will appear here once you’ve added the list in Step 1.'}
+              ? 'This is your guest list — and where replies appear as they come in. For now, just check the names are spelled right and the seats look correct. Each household also has its own private link: press Copy to send it again by hand whenever you need to. Once people reply, who’s coming, their meals and any allergies all show up here.'
+              : 'Your guests will appear here as a table once you’ve added the list in Step 1 — and it’s where their replies will land, too.'}
             {paperGuests.length > 0 &&
               ` ${paperGuests.length} ${paperGuests.length === 1 ? 'household has' : 'households have'} no email — invite them by hand with the Copy button: ${paperGuests.map((h) => h.label).join(', ')}.`}
             {MEALS_ENABLED &&
@@ -394,7 +394,7 @@ const bannerText = !hasList
           </div>
           {
             step3 === 'later' ? (
-              <p class="step__hint">Add your guest list first (Step 1), then come back here to invite everyone.</p>
+              <p class="step__hint">This is where you’ll email everyone their invitation. Add your guest list in Step 1 first, then come back and you can send them all at once.</p>
             ) : step3 === 'done' ? (
               <p class="step__hint">
                 ✓ Everyone with an email has been invited.
@@ -404,9 +404,11 @@ const bannerText = !hasList
             ) : (
               <Fragment>
                 <p class="step__hint">
-                  Do these in order: <strong>① Test</strong> to yourselves and open it,
-                  <strong> ② Preview</strong> who’ll get it, then <strong>③ Send</strong>. No one is
-                  ever emailed twice.
+                  This emails everyone their invitation, in three calm steps.
+                  <strong>① Test</strong> sends one to you — open it and check it looks right.
+                  <strong> ② Preview</strong> shows exactly who’ll get it.
+                  <strong> ③ Send</strong> sends the real thing. No one is ever emailed twice, so you
+                  can’t double up.
                 </p>
                 <div class="panel" data-panel data-count={pendingInvite}>
                   <p class="panel__head"><strong>{pendingInvite}</strong> ready to invite</p>
@@ -433,8 +435,8 @@ const bannerText = !hasList
             </div>
             <p class="step__hint">
               {outstanding === 0
-                ? 'Everyone invited has replied — nothing waiting here.'
-                : `${outstanding} still to reply · ${responded.length} in so far. Nothing to do here — replies save themselves and show in Step 2. Come back to send a reminder when you’re ready.`}
+                ? 'Everyone you invited has replied — nothing waiting here. 🎉'
+                : `Now you just wait — the nice bit. Replies save themselves and appear in Step 2 the moment guests send them, so there’s nothing to do here. ${responded.length} in so far, ${outstanding} still to come. Ready to chase the ones who haven’t replied? That’s Step 5.`}
             </p>
           </li>
         )}
@@ -448,15 +450,17 @@ const bannerText = !hasList
           </div>
           {
             step5 === 'later' ? (
-              <p class="step__hint">This opens up once your invitations have gone out.</p>
+              <p class="step__hint">This is where you’ll nudge anyone who hasn’t replied. It unlocks once your invitations have gone out in Step 3.</p>
             ) : step5 === 'done' ? (
               <p class="step__hint">✓ Everyone has replied — no reminders needed.</p>
             ) : (
               <Fragment>
                 <p class="step__hint">
-                  About a week before the deadline, nudge anyone who hasn’t replied — same
-                  <strong> ① Test ② Preview ③ Send</strong>. Anyone reminded in the last 12 hours is
-                  skipped automatically.
+                  This sends a gentle nudge to anyone who hasn’t replied yet — about a week before the
+                  deadline is ideal. It’s the same three steps:
+                  <strong>① Test</strong>, <strong>② Preview</strong>, <strong>③ Send</strong>. Anyone
+                  who’s already replied — or was reminded in the last 12 hours — is skipped
+                  automatically, so it’s always safe to press.
                 </p>
                 <div class="panel" data-panel data-count={remindable}>
                   <p class="panel__head">
@@ -486,8 +490,9 @@ const bannerText = !hasList
             <span class="pill">{stepPill(step6)}</span>
           </div>
           <p class="step__hint">
-            Download the spreadsheet for your caterer and venue — it lists every guest, their meal,
-            and any allergies. Grab it whenever you need a headcount.
+            When it’s time to brief your caterer or venue, download the spreadsheet here. It lists
+            every guest, whether they’re coming, their meal choice and any allergies, with your total
+            headcount. Grab a fresh copy whenever you like — it’s always up to date.
           </p>
           <p><a class="dl" href="export.csv">Download the spreadsheet (CSV)</a></p>
           {
