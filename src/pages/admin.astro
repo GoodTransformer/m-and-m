@@ -222,9 +222,8 @@ const bannerText = !hasList
           <p class="step__hint">
             {step1 === 'done' ? (
               <Fragment>
-                This is where you add your guest list — and that’s done: <strong>{households.length} households,
-                {' '}{guestCount} guests</strong> are in. You’ll see everyone, and their replies, over in Step 3.
-                To add or fix anyone later, open <em>Update the guest list</em> below.
+                This is where you add your guest list — and that’s done. You’ll see everyone, and their
+                replies, over in Step 3. To add or fix anyone later, open <em>Update the guest list</em> below.
               </Fragment>
             ) : (
               'This is where you add everyone you’re inviting — as a simple spreadsheet. The guide below shows exactly how; paste your list in and press Import. Each household then gets its own private invitation link.'
@@ -281,6 +280,9 @@ const bannerText = !hasList
             </div>
             <p class="result" data-import-result aria-live="polite"></p>
           </details>
+          {step1 === 'done' && (
+            <p class="step__count">{households.length} households · {guestCount} guests on the list.</p>
+          )}
         </li>
 
         {/* ---- Step 2 — Send the invitations ---- */}
@@ -912,6 +914,11 @@ const bannerText = !hasList
         max-width: 72ch;
         color: var(--text-muted, #6b5a4f);
         font-size: 0.95rem;
+      }
+      .step__count {
+        margin: 0.6rem 0 0;
+        font-size: 0.85rem;
+        color: var(--text-muted, #6b5a4f);
       }
       .pill {
         margin-left: auto;
