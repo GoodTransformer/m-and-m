@@ -218,17 +218,48 @@ const bannerText = !hasList
           </div>
           <p class="step__hint">
             {step1 === 'done'
-              ? `${households.length} households · ${guestCount} guests on the list. Need to change it? Paste an updated list — it updates, never duplicates.`
-              : 'Paste your guest list below and press Import. Each household gets its own private link. Only the household name is required.'}
+              ? `${households.length} households · ${guestCount} guests on the list. Need to change it? Paste an updated list below — it updates the people already there and never makes duplicates.`
+              : 'This is where you add everyone you’re inviting — as a simple spreadsheet. The guide below shows exactly how; paste your list in and press Import. Each household then gets its own private invitation link.'}
           </p>
           <details class="fold" open={step1 !== 'done'}>
-            <summary>{step1 === 'done' ? 'Update the guest list' : 'Paste your list'}</summary>
+            <summary>{step1 === 'done' ? 'Update the guest list' : 'How to add your list'}</summary>
             <p class="muted">
-              Columns: <code>household, guests, email, plus, language</code> — only
-              <code>household</code> is required. List each household's people in
-              <code>guests</code>, separated by semicolons — those are the seats. <code>plus</code> is
-              how many extra “+ guest” seats they may bring (default 0). Anyone with no email is a
-              “paper guest” you invite by hand. Re-importing updates existing rows (matched by email).
+              Make the list in a spreadsheet — Excel, Numbers or Google Sheets — then copy the cells
+              and paste them into the box below. (You can also just type the rows straight in.) The
+              first row names the columns; every row after it is one household.
+            </p>
+            <p class="muted">
+              Put these columns <strong>in this order</strong> — only the first one is required:
+            </p>
+            <ol class="cols">
+              <li>
+                <code>household</code> — what you’ll call them in the invitation, e.g.
+                <em>The Whitfields</em> or <em>Tomás Herrera</em>.
+              </li>
+              <li>
+                <code>guests</code> — everyone’s full name, separated by semicolons, like
+                <em>Eleanor Whitfield; James Whitfield</em>. Each name becomes one seat.
+              </li>
+              <li>
+                <code>email</code> — where their invitation is sent. Leave it blank for anyone you’ll
+                hand the link to in person.
+              </li>
+              <li>
+                <code>plus</code> — how many extra “+ guest” seats they may bring. A number; leave
+                blank or <em>0</em> for none.
+              </li>
+              <li>
+                <code>language</code> — <em>en</em> for English or <em>es</em> for Spanish.
+              </li>
+            </ol>
+            <p class="muted">Here’s what it looks like — the first row, then one household:</p>
+            <div class="example">
+              <code>household, guests, email, plus, language</code>
+              <code>The Whitfields, Eleanor Whitfield; James Whitfield, eleanor@example.com, 1, en</code>
+            </div>
+            <p class="muted">
+              Pasting an updated list later is safe — it updates people who are already there and
+              never makes duplicates.
             </p>
             <textarea
               data-csv
@@ -917,6 +948,40 @@ const bannerText = !hasList
         letter-spacing: 0.06em;
         text-transform: uppercase;
         color: var(--accent, #5b1215);
+      }
+      .cols {
+        margin: 0.3rem 0 0.85rem;
+        padding-left: 1.4rem;
+        color: var(--text-muted, #6b5a4f);
+        font-size: 0.93rem;
+      }
+      .cols li {
+        margin: 0.35rem 0;
+        line-height: 1.45;
+      }
+      .cols code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.88em;
+        color: var(--text, #24140f);
+        background: color-mix(in srgb, var(--rule, #e3d6c0) 35%, transparent);
+        padding: 0.05rem 0.32rem;
+        border-radius: 3px;
+      }
+      .example {
+        margin: 0.3rem 0 0.85rem;
+        padding: 0.6rem 0.75rem;
+        background: #fff;
+        border: 1px solid var(--rule, #e3d6c0);
+        border-radius: var(--radius, 2px);
+        overflow-x: auto;
+      }
+      .example code {
+        display: block;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.8rem;
+        line-height: 1.6;
+        white-space: nowrap;
+        color: var(--text, #24140f);
       }
       .diet {
         margin: 0.3rem 0 0;
