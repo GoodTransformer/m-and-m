@@ -281,7 +281,10 @@ const bannerText = !hasList
             <p class="result" data-import-result aria-live="polite"></p>
           </details>
           {step1 === 'done' && (
-            <p class="step__count">{households.length} households · {guestCount} guests on the list.</p>
+            <p class="step__count">
+              <span class="step__count-label">On the list</span>
+              {households.length} households · {guestCount} guests
+            </p>
           )}
         </li>
 
@@ -916,8 +919,17 @@ const bannerText = !hasList
         font-size: 0.95rem;
       }
       .step__count {
-        margin: 0.6rem 0 0;
-        font-size: 0.85rem;
+        margin: 1.1rem 0 0;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--rule, #e3d6c0);
+        font-size: 0.9rem;
+        color: var(--text, #24140f);
+      }
+      .step__count-label {
+        margin-right: 0.5rem;
+        font-size: 0.68rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
         color: var(--text-muted, #6b5a4f);
       }
       .pill {
