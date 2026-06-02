@@ -233,7 +233,7 @@ const bannerText = !hasList
             <summary>{step1 === 'done' ? 'Update the guest list' : 'How to add your list'}</summary>
             <p class="muted">
               Make the list in a spreadsheet — Excel, Numbers or Google Sheets. The first row names
-              the columns; every row after it is one household. You’ll upload or paste it at the bottom.
+              the columns; every row after it is one household. You’ll upload it at the bottom.
             </p>
             <p class="muted">
               Put these columns <strong>in this order</strong> — only the first one is required:
@@ -276,13 +276,12 @@ const bannerText = !hasList
               alt="A spreadsheet with the columns household, guests, email, plus, language. The Whitfields: two names separated by a semicolon, plus 0. Lizzie Thornton: one name, plus 1 — she may bring a guest. The Okonkwos: three names. Tomás Herrera: language es. Mary Stevens: no email — a paper guest you invite by hand."
             />
             <p class="muted">
-              Pasting an updated list later is safe — it updates people who are already there and
+              Re-uploading an updated list later is safe — it updates people who are already there and
               never makes duplicates.
             </p>
             <p class="muted">
-              Now add your list — <strong>upload a <code>.csv</code> file</strong> or <strong>paste the
-              rows</strong> below. (To make a CSV from your spreadsheet: <em>File → Save as / Download →
-              CSV</em>.)
+              Now <strong>upload your list</strong> — choose your <code>.csv</code> file below. (To make
+              a CSV from your spreadsheet: <em>File → Save as / Download → CSV</em>.)
             </p>
             <div class="upload-row">
               <label class="file-btn">
@@ -296,11 +295,6 @@ const bannerText = !hasList
               </label>
               <span class="file-name" data-csv-file-name aria-live="polite"></span>
             </div>
-            <textarea
-              data-csv
-              rows="6"
-              placeholder="household,guests,email,plus,language&#10;The Whitfields,Eleanor Whitfield; James Whitfield,eleanor@example.com,0,en"
-></textarea>
             <div class="btns">
               <button type="button" data-import-preview>Preview</button>
               <button type="button" class="btn-go" data-import-go>Import</button>
@@ -416,7 +410,11 @@ const bannerText = !hasList
                         <td>{h.email ?? '—'}</td>
                         <td>
                           {h.invitedGuests.length}
-                          {h.plusOnes > 0 && <span class="muted-inline"> +{h.plusOnes}</span>}
+                          {h.plusOnes > 0 && (
+                            <span class="muted-inline">
+                              {` + ${h.plusOnes === 1 ? 'guest' : `${h.plusOnes} guests`}`}
+                            </span>
+                          )}
                         </td>
                         <td>{h.locale}</td>
                         <td>{statusLabel(h.inviteStatus)}</td>
@@ -615,12 +613,13 @@ const bannerText = !hasList
       });
 
       // Import
-      const csv = () => document.querySelector<HTMLTextAreaElement>('[data-csv]')!.value;
+      let csvText = ''; // the uploaded file's text; Preview/Import read this
+      const csv = () => csvText;
       const importOut = () => document.querySelector<HTMLElement>('[data-import-result]')!;
 
-      // Upload a .csv (or .tsv/.txt) file → drop its text into the paste box and run
-      // Preview automatically. Both feed the same parser (commas or tabs), so a CSV
-      // export and a spreadsheet copy both work.
+      // Upload a .csv (or .tsv/.txt) file → hold its text and run Preview
+      // automatically. The parser handles commas or tabs, so a CSV export from any
+      // spreadsheet works.
       const fileInput = document.querySelector<HTMLInputElement>('[data-csv-file]');
       const fileNameEl = document.querySelector<HTMLElement>('[data-csv-file-name]');
       fileInput?.addEventListener('change', () => {
@@ -634,12 +633,12 @@ const bannerText = !hasList
         }
         const reader = new FileReader();
         reader.onload = () => {
-          document.querySelector<HTMLTextAreaElement>('[data-csv]')!.value = String(reader.result ?? '');
+          csvText = String(reader.result ?? '');
           if (fileNameEl) fileNameEl.textContent = `Loaded ${file.name}`;
           document.querySelector<HTMLButtonElement>('[data-import-preview]')?.click();
         };
         reader.onerror = () => {
-          if (fileNameEl) fileNameEl.textContent = 'Could not read that file — try pasting instead.';
+          if (fileNameEl) fileNameEl.textContent = 'Could not read that file — please try again.';
         };
         reader.readAsText(file);
       });
