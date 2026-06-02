@@ -276,15 +276,6 @@ const bannerText = !hasList
               loading="lazy"
               alt="A spreadsheet with the columns household, guests, email, plus, language. The Whitfields: two names separated by a semicolon, plus 0. Lizzie Thornton: one name, plus 1 — she may bring a guest. The Okonkwos: three names. Tomás Herrera: language es. Mary Stevens: no email — a paper guest you invite by hand."
             />
-            <p class="muted">Prefer to type it? Here’s the same list as plain text — paste this (or your own) as a starting point:</p>
-            <div class="example">
-              <code>household, guests, email, plus, language</code>
-              <code>The Whitfields, Eleanor Whitfield; James Whitfield, eleanor@example.com, 0, en</code>
-              <code>Lizzie Thornton, Lizzie Thornton, lizzie@example.com, 1, en</code>
-              <code>The Okonkwos, Chidi Okonkwo; Amara Okonkwo; Ngozi Okonkwo, chidi@example.com, 0, en</code>
-              <code>Tomás Herrera, Tomás Herrera, tomas@example.com, 0, es</code>
-              <code>Mary Stevens, Mary Stevens, , 0, en</code>
-            </div>
             <p class="muted">
               Pasting an updated list later is safe — it updates people who are already there and
               never makes duplicates.
@@ -1090,22 +1081,6 @@ const bannerText = !hasList
         margin: 0.3rem 0 1rem;
         border: 1px solid var(--rule, #e3d6c0);
         border-radius: var(--radius, 2px);
-      }
-      .example {
-        margin: 0.3rem 0 0.85rem;
-        padding: 0.6rem 0.75rem;
-        background: #fff;
-        border: 1px solid var(--rule, #e3d6c0);
-        border-radius: var(--radius, 2px);
-        overflow-x: auto;
-      }
-      .example code {
-        display: block;
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: 0.8rem;
-        line-height: 1.6;
-        white-space: nowrap;
-        color: var(--text, #24140f);
       }
       .diet {
         margin: 0.3rem 0 0;
