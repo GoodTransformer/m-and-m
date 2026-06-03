@@ -46,7 +46,23 @@ const otherHome = localePath('/', otherLocale(locale));
     padding-block: clamp(3rem, 9vw, 6rem);
     position: relative;
   }
+  /* A barely-there candlelight bloom pooled behind the names — warms the flat
+     ivory ground without touching layout. Decorative only. */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(
+      62% 48% at 50% 40%,
+      color-mix(in srgb, var(--champagne-silk) 34%, transparent),
+      transparent 72%
+    );
+  }
   .hero__inner {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
