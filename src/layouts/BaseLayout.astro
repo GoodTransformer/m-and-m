@@ -4,21 +4,24 @@ import { getStrings } from '../i18n';
 import Masthead from '../components/Masthead.astro';
 import Footer from '../components/Footer.astro';
 
-// Self-hosted fonts (Fontsource). Fraunces "standard" carries the weight +
-// optical-size axes; EB Garamond carries weight. Italics imported separately.
-// Each @font-face is unicode-range-gated, so a visitor only downloads the latin
-// faces their text needs (Spanish accents are U+00xx ∈ latin); the other subsets
-// ship in the bundle but are never fetched.
-import '@fontsource-variable/fraunces/standard.css';
-import '@fontsource-variable/fraunces/standard-italic.css';
+// Self-hosted fonts (Fontsource). Fraunces "full" carries all four axes —
+// weight + optical-size + SOFT (terminal softness) + WONK — so the hero names
+// can warm their terminals via SOFT (see Hero.astro). EB Garamond carries
+// weight. Italics imported separately. Each @font-face is unicode-range-gated,
+// so a visitor only downloads the latin faces their text needs (Spanish accents
+// are U+00xx ∈ latin); the other subsets ship in the bundle but are never fetched.
+// NB: the full face is heavier than "standard" (~+54KB normal) — the price of
+// the SOFT axis. Revert to standard.css / standard-italic.css to drop it.
+import '@fontsource-variable/fraunces/full.css';
+import '@fontsource-variable/fraunces/full-italic.css';
 import '@fontsource-variable/eb-garamond/index.css';
 import '@fontsource-variable/eb-garamond/wght-italic.css';
 
 // Preload the three latin faces that paint the hero/body above the fold, so the
 // type settles immediately instead of flashing from the serif fallback. These
 // `?url` imports resolve to the build-hashed file paths (robust across rebuilds).
-import frauncesNormal from '@fontsource-variable/fraunces/files/fraunces-latin-standard-normal.woff2?url';
-import frauncesItalic from '@fontsource-variable/fraunces/files/fraunces-latin-standard-italic.woff2?url';
+import frauncesNormal from '@fontsource-variable/fraunces/files/fraunces-latin-full-normal.woff2?url';
+import frauncesItalic from '@fontsource-variable/fraunces/files/fraunces-latin-full-italic.woff2?url';
 import ebGaramondNormal from '@fontsource-variable/eb-garamond/files/eb-garamond-latin-wght-normal.woff2?url';
 
 import '../styles/tokens.css';

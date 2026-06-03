@@ -78,6 +78,9 @@ const otherHome = localePath('/', otherLocale(locale));
     font-size: clamp(3rem, 13vw, 6.5rem);
     line-height: 0.98;
     margin: 0;
+    /* Warm the terminals a touch (Fraunces SOFT axis, 0–100). Weight and optical
+       size still follow font-weight / font-optical-sizing from .display. */
+    font-variation-settings: 'SOFT' 38;
   }
   .hero__names .amp {
     color: var(--oxidised-bronze);
