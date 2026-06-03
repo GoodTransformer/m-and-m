@@ -42,7 +42,7 @@ const Tag = href ? 'a' : 'button';
     font-family: var(--font-body);
     font-size: 0.92rem;
     font-weight: 600;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     text-decoration: none;
     color: var(--btn-fg);
@@ -88,6 +88,9 @@ const Tag = href ? 'a' : 'button';
   .btn--ghost:hover {
     border-color: var(--accent);
     color: var(--accent);
+    /* Fill with a breath of warmth on hover, rather than only re-colouring the
+       outline — so the button reads as activating, not merely outlined. */
+    background: color-mix(in srgb, var(--accent) 7%, transparent);
   }
 
   .btn--quiet {

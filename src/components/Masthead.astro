@@ -175,8 +175,10 @@ const isCurrent = (p: string) =>
   .site-nav__link[aria-current='page'] {
     color: var(--accent);
   }
-  /* underline that doesn't affect line height/alignment */
-  .site-nav__link[aria-current='page']::after {
+  /* Underline that previews the current-page marker: held full for the active
+     page, and grown in on hover (desktop) so hover and "you are here" share one
+     gesture. Transform-only — never affects line height or the baseline row. */
+  .site-nav__link::after {
     content: '';
     position: absolute;
     left: 0;
@@ -184,6 +186,17 @@ const isCurrent = (p: string) =>
     bottom: 0.05rem;
     height: 1px;
     background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s var(--ease-soft);
+  }
+  .site-nav__link[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+  @media (hover: hover) {
+    .site-nav__link:hover::after {
+      transform: scaleX(1);
+    }
   }
 
   .menu-btn {

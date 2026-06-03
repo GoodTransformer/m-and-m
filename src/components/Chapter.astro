@@ -86,6 +86,9 @@ const hasHead = Boolean(label || title);
   .chapter--deep :global(.btn--ghost:hover) {
     color: var(--candle-ivory);
     border-color: var(--antique-brass);
+    /* Warm brass wash on the dark ground (the oxblood wash used on light grounds
+       would disappear here). */
+    background: color-mix(in srgb, var(--antique-brass) 14%, transparent);
   }
 
   .chapter__head {
