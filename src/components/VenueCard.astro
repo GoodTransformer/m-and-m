@@ -184,15 +184,29 @@ const dest = `${venue.name}, ${venue.postcode}`;
   @media (min-width: 48rem) {
     .venue {
       grid-template-columns: 0.82fr 1fr;
-      align-items: center;
+      /* Let both columns share the row's full height so the text can be
+         distributed against the image rather than floating on a centred axis. */
+      align-items: stretch;
       gap: clamp(2.5rem, 5vw, 4.5rem);
     }
     .venue__media {
       max-width: none;
       margin-inline: 0;
+      /* Keep the photo's own height (its aspect ratio); when it's the shorter of
+         the two, anchor its base to the text's last line. */
+      align-self: end;
     }
     .venue--flip .venue__media {
       order: 2;
+    }
+    /* Fill the text to the image's height: role label to the top, the maps +
+       what3words to the bottom, and any surplus shared as even breathing room
+       between the blocks. Where the text already matches the image (Magdalen)
+       there's no surplus, so its rhythm is untouched. */
+    .venue__body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
   }
 </style>
