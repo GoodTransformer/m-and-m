@@ -53,6 +53,7 @@ const widths = [...new Set([400, 640, 960, 1280, cap])]
 
 <style>
   .frame {
+    position: relative;
     margin: 0;
     width: 100%;
     aspect-ratio: var(--ratio);
@@ -60,6 +61,18 @@ const widths = [...new Set([400, 640, 960, 1280, cap])]
     overflow: hidden;
     background: var(--bg-card);
     border: 1px solid var(--bg-card-edge);
+    /* Mounted-plate feel: the resting shadow lifts the photo a hair off the page. */
+    box-shadow: var(--shadow-rest);
+  }
+  /* Inner hairline drawn *over* the cover image, so the photo edge reads as
+     matted rather than bleeding into the warm ground. */
+  .frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--espresso) 8%, transparent);
+    pointer-events: none;
   }
   .frame img {
     width: 100%;

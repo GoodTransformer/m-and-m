@@ -54,6 +54,7 @@ const Tag = href ? 'a' : 'button';
       background-color 0.3s var(--ease-soft),
       color 0.3s var(--ease-soft),
       border-color 0.3s var(--ease-soft),
+      box-shadow 0.3s var(--ease-soft),
       transform 0.3s var(--ease-soft);
     text-align: center;
   }
@@ -66,10 +67,18 @@ const Tag = href ? 'a' : 'button';
     background: var(--accent);
     color: var(--accent-text);
     border-color: var(--accent);
+    /* A whisper of weight so the oxblood CTA sits on the page, not pasted onto it. */
+    box-shadow: var(--shadow-rest);
   }
   .btn--primary:hover {
     background: var(--accent-hover);
     border-color: var(--accent-hover);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 26%, transparent);
+    transform: translateY(-1px);
+  }
+  .btn--primary:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-rest);
   }
 
   .btn--ghost {

@@ -63,9 +63,11 @@ const { items, ariaLabel, class: cls = '' } = Astro.props;
     border: 1px solid var(--bg-card-edge);
     border-radius: var(--radius);
     color: var(--text);
+    box-shadow: var(--shadow-rest);
     transition:
       background-color 0.3s var(--ease-soft),
       border-color 0.3s var(--ease-soft),
+      box-shadow 0.4s var(--ease-soft),
       transform 0.3s var(--ease-soft);
   }
   .quick__label {
@@ -92,6 +94,7 @@ const { items, ariaLabel, class: cls = '' } = Astro.props;
     .quick__link:hover {
       background: var(--bg-card);
       border-color: color-mix(in srgb, var(--oxidised-bronze) 55%, transparent);
+      box-shadow: var(--shadow-soft);
       transform: translateY(-2px);
     }
     .quick__link:hover .quick__arrow {
