@@ -142,7 +142,10 @@ const venueRoles: Record<string, string> = {
   .welcome__grid {
     display: grid;
     gap: clamp(2rem, 6vw, 4rem);
-    align-items: center;
+    /* Top-align: the heading sits level with the image's top edge (same rule as
+       the venue text), giving the splits one consistent top line. The small
+       height surplus falls at the bottom, where it's unobtrusive. */
+    align-items: start;
   }
   .welcome__title {
     margin-bottom: 1.1rem;
@@ -228,7 +231,8 @@ const venueRoles: Record<string, string> = {
   .split {
     display: grid;
     gap: clamp(1.75rem, 5vw, 3.5rem);
-    align-items: center;
+    /* Top-align to match the Welcome split and the venues. */
+    align-items: start;
   }
   .split__text h2 {
     margin-bottom: 1rem;
