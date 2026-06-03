@@ -46,7 +46,9 @@ const { events, class: cls = '' } = Astro.props;
     color: var(--oxidised-bronze);
     padding-top: 0.1rem;
     text-align: right;
-    font-variant-numeric: tabular-nums;
+    /* Lining + tabular so the times align as a clean column, like a printed
+       programme (tabular alone could inherit oldstyle figure heights). */
+    font-variant-numeric: lining-nums tabular-nums;
     white-space: nowrap;
   }
 

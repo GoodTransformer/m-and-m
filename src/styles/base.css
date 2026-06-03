@@ -31,6 +31,10 @@ body {
   text-rendering: optimizeLegibility;
   font-variant-ligatures: common-ligatures contextual;
   font-kerning: normal;
+  /* Optically flush margins where supported (Safari/iOS today): opening and
+     closing punctuation hangs into the gutter. Pure progressive enhancement —
+     other browsers render exactly as before. Inherits to all prose. */
+  hanging-punctuation: first last;
   min-height: 100svh;
   display: flex;
   flex-direction: column;

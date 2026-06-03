@@ -135,6 +135,9 @@ const dest = `${venue.name}, ${venue.postcode}`;
     font-size: 1rem;
     color: var(--text);
     max-width: 40ch;
+    /* Lining figures so postcodes (OX1 4AU) sit evenly beside the capitals
+       rather than bouncing on oldstyle descenders. */
+    font-variant-numeric: lining-nums;
   }
   .venue__addr-line {
     display: block;
