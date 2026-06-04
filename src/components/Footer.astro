@@ -7,6 +7,7 @@ import { formatDateLong, capitalise } from '../lib/format';
 import LanguageToggle from './LanguageToggle.astro';
 import Rule from './Rule.astro';
 import Arrow from './Arrow.astro';
+import Amp from './Amp.astro';
 
 interface Props {
   locale: Locale;
@@ -23,7 +24,7 @@ const dateLine = capitalise(formatDateLong(SITE.date, locale));
     <Rule ornament class="footer__rule" />
 
     <p class="footer__mono">Mari <span class="amp">&amp;</span> Michael</p>
-    <p class="footer__date muted">{dateLine} · {SITE.placeLine}</p>
+    <p class="footer__date muted">{dateLine} · <Amp text={SITE.placeLine} /></p>
 
     <nav class="footer__nav" aria-label="Footer">
       <ul>
@@ -31,7 +32,7 @@ const dateLine = capitalise(formatDateLong(SITE.date, locale));
           nav.map((item) => (
             <li>
               <a href={item.href} aria-current={path === item.path ? 'page' : undefined}>
-                {item.label}
+                <Amp text={item.label} />
               </a>
             </li>
           ))

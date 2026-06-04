@@ -1,10 +1,11 @@
 ---
-// A page "chapter" — the core editorial section. Optional small-caps label with
-// a roman numeral, a display title, and a slot. `deep` paints a dark walnut
-// interlude (old-world depth); `alt` uses the parchment ground.
+// A page "chapter" — the core editorial section. Optional small-caps label, a
+// display title, and a slot. `deep` paints a dark walnut interlude (old-world
+// depth); `alt` uses the parchment ground.
+import Amp from './Amp.astro';
+
 interface Props {
   label?: string;
-  numeral?: string;
   title?: string;
   variant?: 'light' | 'alt' | 'deep';
   center?: boolean;
@@ -15,7 +16,6 @@ interface Props {
 }
 const {
   label,
-  numeral,
   title,
   variant = 'light',
   center = false,
@@ -40,13 +40,12 @@ const hasHead = Boolean(label || title);
         <header class="chapter__head reveal">
           {label && (
             <p class:list={['chapter-label', variant === 'deep' && 'chapter-label--on-deep']}>
-              {numeral && <span class="chapter-numeral">{numeral}</span>}
-              {label}
+              <Amp text={label} />
             </p>
           )}
           {title && (
             <Heading id={headingId} class="chapter__title">
-              {title}
+              <Amp text={title} />
             </Heading>
           )}
         </header>

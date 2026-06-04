@@ -6,6 +6,7 @@ import type { RsvpFieldErrors, SubmittedValues } from '../lib/rsvp';
 import type { RsvpResponse } from '../lib/db';
 import { MEALS, MEALS_ENABLED, CONTACT_EMAIL } from '../data/site';
 import Button from './Button.astro';
+import Amp from './Amp.astro';
 
 interface Props {
   locale: Locale;
@@ -125,7 +126,7 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
 
   {/* Who's coming + meals — your named guests (fixed), then any granted plus-one. */}
   <div class="field" data-when-yes>
-    <span class="field__grouplabel">{t.mealsLabel}</span>
+    <span class="field__grouplabel"><Amp text={t.mealsLabel} /></span>
     <p class="field__hint">{t.mealsHint}</p>
     <div class="guests">
       {

@@ -5,6 +5,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Chapter from '../Chapter.astro';
 import Card from '../Card.astro';
 import Arrow from '../Arrow.astro';
+import Amp from '../Amp.astro';
 
 interface Props {
   locale: Locale;
@@ -16,7 +17,6 @@ const t = getStrings(locale);
 <BaseLayout locale={locale} path="/travel" title={t.nav.travel}>
   <Chapter
     label={t.travel.label}
-    numeral="IV"
     title={t.travel.title}
     headingLevel="h1"
     id="travel"
@@ -27,7 +27,7 @@ const t = getStrings(locale);
       {
         t.travel.sections.map((s) => (
           <div class="travel__sec reveal">
-            <h2 class="h3 travel__sec-title">{s.title}</h2>
+            <h2 class="h3 travel__sec-title"><Amp text={s.title} /></h2>
             <p>{s.body}</p>
           </div>
         ))
@@ -43,8 +43,8 @@ const t = getStrings(locale);
         t.travel.stays.map((s) => (
           <Card class="stay reveal">
             <p class="chapter-label">{s.distance}</p>
-            <h3 class="stay__name">{s.name}</h3>
-            <p class="muted stay__note">{s.note}</p>
+            <h3 class="stay__name"><Amp text={s.name} /></h3>
+            <p class="muted stay__note"><Amp text={s.note} /></p>
             {s.url && (
               <a class="stay__link" href={s.url} target="_blank" rel="noopener noreferrer">
                 {t.ui.readMore} <Arrow dir="ne" />
