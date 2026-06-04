@@ -105,20 +105,39 @@ const { items, ariaLabel, class: cls = '' } = Astro.props;
     }
   }
 
-  /* A single elegant row once there is room. */
+  /* Desktop: an engraved index, not a button grid. The filled tiles give way to
+     an open row framed by hairlines — top and bottom rules, thin dividers
+     between — so the wayfinding reads like a printed contents page. (Mobile
+     keeps the tappable filled tiles.) */
   @media (min-width: 48rem) {
     .quick__list {
       grid-template-columns: repeat(var(--quick-cols, 5), 1fr);
+      gap: 0;
+      border-block: 1px solid var(--rule);
+    }
+    .quick__item + .quick__item {
+      border-left: 1px solid var(--rule);
     }
     .quick__link {
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.6rem;
-      min-height: 6.5rem;
-      padding: 1.1rem 1.2rem;
+      justify-content: space-between;
+      gap: 1.6rem;
+      min-height: 8rem;
+      padding: 1.85rem 1.5rem;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
     }
     .quick__arrow {
       align-self: flex-start;
+    }
+    /* Quiet hover: a breath of parchment fills the cell — no lift, no shadow. */
+    .quick__link:hover {
+      background: color-mix(in srgb, var(--old-parchment) 28%, transparent);
+      box-shadow: none;
+      transform: none;
     }
   }
 </style>
