@@ -100,4 +100,35 @@ const { events, class: cls = '' } = Astro.props;
     font-size: 1rem;
     max-width: 32ch;
   }
+
+  /* Desktop: a centred programme, like the printed order of the day. The left
+     time-column and connecting rail give way to a centred stack — time as a
+     small label above each event — so the page reads as a paper invitation. */
+  @media (min-width: 48rem) {
+    .timeline {
+      max-width: 30rem;
+      margin-inline: auto;
+      text-align: center;
+    }
+    .timeline__item {
+      display: block;
+      column-gap: 0;
+    }
+    .timeline__marker {
+      display: none;
+    }
+    .timeline__time {
+      text-align: center;
+      padding-top: 0;
+      margin-bottom: 0.45rem;
+      letter-spacing: 0.04em;
+    }
+    .timeline__body {
+      padding-bottom: clamp(2.25rem, 4vw, 3rem);
+    }
+    .timeline__note {
+      max-width: 40ch;
+      margin-inline: auto;
+    }
+  }
 </style>

@@ -36,4 +36,27 @@ const t = getStrings(locale);
     font-style: italic;
     max-width: 40ch;
   }
+
+  /* Desktop: a centred, paper-invitation composition. The schedule reads like a
+     printed order of the day and fills the page, instead of hugging the left
+     edge with a lopsided empty margin. Mobile keeps the left-aligned timeline. */
+  @media (min-width: 48rem) {
+    :global(#weekend .chapter__head) {
+      margin-inline: auto;
+      text-align: center;
+      max-width: 46ch;
+    }
+    :global(#weekend .chapter__title) {
+      margin-inline: auto;
+    }
+    .weekend__intro {
+      margin-inline: auto;
+      text-align: center;
+      max-width: 52ch;
+    }
+    .weekend__closing {
+      margin-inline: auto;
+      text-align: center;
+    }
+  }
 </style>
