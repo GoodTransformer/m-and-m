@@ -167,7 +167,10 @@ const venueRoles: Record<string, string> = {
   }
   @media (min-width: 48rem) {
     .welcome__grid {
-      grid-template-columns: 1.1fr 0.9fr;
+      /* Equal columns give the photograph more presence; the wider gap lets the
+         two halves breathe on desktop (mobile spacing is untouched). */
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(2.5rem, 5vw, 4.5rem);
     }
     .welcome__media {
       max-width: none;
@@ -234,6 +237,22 @@ const venueRoles: Record<string, string> = {
       grid-template-columns: 1fr 1fr;
     }
   }
+  @media (min-width: 48rem) {
+    /* Give the venue name more presence so the wide card doesn't read as mostly
+       empty — the name carries the card. */
+    .venue-card__name {
+      font-size: clamp(2rem, 3.2vw, 2.4rem);
+    }
+    .venue-card {
+      min-height: 9.5rem;
+    }
+    /* With more height, anchor the arrow to the lower corner so the card reads
+       top-to-bottom rather than top-heavy. */
+    .venue-card__arrow {
+      top: auto;
+      bottom: clamp(1.5rem, 3vw, 2rem);
+    }
+  }
 
   /* Split */
   .split {
@@ -251,6 +270,7 @@ const venueRoles: Record<string, string> = {
   @media (min-width: 48rem) {
     .split {
       grid-template-columns: 1fr 1fr;
+      gap: clamp(2.5rem, 5vw, 4.5rem);
     }
   }
 
