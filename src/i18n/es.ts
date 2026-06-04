@@ -120,7 +120,7 @@ export const es: Strings = {
   home: {
     welcome: {
       label: 'Bienvenida',
-      title: 'De la tarde a la luz de las velas',
+      title: 'De la capilla a la luz de las velas',
       body: [
         'Reuniremos a las personas que queremos en Oxford por la tarde y, más al norte, en Weston Manor, para una velada a la luz de las velas, con cena y baile.',
         'Aquí encontrarán todo lo necesario: cuándo llegar, adónde ir y cómo dar con nosotros. Léanlo con calma; el día sabrá esperar.',

@@ -119,7 +119,7 @@ export const en: Strings = {
   home: {
     welcome: {
       label: 'Welcome',
-      title: 'From afternoon to candlelight',
+      title: 'From college to candlelight',
       body: [
         'We are gathering the people we love in Oxford for the afternoon, then north to Weston Manor for an evening of candlelight, dinner and dancing.',
         'Everything you need is here: when to arrive, where to go, and how to find us. Read it at your leisure; the day will keep.',
