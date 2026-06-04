@@ -85,22 +85,12 @@ blockquote {
   letter-spacing: var(--tracking-label);
   font-weight: 600;
   color: var(--oxidised-bronze);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.7em;
+  display: inline-block;
 }
 
 .chapter-label--on-deep {
   /* lighter than raw brass so the small label clears WCAG AA on dark walnut */
   color: color-mix(in srgb, var(--antique-brass) 50%, var(--champagne-silk));
-}
-
-.chapter-numeral {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: 0;
-  text-transform: none;
 }
 
 .lead {
@@ -118,6 +108,11 @@ blockquote {
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 400;
+  /* Pin Fraunces' display optical size so the ornate swash ampersand is used at
+     every size. Without this, small contexts (the masthead wordmark, small-caps
+     labels) fall to opsz: auto and render Fraunces' plainer text ampersand — a
+     different glyph from the ornate one in the large hero lockup. */
+  font-variation-settings: 'opsz' 144;
 }
 
 .dropcap::first-letter {

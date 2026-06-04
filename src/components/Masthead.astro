@@ -3,6 +3,7 @@ import { localePath, type Locale } from '../lib/i18n';
 import { getStrings } from '../i18n';
 import { mainNav } from '../lib/nav';
 import LanguageToggle from './LanguageToggle.astro';
+import Amp from './Amp.astro';
 
 interface Props {
   locale: Locale;
@@ -36,7 +37,7 @@ const isCurrent = (p: string) =>
                   href={item.href}
                   aria-current={isCurrent(item.path) ? 'page' : undefined}
                 >
-                  {item.label}
+                  <Amp text={item.label} />
                 </a>
               </li>
             ))

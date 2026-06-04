@@ -119,15 +119,15 @@ export const en: Strings = {
   home: {
     welcome: {
       label: 'Welcome',
-      title: 'A candlelit evening',
+      title: 'From afternoon to candlelight',
       body: [
-        'We are gathering the people we love in Oxford, and then a little way north at Weston Manor, for one long evening of candlelight, dinner and dancing.',
+        'We are gathering the people we love in Oxford for the afternoon, then north to Weston Manor for an evening of candlelight, dinner and dancing.',
         'Everything you need is here: when to arrive, where to go, and how to find us. Read it at your leisure; the day will keep.',
       ],
     },
     weekend: {
       label: 'The Day',
-      title: 'Two places, one evening',
+      title: 'Two places, one day',
       intro:
         'The ceremony at Magdalen, then dinner and dancing at Weston Manor. Here is how the day unfolds, hour by hour.',
       cta: 'See the day',
@@ -219,7 +219,7 @@ export const en: Strings = {
     addressLabel: 'Address',
     magdalen: {
       blurb:
-        'A chapel of stone and candlelight on the High Street, where the deer park meets the river. We will marry here, among the cloisters, in the late afternoon.',
+        'A chapel of stone and candlelight on the High Street, where the deer park meets the river. We will marry here, among the cloisters, in the afternoon.',
       arrival: 'Enter through the Porters’ Lodge on the High Street; someone will point the way.',
       parking: 'There is no parking at the College: use the Oxford Park & Ride (Thornhill is closest) or a taxi.',
     },
@@ -243,7 +243,7 @@ export const en: Strings = {
       },
       {
         title: 'By train',
-        body: 'Oxford station is well served from London Paddington and Marylebone, and is a short taxi ride from Magdalen. For Weston Manor, Islip is the closest station by taxi; Bicester Village is also a practical option.',
+        body: 'Oxford station is well served from Paddington and Marylebone, a short taxi from Magdalen. For Weston Manor, Bicester Village is easiest — direct from Marylebone, then a taxi; Islip is nearer but barely served.',
       },
       {
         title: 'Between the two',
@@ -285,7 +285,7 @@ export const en: Strings = {
       },
       {
         q: 'How do we reply?',
-        a: 'Everything you need to reply is on your invitation. (If you cannot find it, send us a note and we will point the way.)',
+        a: 'Everything you need to reply is on your invitation. (If you cannot find it, send us a note at {email} and we will point the way.)',
       },
       {
         q: 'Where do I park?',
@@ -293,7 +293,7 @@ export const en: Strings = {
       },
       {
         q: 'Will it be cold?',
-        a: 'September evenings are mild but unhurried. The cloisters are open to the air, so bring a wrap for drinks and the walk to the cars.',
+        a: 'September days are mild, the evenings cooler. The cloisters are open to the air, so bring a wrap for drinks and the walk to the cars.',
       },
       {
         q: 'When should I arrive?',

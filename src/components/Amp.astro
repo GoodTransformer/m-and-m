@@ -1,0 +1,20 @@
+---
+// The house ampersand. Splits a string on "&" and sets every one in the single
+// site-wide glyph (Fraunces italic swash, via .amp) so each "&" — name lockups,
+// titles, labels, prose — reads as one consistent mark, regardless of the font
+// the surrounding text is set in. Strings without an "&" render verbatim.
+// Safe templating (no set:html): the non-"&" parts are auto-escaped.
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+const parts = (text ?? '').split('&');
+---
+{
+  parts.map((part, i) => (
+    <Fragment>
+      {i > 0 && <span class="amp">&amp;</span>}
+      {part}
+    </Fragment>
+  ))
+}

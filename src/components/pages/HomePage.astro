@@ -11,6 +11,7 @@ import Button from '../Button.astro';
 import Rule from '../Rule.astro';
 import Frame from '../Frame.astro';
 import Arrow from '../Arrow.astro';
+import Amp from '../Amp.astro';
 import { magdalenWide, westonGarden } from '../../assets/images';
 
 interface Props {
@@ -33,7 +34,7 @@ const venueRoles: Record<string, string> = {
 };
 ---
 
-<BaseLayout locale={locale} path="/">
+<BaseLayout locale={locale} path="/" mainClass="home">
   <Hero locale={locale} />
 
   <!-- Quick actions — kept high, reachable in one tap -->
@@ -45,7 +46,7 @@ const venueRoles: Record<string, string> = {
   </section>
 
   <!-- I · Welcome -->
-  <Chapter label={t.home.welcome.label} numeral="I" id="welcome" class="welcome">
+  <Chapter label={t.home.welcome.label} id="welcome" class="welcome">
     <div class="welcome__grid">
       <div class="welcome__text reveal">
         <h2 class="welcome__title">{t.home.welcome.title}</h2>
@@ -60,7 +61,6 @@ const venueRoles: Record<string, string> = {
   <!-- II · The Day — dramatic dark interlude -->
   <Chapter
     label={t.home.weekend.label}
-    numeral="II"
     variant="deep"
     center
     id="weekend-preview"
@@ -78,7 +78,7 @@ const venueRoles: Record<string, string> = {
   </Chapter>
 
   <!-- III · The Venues — two name cards -->
-  <Chapter label={t.home.venues.label} numeral="III" title={t.home.venues.title} variant="alt">
+  <Chapter label={t.home.venues.label} title={t.home.venues.title} variant="alt">
     <p class="section-intro reveal">{t.home.venues.intro}</p>
     <div class="venue-cards">
       {
@@ -95,7 +95,7 @@ const venueRoles: Record<string, string> = {
   </Chapter>
 
   <!-- IV · Travel & Stay — text + plate split -->
-  <Chapter label={t.home.travel.label} numeral="IV" id="travel-preview">
+  <Chapter label={t.home.travel.label} id="travel-preview">
     <div class="split">
       <div class="split__media reveal">
         <Frame src={westonGarden} alt="Weston Manor across its gardens" width={900} ratio="3/2" />
@@ -103,13 +103,13 @@ const venueRoles: Record<string, string> = {
       <div class="split__text reveal">
         <h2>{t.home.travel.title}</h2>
         <p class="section-intro">{t.home.travel.intro}</p>
-        <Button href={localePath('/travel', locale)} variant="quiet">{t.home.travel.cta}</Button>
+        <Button href={localePath('/travel', locale)} variant="quiet"><Amp text={t.home.travel.cta} /></Button>
       </div>
     </div>
   </Chapter>
 
   <!-- V · A Note on Gifts — centred -->
-  <Chapter label={t.home.gifts.label} numeral="V" variant="alt" center id="gifts-preview">
+  <Chapter label={t.home.gifts.label} variant="alt" center id="gifts-preview">
     <div class="gifts reveal">
       <h2>{t.home.gifts.title}</h2>
       <p class="section-intro center">{t.home.gifts.intro}</p>
@@ -119,8 +119,16 @@ const venueRoles: Record<string, string> = {
 </BaseLayout>
 
 <style>
+  /* The home page stacks many sparse sections, so on wide viewports the default
+     --section-y (cap 8rem) compounds into ~16rem voids between them — baggy. Pull
+     the home rhythm in (cap 6rem). Phones are untouched: both clamps sit at the
+     3.5rem floor below ~800px, so only tablet/desktop tighten. */
+  :global(main.home) {
+    --section-y: clamp(3.5rem, 7vw, 6rem);
+  }
+
   .find {
-    padding-block: clamp(1.5rem, 5vw, 2.5rem) clamp(2.5rem, 6vw, 4rem);
+    padding-block: clamp(1.5rem, 5vw, 2.5rem) clamp(2.5rem, 5vw, 3rem);
   }
   .find__label {
     display: block;

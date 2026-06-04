@@ -120,15 +120,15 @@ export const es: Strings = {
   home: {
     welcome: {
       label: 'Bienvenida',
-      title: 'Una velada a la luz de las velas',
+      title: 'De la tarde a la luz de las velas',
       body: [
-        'Reuniremos a las personas que queremos en Oxford y, un poco más al norte, en Weston Manor, para una larga velada a la luz de las velas, con cena y baile.',
+        'Reuniremos a las personas que queremos en Oxford por la tarde y, más al norte, en Weston Manor, para una velada a la luz de las velas, con cena y baile.',
         'Aquí encontrarán todo lo necesario: cuándo llegar, adónde ir y cómo dar con nosotros. Léanlo con calma; el día sabrá esperar.',
       ],
     },
     weekend: {
       label: 'El día',
-      title: 'Dos lugares, una velada',
+      title: 'Dos lugares, un día',
       intro:
         'La ceremonia en Magdalen y, después, cena y baile en Weston Manor. Así transcurre el día, hora a hora.',
       cta: 'Ver el día',
@@ -220,7 +220,7 @@ export const es: Strings = {
     addressLabel: 'Dirección',
     magdalen: {
       blurb:
-        'Una capilla de piedra y velas en la High Street, donde el parque de los ciervos se encuentra con el río. Aquí nos casaremos, entre los claustros, al caer la tarde.',
+        'Una capilla de piedra y velas en la High Street, donde el parque de los ciervos se encuentra con el río. Aquí nos casaremos, entre los claustros, por la tarde.',
       arrival: 'Entren por la conserjería (Porters’ Lodge), en la High Street; alguien les indicará.',
       parking: 'El College no tiene estacionamiento: usen el Park & Ride de Oxford (Thornhill es el más cercano) o un taxi.',
     },
@@ -244,7 +244,7 @@ export const es: Strings = {
       },
       {
         title: 'En tren',
-        body: 'La estación de Oxford tiene buenas conexiones desde Londres Paddington y London Marylebone, y queda a un corto trayecto en taxi de Magdalen. Para Weston Manor, Islip es la estación más cercana en taxi; Bicester Village también es una opción práctica.',
+        body: 'Oxford tiene buenas conexiones desde Paddington y Marylebone, a corto trayecto en taxi de Magdalen. Para Weston Manor, Bicester Village es la más práctica —directa desde Marylebone—, luego un taxi; Islip está más cerca, pero con pocos trenes.',
       },
       {
         title: 'Entre los dos',
@@ -286,7 +286,7 @@ export const es: Strings = {
       },
       {
         q: '¿Cómo confirmamos?',
-        a: 'Todo lo necesario para responder está en su invitación. (Si no lo encuentran, escríbannos y les indicaremos.)',
+        a: 'Todo lo necesario para responder está en su invitación. (Si no lo encuentran, escríbannos a {email} y les indicaremos.)',
       },
       {
         q: '¿Dónde estaciono?',
@@ -294,7 +294,7 @@ export const es: Strings = {
       },
       {
         q: '¿Hará frío?',
-        a: 'Las tardes de septiembre son suaves, pero sin prisa. El claustro está al aire libre: traigan algo de abrigo para las copas y el camino a los autos.',
+        a: 'Los días de septiembre son suaves; las noches, más frescas. El claustro está al aire libre: traigan algo de abrigo para las copas y el camino a los autos.',
       },
       {
         q: '¿Cuándo debo llegar?',
