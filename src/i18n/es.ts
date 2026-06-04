@@ -240,7 +240,7 @@ export const es: Strings = {
     sections: [
       {
         title: 'En auto',
-        body: 'Ambos lugares son fáciles por carretera. Weston Manor está a dos millas de la salida 9 de la M40, junto a la A34. Magdalen no tiene estacionamiento: el Park & Ride de Oxford (Thornhill es el más cercano) evita el tráfico.',
+        body: 'Ambos lugares son fáciles por carretera. Magdalen no tiene estacionamiento: el Park & Ride de Oxford (Thornhill es el más cercano) evita el tráfico. Weston Manor está a dos millas de la salida 9 de la M40, junto a la A34.',
       },
       {
         title: 'En tren',

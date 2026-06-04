@@ -239,7 +239,7 @@ export const en: Strings = {
     sections: [
       {
         title: 'By car',
-        body: 'Both places are easy by road. Weston Manor is two miles from Junction 9 of the M40, off the A34. Magdalen has no parking: the Oxford Park & Ride (Thornhill is closest) spares the city traffic.',
+        body: 'Both places are easy by road. Magdalen has no parking: the Oxford Park & Ride (Thornhill is closest) spares the city traffic. Weston Manor is two miles from Junction 9 of the M40, off the A34.',
       },
       {
         title: 'By train',
