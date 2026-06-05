@@ -16,6 +16,11 @@ export function adminUrl(): string {
   return `${ORIGIN}${BASE}admin/`;
 }
 
+/** Absolute URL of the "add to calendar" .ics (for the confirmation email). */
+export function calendarUrl(): string {
+  return `${ORIGIN}${BASE}wedding.ics`;
+}
+
 /** True if SITE_URL looks unset/placeholder (still localhost or the example
     origin). Used to warn in /admin that invitation links would be wrong. */
 export function siteOriginLooksUnset(): boolean {

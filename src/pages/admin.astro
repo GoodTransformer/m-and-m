@@ -64,6 +64,10 @@ if (import.meta.env.PROD) {
       'the contact email shown to guests is still a placeholder — set CONTACT_EMAIL (src/data/site.ts)',
     );
 }
+// Addresses where mail did NOT arrive (Resend webhook). A bounce means the guest
+// never got their link — the couple must reach them another way.
+const bounced = households.filter((h) => h.deliveryStatus === 'bounced');
+const complained = households.filter((h) => h.deliveryStatus === 'complained');
 
 // Headcount + replied live in the headline line, so the tiles cover the rest.
 const stats: Array<[number, string]> = [
@@ -230,6 +234,20 @@ const bannerText = !hasList
         contentTodos.length > 0 && (
           <p class="warn">
             ⚠ Before sharing the site, finish: {contentTodos.join('; ')}.
+          </p>
+        )
+      }
+      {
+        (bounced.length > 0 || complained.length > 0) && (
+          <p class="warn">
+            ⚠ Mail didn’t reach{' '}
+            {[
+              bounced.length > 0 && `${bounced.length} ${bounced.length === 1 ? 'guest' : 'guests'} (bounced)`,
+              complained.length > 0 && `${complained.length} (marked as spam)`,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+            {' '}— reach them another way: {[...bounced, ...complained].map((h) => h.label).join(', ')}.
           </p>
         )
       }
@@ -451,7 +469,20 @@ const bannerText = !hasList
                           )}
                           <code class="code">{h.code}</code>
                         </td>
-                        <td>{h.email ?? '—'}</td>
+                        <td>
+                          {h.email ?? '—'}
+                          {h.deliveryStatus === 'bounced' && (
+                            <span class="flag" title={h.deliveryDetail ?? 'Bounced — the address rejected the email.'}>
+                              ✗ bounced
+                            </span>
+                          )}
+                          {h.deliveryStatus === 'complained' && (
+                            <span class="flag" title="Marked as spam by the recipient.">⚠ spam</span>
+                          )}
+                          {h.deliveryStatus === 'delivered' && (
+                            <span class="muted-inline" title="Delivered">{' ✓'}</span>
+                          )}
+                        </td>
                         <td>
                           {h.invitedGuests.length}
                           {h.plusOnes > 0 && (

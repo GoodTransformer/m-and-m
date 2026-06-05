@@ -68,6 +68,11 @@ const heading = household ? t.title : t.noCodeTitle;
             <h2 class="rsvp__success-title">{t.successTitle}</h2>
             <p class="rsvp__success-review">{t.successReview}</p>
             <div class="rsvp__review" data-success-review></div>
+            <p class="rsvp__success-cal" data-success-cal hidden>
+              <a href={`${import.meta.env.BASE_URL}wedding.ics`}>
+                {locale === 'es' ? 'Añadir al calendario' : 'Add to calendar'}
+              </a>
+            </p>
             <p class="rsvp__success-remedy">
               <span class="rsvp__remedy-hint">{t.successChangeHint}</span>
               <button type="button" class="rsvp__change" data-change-answer>{t.successChange}</button>

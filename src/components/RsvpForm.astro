@@ -397,6 +397,7 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
     const successEl = document.querySelector<HTMLElement>('[data-rsvp-success]');
     const leadEl = document.querySelector<HTMLElement>('[data-rsvp-lead]');
     const reviewEl = successEl?.querySelector<HTMLElement>('[data-success-review]');
+    const calEl = successEl?.querySelector<HTMLElement>('[data-success-cal]');
     const esc = (s: unknown) =>
       String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] || c));
     const renderReview = (data: {
@@ -405,6 +406,8 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
       notComing?: string[];
     }) => {
       if (!reviewEl) return;
+      // "Add to calendar" only makes sense for guests who are coming.
+      if (calEl) calEl.hidden = data.attending !== 'yes';
       if (data.attending !== 'yes') {
         reviewEl.innerHTML = `<p class="rsvp__decline">${esc(labels.succDecline)}</p>`;
         return;
