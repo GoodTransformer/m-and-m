@@ -36,6 +36,10 @@ export interface Household {
   invitedAt: string | null;
   remindedAt: string | null;
   inviteError: string | null;
+  // Delivery outcome from the Resend webhook (does mail to this address arrive?).
+  deliveryStatus: 'delivered' | 'bounced' | 'complained' | null;
+  deliveryDetail: string | null; // bounce reason, when known
+  deliveryAt: string | null; // when the last delivery event was recorded
   createdAt: string;
 }
 
@@ -97,6 +101,9 @@ function ensureSchema(): Promise<void> {
             invited_at     TEXT,
             reminded_at    TEXT,
             invite_error   TEXT,
+            delivery_status TEXT,
+            delivery_detail TEXT,
+            delivery_at     TEXT,
             created_at     TEXT    NOT NULL DEFAULT (datetime('now'))
           )`,
           // One household per email (NULLs allowed for paper-only guests).
@@ -122,6 +129,9 @@ function ensureSchema(): Promise<void> {
       await add(`ALTER TABLE households ADD COLUMN invited_guests TEXT NOT NULL DEFAULT '[]'`);
       await add(`ALTER TABLE households ADD COLUMN plus_ones INTEGER NOT NULL DEFAULT 0`);
       await add(`ALTER TABLE rsvps ADD COLUMN roster TEXT NOT NULL DEFAULT '[]'`);
+      await add(`ALTER TABLE households ADD COLUMN delivery_status TEXT`);
+      await add(`ALTER TABLE households ADD COLUMN delivery_detail TEXT`);
+      await add(`ALTER TABLE households ADD COLUMN delivery_at TEXT`);
     })().catch((err) => {
       _schema = null;
       throw err;
@@ -179,6 +189,11 @@ function toHousehold(r: any): Household {
     invitedAt: r.invited_at == null ? null : String(r.invited_at),
     remindedAt: r.reminded_at == null ? null : String(r.reminded_at),
     inviteError: r.invite_error == null ? null : String(r.invite_error),
+    deliveryStatus: ['delivered', 'bounced', 'complained'].includes(String(r.delivery_status))
+      ? (String(r.delivery_status) as 'delivered' | 'bounced' | 'complained')
+      : null,
+    deliveryDetail: r.delivery_detail == null ? null : String(r.delivery_detail),
+    deliveryAt: r.delivery_at == null ? null : String(r.delivery_at),
     createdAt: String(r.created_at ?? ''),
   };
 }
@@ -455,4 +470,22 @@ export async function markReminded(ids: number[]): Promise<void> {
     })),
     'write',
   );
+}
+
+/** Record a delivery outcome from the Resend webhook, matched by recipient email.
+    Returns how many households were updated (0 if the address isn't a guest's —
+    e.g. the couple's own notification/test inbox), so the webhook can ack either
+    way. A 'bounced' means the invitation never reached that guest. */
+export async function recordDelivery(
+  email: string,
+  status: 'delivered' | 'bounced' | 'complained',
+  detail?: string,
+): Promise<number> {
+  await ensureSchema();
+  const res = await db().execute({
+    sql: `UPDATE households SET delivery_status = ?, delivery_detail = ?, delivery_at = datetime('now')
+          WHERE lower(email) = lower(?)`,
+    args: [status, detail ?? null, email],
+  });
+  return Number(res.rowsAffected ?? 0);
 }

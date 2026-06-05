@@ -89,6 +89,11 @@ in the inbox rather than spam — this is plain deliverability, not legal/compli
 - Already handled for you: a real "From" name (Mari & Michael, not `noreply@`), one
   clear link, a **plain-text version** of every email, and UTF-8 so accented names
   (Peña) render correctly.
+- **Know if it arrived:** add a Resend **webhook** → endpoint `/api/resend-webhook/`,
+  subscribe to `email.delivered` / `email.bounced` / `email.complained`, and set
+  `RESEND_WEBHOOK_SECRET`. `/admin` then **flags any bounced invitation** (a guest
+  who never got their link) so you can reach them another way — and a live send is
+  blocked while the sender is still the unverified Resend sandbox.
 
 The **links** are robust by design, too:
 
@@ -159,6 +164,7 @@ npm run dev
 | `RESEND_API_KEY` | Email API key |
 | `RSVP_FROM_EMAIL` | Verified sender, e.g. `Mari & Michael <rsvp@domain>` |
 | `COUPLE_NOTIFY_EMAIL` | Where the couple get a copy of each reply (and test sends) |
+| `RESEND_WEBHOOK_SECRET` | *(optional)* Resend webhook signing secret — lets `/admin` flag bounced invitations |
 | `PUBLIC_TURNSTILE_SITEKEY` | Turnstile site key (the only browser-exposed value) |
 | `TURNSTILE_SECRET_KEY` | Turnstile secret |
 | `ADMIN_USER` / `ADMIN_PASSCODE` | Login for `/admin` |

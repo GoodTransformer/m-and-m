@@ -9,7 +9,7 @@
 // ============================================================
 import { Resend } from 'resend';
 import type { Household, RsvpResponse } from './db';
-import { householdLink, adminUrl } from './links';
+import { householdLink, adminUrl, calendarUrl } from './links';
 import { SITE, RSVP, rosterLines, notComingNames } from '../data/site';
 
 const API_KEY = import.meta.env.RESEND_API_KEY || '';
@@ -240,9 +240,12 @@ export async function sendGuestConfirmation(
       ? `${fmtDate(SITE.date, locale, true)} · ${es ? 'Oxford y Bicester' : 'Oxford & Bicester'}`
       : '';
 
+  const addToCal = es ? 'Añadir al calendario' : 'Add to calendar';
+
   // --- HTML body: the reply, then a clear per-person list, then a change button.
   let inner = `<p>${esc(heading)}</p>`;
-  if (whenWhere) inner += `<p style="margin:0.4rem 0 0;color:#6b5a4f;font-size:0.92rem">${esc(whenWhere)}</p>`;
+  if (whenWhere)
+    inner += `<p style="margin:0.4rem 0 0;color:#6b5a4f;font-size:0.92rem">${esc(whenWhere)} · <a href="${calendarUrl()}" style="color:#5b1215;text-decoration:underline">${esc(addToCal)}</a></p>`;
   inner += `<p>${esc(intro)}</p>`;
   inner += `<p style="margin:0.9rem 0 0.3rem"><strong>${esc(attendingLine(r, locale))}</strong></p>`;
   if (coming.length) {
@@ -264,7 +267,7 @@ export async function sendGuestConfirmation(
 
   // --- plain-text alternative (includes the link as a URL).
   const lines: string[] = whenWhere
-    ? [heading, whenWhere, '', intro, '', attendingLine(r, locale)]
+    ? [heading, whenWhere, `${addToCal}: ${calendarUrl()}`, '', intro, '', attendingLine(r, locale)]
     : [heading, '', intro, '', attendingLine(r, locale)];
   for (const l of coming) lines.push(`  • ${l}`);
   if (notComing.length) lines.push(`${es ? 'No podrán venir' : 'Can’t come'}: ${notComing.join(', ')}`);
