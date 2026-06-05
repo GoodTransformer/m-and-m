@@ -452,8 +452,8 @@ const bannerText = !hasList
                           replyIsStale(h) && 'stale',
                         ]}
                       >
-                        <td>{h.label}</td>
-                        <td>
+                        <td class="cell-name">{h.label}</td>
+                        <td data-label="Link">
                           <button type="button" class="copy" data-copy={householdLink(h.code, h.locale)}>
                             Copy
                           </button>
@@ -469,7 +469,7 @@ const bannerText = !hasList
                           )}
                           <code class="code">{h.code}</code>
                         </td>
-                        <td>
+                        <td data-label="Email">
                           {h.email ?? '—'}
                           {h.deliveryStatus === 'bounced' && (
                             <span class="flag" title={h.deliveryDetail ?? 'Bounced — the address rejected the email.'}>
@@ -483,7 +483,7 @@ const bannerText = !hasList
                             <span class="muted-inline" title="Delivered">{' ✓'}</span>
                           )}
                         </td>
-                        <td>
+                        <td data-label="Seats">
                           {h.invitedGuests.length}
                           {h.plusOnes > 0 && (
                             <span class="muted-inline">
@@ -491,9 +491,9 @@ const bannerText = !hasList
                             </span>
                           )}
                         </td>
-                        <td>{h.locale}</td>
-                        <td>{statusLabel(h.inviteStatus)}</td>
-                        <td>
+                        <td data-label="Lang">{h.locale}</td>
+                        <td data-label="Invite">{statusLabel(h.inviteStatus)}</td>
+                        <td data-label="Reply">
                           {h.response
                             ? h.response.attending === 'yes'
                               ? `Yes · ${h.response.partySize}`
@@ -506,7 +506,7 @@ const bannerText = !hasList
                           )}
                         </td>
                         {MEALS_ENABLED && (
-                          <td>
+                          <td data-label="Meals">
                             {h.response && h.response.attending === 'yes' ? (
                               <>
                                 {rosterLines(h.response.roster, 'en').join(', ') || '—'}
@@ -1030,6 +1030,77 @@ const bannerText = !hasList
         font-variant: small-caps;
         letter-spacing: 0.04em;
         color: var(--text, #24140f);
+      }
+
+      /* ---- Phones: the replies table becomes a stacked list of households ----
+         It's mostly used on desktop; on a narrow screen the 8 columns would
+         side-scroll, so instead each household stacks into labelled fields. */
+      @media (max-width: 47.99rem) {
+        .tablewrap {
+          overflow-x: visible;
+        }
+        table {
+          font-size: 0.95rem;
+        }
+        thead {
+          display: none;
+        }
+        tbody,
+        tr,
+        td {
+          display: block;
+          width: auto;
+        }
+        tr {
+          padding: 0.9rem 0.1rem;
+          border-top: 1px solid var(--rule, #e3d6c0);
+        }
+        tbody tr:first-child {
+          border-top: 0;
+        }
+        td {
+          border-bottom: 0;
+          padding: 0.18rem 0;
+        }
+        /* Household name = the card heading. */
+        td.cell-name {
+          font-family: var(--font-display, Georgia, serif);
+          font-size: 1.2rem;
+          margin-bottom: 0.35rem;
+          color: var(--text, #24140f);
+        }
+        /* Every other field shows its column name above the value. */
+        td[data-label] {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: baseline;
+          gap: 0.05rem 0.5rem;
+        }
+        td[data-label]::before {
+          content: attr(data-label);
+          flex-basis: 100%;
+          font-size: 0.68rem;
+          letter-spacing: 0.09em;
+          text-transform: uppercase;
+          color: var(--text-muted, #6b5a4f);
+        }
+        /* Short fields keep label + value on one line so the card stays compact;
+           wide fields (Link, Email, Meals) keep the value on its own line. */
+        td[data-label='Seats']::before,
+        td[data-label='Lang']::before,
+        td[data-label='Invite']::before,
+        td[data-label='Reply']::before {
+          flex-basis: 5rem;
+        }
+        /* Dietary/message note continues under its household (no divider). */
+        tr.notes-row {
+          border-top: 0;
+          padding-top: 0;
+        }
+        .note {
+          display: block;
+          margin: 0 0 0.2rem;
+        }
       }
 
       /* ---- Guided step-by-step workflow ---- */
