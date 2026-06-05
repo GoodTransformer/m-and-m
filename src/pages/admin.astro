@@ -2,7 +2,8 @@
 export const prerender = false;
 import { listHouseholdsWithResponses, type HouseholdWithResponse } from '../lib/db';
 import { householdLink, siteOriginLooksUnset } from '../lib/links';
-import { MEALS, MEALS_ENABLED, rosterLines, notComingNames, RSVP, isRsvpOpen } from '../data/site';
+import { fromLooksUnset } from '../lib/email';
+import { MEALS, MEALS_ENABLED, rosterLines, notComingNames, RSVP, isRsvpOpen, CONTACT_EMAIL } from '../data/site';
 import '../styles/tokens.css';
 
 const households = await listHouseholdsWithResponses();
@@ -47,6 +48,22 @@ const linkWarning = import.meta.env.PROD && siteOriginLooksUnset();
 // Warn (in production) if email sending isn't configured — guests would get no
 // confirmation and invitations/reminders can't go out.
 const emailWarning = import.meta.env.PROD && !import.meta.env.RESEND_API_KEY;
+// Once the key IS set, the next (and biggest) deliverability mistake is sending
+// from Resend's shared sandbox instead of a verified domain — that lands in spam.
+// A live send refuses while this is true; surface it here so it's fixed first.
+const fromWarning =
+  import.meta.env.PROD && Boolean(import.meta.env.RESEND_API_KEY) && fromLooksUnset();
+// Content that's still placeholder on the LIVE site (guests would see it). A
+// gentle pre-launch checklist, shown only in production.
+const contentTodos: string[] = [];
+if (import.meta.env.PROD) {
+  if (MEALS_ENABLED && MEALS.some((m) => /set dish name|poner nombre/i.test(`${m.en} ${m.es}`)))
+    contentTodos.push('the meal names are still placeholders — set them in MEALS (src/data/site.ts)');
+  if (/TBC|example\./i.test(CONTACT_EMAIL))
+    contentTodos.push(
+      'the contact email shown to guests is still a placeholder — set CONTACT_EMAIL (src/data/site.ts)',
+    );
+}
 
 // Headcount + replied live in the headline line, so the tiles cover the rest.
 const stats: Array<[number, string]> = [
@@ -196,6 +213,23 @@ const bannerText = !hasList
           <p class="warn">
             ⚠ RESEND_API_KEY looks unset — confirmation emails and invitations/reminders will NOT be
             sent. Add it in Vercel and redeploy before sending anything.
+          </p>
+        )
+      }
+      {
+        fromWarning && (
+          <p class="warn">
+            ⚠ RSVP_FROM_EMAIL is still the Resend sandbox (onboarding@resend.dev) — real invitations
+            would land in spam. Verify your sending domain in Resend, set RSVP_FROM_EMAIL to it, and
+            redeploy. (A “Test to us” still works so you can see this; a live send is blocked until
+            it’s fixed.)
+          </p>
+        )
+      }
+      {
+        contentTodos.length > 0 && (
+          <p class="warn">
+            ⚠ Before sharing the site, finish: {contentTodos.join('; ')}.
           </p>
         )
       }
@@ -405,6 +439,16 @@ const bannerText = !hasList
                           <button type="button" class="copy" data-copy={householdLink(h.code, h.locale)}>
                             Copy
                           </button>
+                          {h.response && (h.email || h.response.email) && (
+                            <button
+                              type="button"
+                              class="copy"
+                              data-resend={h.code}
+                              title="Re-send this household’s confirmation email"
+                            >
+                              Resend
+                            </button>
+                          )}
                           <code class="code">{h.code}</code>
                         </td>
                         <td>{h.email ?? '—'}</td>
@@ -609,6 +653,28 @@ const bannerText = !hasList
             `Sent ${data.sent}, failed ${data.failed}, ${data.remaining} remaining.` +
             (data.failed ? ' Check failures below and retry.' : '');
           setTimeout(() => location.reload(), 1800);
+        });
+      });
+
+      // Resend a single confirmation email (replies table)
+      document.querySelectorAll<HTMLButtonElement>('[data-resend]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Re-send the confirmation email to this household?')) return;
+          const orig = btn.textContent;
+          btn.disabled = true;
+          btn.textContent = 'Sending…';
+          const { ok, data } = await postJSON('resend/', { code: btn.dataset.resend });
+          if (ok && !data.error) {
+            btn.textContent = 'Sent ✓';
+            setTimeout(() => {
+              btn.textContent = orig;
+              btn.disabled = false;
+            }, 2500);
+          } else {
+            alert('Error: ' + (data.error || 'failed'));
+            btn.textContent = orig;
+            btn.disabled = false;
+          }
         });
       });
 
