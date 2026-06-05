@@ -18,6 +18,15 @@ const COUPLE = import.meta.env.COUPLE_NOTIFY_EMAIL || '';
 
 const resend = API_KEY ? new Resend(API_KEY) : null;
 
+/** True if RSVP_FROM_EMAIL is unset or still Resend's shared sandbox
+    (`onboarding@resend.dev`). Real mail must go from a *verified* domain, or it
+    lands in spam (or is blocked) — so /admin warns and a live send refuses while
+    this is the case. The biggest single deliverability factor. */
+export function fromLooksUnset(): boolean {
+  const raw = import.meta.env.RSVP_FROM_EMAIL || '';
+  return !raw.trim() || /resend\.dev/i.test(raw);
+}
+
 export interface EmailPayload {
   from: string;
   to: string;
@@ -206,6 +215,10 @@ export async function sendGuestConfirmation(
   locale: 'en' | 'es',
   toEmail: string,
   code: string,
+  // Override the dedupe key to force a genuine re-send (the /admin "Resend"
+  // button passes a unique key). Default keys off the reply's updatedAt, so the
+  // automatic on-submit send is naturally idempotent.
+  idempotencyKey?: string,
 ): Promise<void> {
   if (!toEmail) return;
   const es = locale === 'es';
@@ -220,9 +233,17 @@ export async function sendGuestConfirmation(
   const coming = rosterLines(r.roster, locale);
   const notComing = notComingNames(r.roster);
   const changeLabel = es ? 'Cambiar mi respuesta' : 'Change my reply';
+  // The when/where, shown only to those coming (a decline shouldn't be met with
+  // "here's where it is"). A handy reminder for the guest to keep.
+  const whenWhere =
+    r.attending === 'yes'
+      ? `${fmtDate(SITE.date, locale, true)} · ${es ? 'Oxford y Bicester' : 'Oxford & Bicester'}`
+      : '';
 
   // --- HTML body: the reply, then a clear per-person list, then a change button.
-  let inner = `<p>${esc(heading)}</p><p>${esc(intro)}</p>`;
+  let inner = `<p>${esc(heading)}</p>`;
+  if (whenWhere) inner += `<p style="margin:0.4rem 0 0;color:#6b5a4f;font-size:0.92rem">${esc(whenWhere)}</p>`;
+  inner += `<p>${esc(intro)}</p>`;
   inner += `<p style="margin:0.9rem 0 0.3rem"><strong>${esc(attendingLine(r, locale))}</strong></p>`;
   if (coming.length) {
     inner +=
@@ -242,7 +263,9 @@ export async function sendGuestConfirmation(
   inner += button(link, changeLabel);
 
   // --- plain-text alternative (includes the link as a URL).
-  const lines: string[] = [heading, '', intro, '', attendingLine(r, locale)];
+  const lines: string[] = whenWhere
+    ? [heading, whenWhere, '', intro, '', attendingLine(r, locale)]
+    : [heading, '', intro, '', attendingLine(r, locale)];
   for (const l of coming) lines.push(`  • ${l}`);
   if (notComing.length) lines.push(`${es ? 'No podrán venir' : 'Can’t come'}: ${notComing.join(', ')}`);
   if (r.dietary.trim()) lines.push(`${es ? 'Dietas / alergias' : 'Dietary / allergies'}: ${r.dietary}`);
@@ -263,7 +286,7 @@ export async function sendGuestConfirmation(
       html: shell(inner),
       text,
     },
-    { idempotencyKey: `confirm:${toEmail}:${r.updatedAt}` },
+    { idempotencyKey: idempotencyKey ?? `confirm:${toEmail}:${r.updatedAt}` },
   );
 }
 

@@ -14,7 +14,7 @@ import {
   markReminded,
   type Household,
 } from '../../lib/db';
-import { buildInvite, buildReminder, sendBatch, type EmailPayload } from '../../lib/email';
+import { buildInvite, buildReminder, sendBatch, fromLooksUnset, type EmailPayload } from '../../lib/email';
 import { siteOriginLooksUnset } from '../../lib/links';
 
 const DEFAULT_LIMIT = 90; // headroom under Resend's free 100/day cap
@@ -90,6 +90,17 @@ export const POST: APIRoute = async ({ request }) => {
       return json({ error: 'Email isn’t configured yet (RESEND_API_KEY) — no mail was sent.' }, 503);
     if (siteOriginLooksUnset())
       return json({ error: 'SITE_URL isn’t set — personal links would be broken. Set it and redeploy.' }, 503);
+    // A real (live) blast must come from a *verified* domain, not the Resend
+    // sandbox — otherwise every invitation lands in spam. A `test` is allowed
+    // through so the couple can see where the sandbox sender actually lands.
+    if (mode === 'live' && fromLooksUnset())
+      return json(
+        {
+          error:
+            'Verify a sending domain in Resend and set RSVP_FROM_EMAIL before a real send — the sandbox sender (onboarding@resend.dev) lands in spam.',
+        },
+        503,
+      );
   }
 
   const recipients = type === 'invite' ? await householdsPendingInvite() : await invitedNonResponders();
