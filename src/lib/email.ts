@@ -9,7 +9,7 @@
 // ============================================================
 import { Resend } from 'resend';
 import type { Household, RsvpResponse } from './db';
-import { householdLink, adminUrl, calendarUrl } from './links';
+import { householdLink, adminUrl, calendarUrl, assetUrl } from './links';
 import { SITE, RSVP, rosterLines, notComingNames } from '../data/site';
 
 const API_KEY = import.meta.env.RESEND_API_KEY || '';
@@ -47,6 +47,24 @@ function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// The site's ornate Fraunces swash ampersand. Mail clients can't load the font,
+// so the couple's "Mari & Michael" lockups use an image of the *real* glyph
+// (bronze, transparent — generated from the font at opsz 144, the same display
+// optical size the site pins). Sized to its context from the surrounding
+// font-size; alt="&" degrades to a plain ampersand if a client blocks images.
+const AMP_SRC = assetUrl('amp.png');
+function ampImg(fs: number): string {
+  const h = Math.round(fs * 0.92);
+  const w = Math.round(h * 0.767); // glyph aspect (w/h) from the font outline
+  const dy = -Math.round(fs * 0.18); // drop so the swash descender sits below the baseline
+  const m = Math.max(2, Math.round(fs * 0.15));
+  return `<img src="${AMP_SRC}" alt="&amp;" width="${w}" height="${h}" style="width:${w}px;height:${h}px;vertical-align:${dy}px;margin:0 ${m}px;border:0;outline:none" />`;
+}
+/** Replace the couple-lockup ampersand in a plain string with the swash glyph. */
+function withSwash(s: string, fs: number): string {
+  return esc(s).replace('&amp;', ampImg(fs));
+}
+
 function fmtDate(iso: string, locale: 'en' | 'es', withWeekday = false): string {
   const opts: Intl.DateTimeFormatOptions = {
     day: 'numeric',
@@ -60,7 +78,7 @@ function fmtDate(iso: string, locale: 'en' | 'es', withWeekday = false): string 
 }
 
 function shell(inner: string): string {
-  return `<div style="font-family:Georgia,'Times New Roman',serif;color:#24140f;max-width:34rem;line-height:1.55">${inner}<p style="margin-top:1.75rem">— Mari &amp; Michael</p></div>`;
+  return `<div style="font-family:Georgia,'Times New Roman',serif;color:#24140f;max-width:34rem;line-height:1.55">${inner}<p style="margin-top:1.75rem">— Mari${ampImg(16)}Michael</p></div>`;
 }
 
 function button(href: string, label: string): string {
@@ -99,7 +117,7 @@ function invitationHtml(o: {
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f2e8d8;margin:0"><tr><td align="center" style="padding:48px 24px">
   <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;max-width:480px"><tr><td style="font-family:Georgia,'Times New Roman',serif;color:#24140f;text-align:center">
     <div style="font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:#6c4f36">${esc(o.eyebrow)}</div>
-    <div style="margin:18px 0 12px;font-size:40px;line-height:1.05;color:#2b1b14">Mari <span style="color:#6c4f36;font-style:italic">&amp;</span> Michael</div>
+    <div style="margin:18px 0 12px;font-size:40px;line-height:1.15;color:#2b1b14">Mari${ampImg(40)}Michael</div>
     <div style="font-size:17px;font-style:italic;color:#24140f">${esc(o.date)}</div>
     <div style="margin:9px 0 0;font-size:11px;letter-spacing:0.13em;text-transform:uppercase;color:#6c4f36;line-height:1.5">Magdalen College, Oxford &middot; Weston Manor, Bicester</div>
     <div style="margin:34px 0 0;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#6c4f36">${esc(o.forLabel)}</div>
@@ -107,7 +125,7 @@ function invitationHtml(o: {
     <p style="margin:20px auto 28px;max-width:30em;font-size:15px;line-height:1.6;color:#24140f">${esc(o.intro)}</p>
     <a href="${o.link}" style="display:inline-block;background:#5b1215;color:#f2e8d8;text-decoration:none;padding:13px 34px;border-radius:3px;font-size:14px;letter-spacing:0.06em">${esc(o.cta)}</a>
     <p style="margin:28px auto 0;max-width:30em;font-size:12px;line-height:1.55;color:#6c4f36">${esc(o.note)}</p>
-    <p style="margin:24px 0 0;font-size:13px;font-style:italic;color:#6c4f36">${esc(o.signoff)}</p>
+    <p style="margin:24px 0 0;font-size:13px;font-style:italic;color:#6c4f36">${withSwash(o.signoff, 13)}</p>
   </td></tr></table>
 </td></tr></table>`;
 }
