@@ -6,6 +6,9 @@ know exactly who hasn't replied. The couple can also **send the invitations and
 reminders automatically**, with strong safety rails. It runs **free** on every
 service below.
 
+> Outstanding tasks across the project are tracked in
+> [`LAUNCH-CHECKLIST.md`](LAUNCH-CHECKLIST.md).
+
 ## The reply process
 
 1. You import your guest list (once) in `/admin`. Each household gets a personal

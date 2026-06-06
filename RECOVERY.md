@@ -3,6 +3,8 @@
 What to do if the site goes down or the database is damaged. **The code is
 replaceable; the RSVP replies are not.** This is the runbook.
 
+> Part of the launch/ops checklist — see [`LAUNCH-CHECKLIST.md`](LAUNCH-CHECKLIST.md).
+
 ## Where everything lives
 
 | Thing | Location | If lost |

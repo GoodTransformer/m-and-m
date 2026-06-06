@@ -8,7 +8,8 @@ translated from the Wedding Brand Identity Guide. See
 
 > The text and images on the site are tasteful **placeholders**. See
 > [Details to confirm](#details-to-confirm) for everything to replace before it
-> goes out widely.
+> goes out widely. For **all** outstanding work — content, deploy, backups — see
+> [`LAUNCH-CHECKLIST.md`](LAUNCH-CHECKLIST.md).
 
 ## Quick start
 
@@ -54,7 +55,8 @@ no markup change needed.
 
 ## Details to confirm
 
-Placeholders currently in the site — replace before sharing widely:
+Placeholders currently in the site — replace before sharing widely. *(Source of
+truth for content; rolled up in [`LAUNCH-CHECKLIST.md`](LAUNCH-CHECKLIST.md).)*
 
 - [x] **Wedding date** — Wednesday, 23 September 2026 (confirmed; midweek, so no "weekend" copy)
 - [ ] **RSVP deadline** (currently 26 August 2026 placeholder) — `data/site.ts` (`RSVP.deadline`)
