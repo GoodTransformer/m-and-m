@@ -25,6 +25,31 @@ function icsStamp(d: Date): string {
 function esc(s: string): string {
   return s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
 }
+/** Fold a content line to ≤75 octets (RFC 5545): continuation lines start with a
+    space. Folds on octet boundaries without splitting a multi-byte character, so
+    long values (e.g. DESCRIPTION) don't trip strict parsers like some Outlook builds. */
+function fold(line: string): string {
+  const enc = new TextEncoder();
+  if (enc.encode(line).length <= 75) return line;
+  const chunks: string[] = [];
+  let cur = '';
+  let bytes = 0;
+  let limit = 75; // first line: 75 octets; continuations: 74 (the leading space is 1)
+  for (const ch of line) {
+    const b = enc.encode(ch).length;
+    if (bytes + b > limit) {
+      chunks.push(cur);
+      cur = ch;
+      bytes = b;
+      limit = 74;
+    } else {
+      cur += ch;
+      bytes += b;
+    }
+  }
+  if (cur) chunks.push(cur);
+  return chunks.join('\r\n ');
+}
 
 export const GET: APIRoute = () => {
   const start = new Date(`${SITE.date}T${ARRIVE_LOCAL}:00${BST_OFFSET}`);
@@ -36,9 +61,11 @@ export const GET: APIRoute = () => {
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
-    // Stable UID + DTSTAMP so re-adding updates the same event (no duplicates).
+    // Stable UID so re-importing updates the same event instead of duplicating it;
+    // bump SEQUENCE if the event details below ever change.
     `UID:mari-and-michael-wedding-${SITE.date}@m-and-m`,
     'DTSTAMP:20260101T000000Z',
+    'SEQUENCE:0',
     `DTSTART:${icsStamp(start)}`,
     `DTEND:${icsStamp(end)}`,
     `SUMMARY:${esc(SUMMARY)}`,
@@ -46,7 +73,9 @@ export const GET: APIRoute = () => {
     `DESCRIPTION:${esc(DESCRIPTION)}`,
     'END:VEVENT',
     'END:VCALENDAR',
-  ].join('\r\n');
+  ]
+    .map(fold)
+    .join('\r\n');
 
   return new Response(ics + '\r\n', {
     headers: {

@@ -19,18 +19,6 @@ export function formatDateLong(iso: string, locale: Locale): string {
   }).format(d);
 }
 
-/** "12.09.2026" — compact, for mastheads/footers. */
-export function formatDateNumeric(iso: string, locale: Locale): string {
-  const d = new Date(`${iso}T12:00:00`);
-  return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })
-    .format(d)
-    .replace(/\//g, '.');
-}
-
 /** Capitalise the first letter (Spanish weekday/month come lowercased from Intl). */
 export function capitalise(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);

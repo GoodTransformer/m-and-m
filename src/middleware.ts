@@ -9,7 +9,7 @@ import { ADMIN_COOKIE, adminPasscode, safeEqual, sameOrigin, sessionToken } from
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const path = context.url.pathname;
-  if (!/\/admin(\/|$)/i.test(path)) return next();
+  if (!/^\/admin(\/|$)/i.test(path)) return next();
 
   if (!adminPasscode()) {
     return new Response('Admin is disabled until ADMIN_PASSCODE is set.', { status: 503 });
