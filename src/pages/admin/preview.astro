@@ -1,0 +1,98 @@
+---
+// Gated preview of the exact invitation + reminder emails guests receive
+// (renders buildInvite/buildReminder output). Behind the admin middleware.
+export const prerender = false;
+import { buildInvite, buildReminder } from '../../lib/email';
+import type { Household } from '../../lib/db';
+import { adminUrl } from '../../lib/links';
+
+const sample = (over: Partial<Household> = {}): Household => ({
+  id: 0,
+  code: 'SAMPLE00',
+  label: 'The Whitfields',
+  invitedNames: 'Eleanor & James Whitfield',
+  invitedGuests: ['Eleanor Whitfield', 'James Whitfield'],
+  plusOnes: 0,
+  email: 'sample@example.com',
+  maxSeats: 2,
+  locale: 'en',
+  inviteStatus: 'pending',
+  invitedAt: null,
+  remindedAt: null,
+  inviteError: null,
+  deliveryStatus: null,
+  deliveryDetail: null,
+  deliveryAt: null,
+  createdAt: '',
+  ...over,
+});
+
+const es = sample({
+  locale: 'es',
+  label: 'Familia Peña',
+  invitedNames: 'Mariana & Diego Peña',
+  invitedGuests: ['Mariana Peña', 'Diego Peña'],
+  plusOnes: 1,
+});
+
+const blocks = [
+  { title: 'Invitation · English', payload: buildInvite(sample()) },
+  { title: 'Invitation · Español (with a +1)', payload: buildInvite(es) },
+  { title: 'Reminder · English', payload: buildReminder(sample({ label: 'Margaret Hollis', invitedNames: 'Margaret Hollis', invitedGuests: ['Margaret Hollis'] })) },
+  { title: 'Reminder · Español', payload: buildReminder(es) },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Email preview · Mari &amp; Michael</title>
+    <style>
+      body { margin: 0; background: #d8d4cc; }
+      .bar {
+        font-family: -apple-system, system-ui, sans-serif;
+        background: #fff;
+        border-bottom: 1px solid #cfc8bb;
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+      .bar a { color: #5b1215; }
+      .wrap { max-width: 680px; margin: 0 auto; padding: 8px 12px 64px; }
+      .meta {
+        font-family: -apple-system, system-ui, sans-serif;
+        font-size: 12px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #6b5a4f;
+        margin: 30px 0 4px;
+      }
+      .subject {
+        font-family: -apple-system, system-ui, sans-serif;
+        font-size: 14px;
+        color: #222;
+        margin: 0 0 10px;
+        font-weight: 600;
+      }
+      .frame { box-shadow: 0 1px 8px rgba(0, 0, 0, 0.16); }
+    </style>
+  </head>
+  <body>
+    <div class="bar">
+      Email preview — exactly what guests receive. <a href={adminUrl()}>← Back to admin</a>
+    </div>
+    <div class="wrap">
+      {
+        blocks.map((b) => (
+          <section>
+            <p class="meta">{b.title}</p>
+            <p class="subject">{b.payload?.subject}</p>
+            <div class="frame" set:html={b.payload?.html} />
+          </section>
+        ))
+      }
+    </div>
+  </body>
+</html>
