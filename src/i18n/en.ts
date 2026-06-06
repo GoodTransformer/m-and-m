@@ -47,6 +47,7 @@ export const en: Strings = {
     travel: 'Travel & Stay',
     questions: 'Questions',
     today: 'Essentials',
+    story: 'Our Story',
     rsvp: 'RSVP',
   },
 

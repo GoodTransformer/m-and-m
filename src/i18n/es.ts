@@ -48,6 +48,7 @@ export const es: Strings = {
     travel: 'Cómo llegar',
     questions: 'Preguntas',
     today: 'Esencial',
+    story: 'Nuestra historia',
     rsvp: 'Confirmar',
   },
 

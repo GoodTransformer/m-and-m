@@ -124,6 +124,7 @@ export interface Strings {
     travel: string;
     questions: string;
     today: string;
+    story: string;
     rsvp: string;
   };
 
