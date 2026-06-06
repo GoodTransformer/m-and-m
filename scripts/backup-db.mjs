@@ -29,6 +29,18 @@ try {
 const url = process.env.TURSO_DATABASE_URL || 'file:local.db';
 const authToken = process.env.TURSO_AUTH_TOKEN || undefined;
 
+// In CI we must back up the real (remote) production database. If the Turso
+// secret is missing, `url` silently falls back to file:local.db (which isn't in
+// the checkout) and we'd dump an empty, useless "backup" while the run stays
+// green — the worst possible failure for disaster recovery. Fail loudly instead.
+if (process.env.GITHUB_ACTIONS === 'true' && url.startsWith('file:')) {
+  console.error(
+    'Refusing to run in CI without a remote TURSO_DATABASE_URL — the secret is ' +
+      'missing or not a libsql:// URL. No backup written.',
+  );
+  process.exit(1);
+}
+
 // Serialize one SQLite value to a SQL literal. Strings are single-quoted with
 // embedded quotes doubled; newlines and semicolons inside them are fine — the
 // whole script is parsed by SQLite on restore, never split on ';'.
@@ -99,6 +111,11 @@ try {
   console.log(`✓ Backup written: ${file}`);
   console.log(`  Tables: ${tables.map((t) => `${t}=${counts[t] ?? 0}`).join(', ') || '(none)'}`);
   console.log(`  Size:   ${(Buffer.byteLength(sql) / 1024).toFixed(1)} KiB`);
+
+  const totalRows = Object.values(counts).reduce((a, b) => a + b, 0);
+  if (totalRows === 0) {
+    console.warn('  ⚠ Warning: 0 data rows backed up — is this the intended database?');
+  }
 
   // Hand the path to the GitHub Action (for the encrypt + upload steps).
   if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT, `file=${file}\n`);
