@@ -31,6 +31,14 @@ page shows runtime warnings (placeholder meal names, unset contact email).
       `TURNSTILE_SECRET_KEY`, `ADMIN_PASSCODE`.
 - [ ] **Guest list imported** — prod Turso starts empty; import the CSV via
       `/admin` once the DB is live.
+- [ ] **No test data in production** — dev `local.db` holds 5 fictional
+      `@example.com` households (Whitfield, Okonkwo, Herrera, Ramírez, Hollis —
+      the sample CSV from [RSVP-SETUP.md](RSVP-SETUP.md)). They're dev-only
+      (gitignored) and prod starts empty, so they won't appear live — but when
+      importing the real list, confirm prod has **zero** `@example.com` rows and
+      never import the sample CSV into prod. Wiping `local.db` is optional
+      (keeping it is handy for testing backups + `/admin`); the reliable marker
+      for any test row is the `@example.com` email domain.
 
 ## 2 · Activate backups (disaster recovery)
 
