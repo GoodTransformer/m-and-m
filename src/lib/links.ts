@@ -21,6 +21,13 @@ export function calendarUrl(): string {
   return `${ORIGIN}${BASE}wedding.ics`;
 }
 
+/** Absolute URL of a file in /public, e.g. https://site/amp.png. Emails must
+    reference images by absolute URL (a relative src won't resolve in a mail
+    client). In local dev (SITE_URL=http://localhost:4321) it resolves too. */
+export function assetUrl(file: string): string {
+  return `${ORIGIN}${BASE}${file.replace(/^\/+/, '')}`;
+}
+
 /** True if SITE_URL looks unset/placeholder (still localhost or the example
     origin). Used to warn in /admin that invitation links would be wrong. */
 export function siteOriginLooksUnset(): boolean {
