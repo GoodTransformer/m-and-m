@@ -801,6 +801,22 @@ const bannerText = !hasList
           }
         });
       });
+
+      // Name the caterer download with the date + time it was saved, in the
+      // couple's OWN local time, so a folder of exports reads as a timeline
+      // (e.g. "Replies 2026-08-26 14-30.csv"). The `download` attribute takes
+      // precedence over the server's Content-Disposition for these same-origin
+      // links; recomputed on every click so the stamp is the moment of download.
+      // Colon-free "HH-MM" keeps it valid on every filesystem.
+      const exportName = () => {
+        const d = new Date();
+        const p = (n: number) => String(n).padStart(2, '0');
+        return `Replies ${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}-${p(d.getMinutes())}.csv`;
+      };
+      document.querySelectorAll<HTMLAnchorElement>('a[href="export.csv"]').forEach((a) => {
+        a.setAttribute('download', exportName()); // sensible name for right-click "Save link as"
+        a.addEventListener('click', () => a.setAttribute('download', exportName()));
+      });
     </script>
 
     <style>
