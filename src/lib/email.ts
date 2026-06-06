@@ -93,19 +93,22 @@ function invitationHtml(o: {
   note: string;
   signoff: string;
 }): string {
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f2e8d8;margin:0;padding:24px 12px"><tr><td align="center">
-  <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;max-width:520px;background:#fbf6ec;border:1px solid #e3d6c0;border-radius:4px"><tr><td style="padding:38px 40px;font-family:Georgia,'Times New Roman',serif;color:#24140f;text-align:center">
-    <div style="font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:#6b5a4f">${esc(o.eyebrow)}</div>
-    <div style="margin:14px 0 8px;font-size:30px;line-height:1.15;color:#5b1215">Mari &amp; Michael</div>
-    <div style="font-size:14px;color:#6b5a4f">${esc(o.date)} &middot; ${esc(o.venue)}</div>
-    <hr style="border:none;border-top:1px solid #e3d6c0;margin:24px 0" />
-    <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#6b5a4f">${esc(o.forLabel)}</div>
-    <div style="margin:7px 0 0;font-size:19px;color:#24140f">${esc(o.names)}</div>
-    <p style="margin:22px 0 26px;font-size:15px;line-height:1.55">${esc(o.intro)}</p>
-    <a href="${o.link}" style="display:inline-block;background:#5b1215;color:#f2e8d8;text-decoration:none;padding:12px 32px;border-radius:4px;font-size:14px;letter-spacing:0.06em">${esc(o.cta)}</a>
-    <p style="margin:26px 0 0;font-size:12px;line-height:1.5;color:#6b5a4f">${esc(o.note)}</p>
+  // Echoes the site's above-the-fold hero: centred type on the candle-ivory
+  // ground, no card. (Email clients won't load Fraunces, so the web-safe serif
+  // stands in — the composition + palette carry the consistency.)
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f2e8d8;margin:0"><tr><td align="center" style="padding:48px 24px">
+  <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;max-width:480px"><tr><td style="font-family:Georgia,'Times New Roman',serif;color:#24140f;text-align:center">
+    <div style="font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:#6c4f36">${esc(o.eyebrow)}</div>
+    <div style="margin:18px 0 12px;font-size:40px;line-height:1.05;color:#2b1b14">Mari <span style="color:#6c4f36;font-style:italic">&amp;</span> Michael</div>
+    <div style="font-size:17px;font-style:italic;color:#24140f">${esc(o.date)}</div>
+    <div style="margin:9px 0 0;font-size:11px;letter-spacing:0.13em;text-transform:uppercase;color:#6c4f36;line-height:1.5">Magdalen College, Oxford &middot; Weston Manor, Bicester</div>
+    <div style="margin:34px 0 0;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#6c4f36">${esc(o.forLabel)}</div>
+    <div style="margin:8px 0 0;font-size:20px;color:#24140f">${esc(o.names)}</div>
+    <p style="margin:20px auto 28px;max-width:30em;font-size:15px;line-height:1.6;color:#24140f">${esc(o.intro)}</p>
+    <a href="${o.link}" style="display:inline-block;background:#5b1215;color:#f2e8d8;text-decoration:none;padding:13px 34px;border-radius:3px;font-size:14px;letter-spacing:0.06em">${esc(o.cta)}</a>
+    <p style="margin:28px auto 0;max-width:30em;font-size:12px;line-height:1.55;color:#6c4f36">${esc(o.note)}</p>
+    <p style="margin:24px 0 0;font-size:13px;font-style:italic;color:#6c4f36">${esc(o.signoff)}</p>
   </td></tr></table>
-  <div style="margin:16px 0 0;font-family:Georgia,serif;font-size:12px;color:#6b5a4f">${esc(o.signoff)}</div>
 </td></tr></table>`;
 }
 
