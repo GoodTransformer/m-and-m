@@ -8,6 +8,10 @@ local.db
 local.db-*
 *.sqlite
 
+# database backups — plaintext guest PII; NEVER commit (this repo is public)
+backups/
+_restore_test.db
+
 # dependencies
 node_modules/
 

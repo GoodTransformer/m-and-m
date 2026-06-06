@@ -1,0 +1,65 @@
+name: RSVP backup
+
+# Independent, encrypted, off-Turso backup of the guest list + replies.
+# Turso's free tier keeps only ~24h of point-in-time history; this keeps 90 days
+# of daily snapshots as encrypted workflow artifacts. Full runbook: RECOVERY.md.
+
+on:
+  schedule:
+    - cron: '17 7 * * *' # daily at 07:17 UTC (kept off the top of the hour)
+  workflow_dispatch: {} # plus a manual "Run workflow" button
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rsvp-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22 # matches package.json "engines"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Dump the database
+        id: dump
+        env:
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: node scripts/backup-db.mjs
+
+      # This repo is PUBLIC, so the plaintext dump (guest emails, messages,
+      # dietary notes) must NEVER be uploaded as-is. Encrypt with a passphrase
+      # held only in repo secrets; the artifact is useless without it.
+      - name: Encrypt
+        id: encrypt
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BACKUP_PASSPHRASE:-}" ]; then
+            echo "::error::BACKUP_PASSPHRASE secret is not set — refusing to upload plaintext PII."
+            exit 1
+          fi
+          in='${{ steps.dump.outputs.file }}'
+          out="${in}.enc"
+          openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt \
+            -in "$in" -out "$out" -pass env:BACKUP_PASSPHRASE
+          rm -f "$in"
+          echo "file=$out" >> "$GITHUB_OUTPUT"
+
+      - name: Upload encrypted backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: rsvp-backup-${{ github.run_id }}
+          path: ${{ steps.encrypt.outputs.file }}
+          retention-days: 90 # free-tier max; far beyond Turso's ~24h window
+          if-no-files-found: error
