@@ -40,7 +40,10 @@ export function rsvpErrorsFrom(
   if (message === 'closed')
     return { errors: {}, summary: t.closedBody.replace('{email}', CONTACT_EMAIL) };
   if (message === 'choose') return { errors: {}, summary: t.errorChoose };
-  return { errors: {}, summary: t.errorSummary };
+  // Honeypot/time-trap ('spam'), failed Turnstile ('captcha'), or a server fault:
+  // no field to highlight, so show the generic "didn't go through" notice (the
+  // same one the JavaScript path uses) rather than "check the highlighted fields".
+  return { errors: {}, summary: t.submitError };
 }
 
 export interface SubmittedValues {

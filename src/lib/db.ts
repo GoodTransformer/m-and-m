@@ -6,16 +6,31 @@
 // per-person roster. Every query is parameterised, so input can't be
 // interpolated into SQL.
 // ============================================================
-import { createClient, type Client } from '@libsql/client';
+import type { Client } from '@libsql/client';
 import { generateCode } from './code';
 
-const url = import.meta.env.TURSO_DATABASE_URL || 'file:local.db';
+// Local dev defaults to a SQLite file. Production (Vercel) has no writable local
+// filesystem, so it must be given a remote Turso URL — never silently fall back
+// to a file: path there (opening it throws and crashes the whole function).
+const url =
+  import.meta.env.TURSO_DATABASE_URL || (import.meta.env.PROD ? '' : 'file:local.db');
 const authToken = import.meta.env.TURSO_AUTH_TOKEN || undefined;
 
-let _client: Client | null = null;
-function db(): Client {
-  if (!_client) _client = createClient({ url, authToken });
-  return _client;
+// Choose the driver by URL scheme. The default '@libsql/client' entry EAGERLY
+// loads a platform-specific *native* binding (the `libsql` package) the moment
+// it's imported — which a bundled serverless function on Vercel can't ship, so
+// importing it there crashes the function on boot. Only the local file: DB needs
+// it. Remote URLs use the pure-JS web client ('@libsql/client/web', hrana over
+// HTTP), which bundles cleanly. The import is DYNAMIC so the native module is
+// never even loaded in production. Cache the promise so init happens once.
+let _clientP: Promise<Client> | null = null;
+function getClient(): Promise<Client> {
+  if (!_clientP) {
+    _clientP = (
+      url.startsWith('file:') ? import('@libsql/client') : import('@libsql/client/web')
+    ).then((m) => m.createClient({ url, authToken }));
+  }
+  return _clientP;
 }
 
 export type Attending = 'yes' | 'no';
@@ -85,7 +100,7 @@ let _schema: Promise<void> | null = null;
 function ensureSchema(): Promise<void> {
   if (!_schema) {
     _schema = (async () => {
-      await db().batch(
+      await (await getClient()).batch(
         [
           `CREATE TABLE IF NOT EXISTS households (
             id             INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -125,7 +140,7 @@ function ensureSchema(): Promise<void> {
       );
       // Additive migrations for databases created before a column existed
       // (no-op if the column is already there).
-      const add = (sql: string) => db().execute(sql).catch(() => undefined);
+      const add = async (sql: string) => (await getClient()).execute(sql).catch(() => undefined);
       await add(`ALTER TABLE households ADD COLUMN invited_guests TEXT NOT NULL DEFAULT '[]'`);
       await add(`ALTER TABLE households ADD COLUMN plus_ones INTEGER NOT NULL DEFAULT 0`);
       await add(`ALTER TABLE rsvps ADD COLUMN roster TEXT NOT NULL DEFAULT '[]'`);
@@ -217,7 +232,7 @@ export async function generateUniqueCode(): Promise<string> {
   await ensureSchema();
   for (let attempt = 0; attempt < 8; attempt++) {
     const code = generateCode();
-    const { rows } = await db().execute({
+    const { rows } = await (await getClient()).execute({
       sql: 'SELECT 1 FROM households WHERE code = ? LIMIT 1',
       args: [code],
     });
@@ -228,7 +243,7 @@ export async function generateUniqueCode(): Promise<string> {
 
 export async function getHouseholdByCode(code: string): Promise<Household | null> {
   await ensureSchema();
-  const { rows } = await db().execute({
+  const { rows } = await (await getClient()).execute({
     sql: 'SELECT * FROM households WHERE code = ? LIMIT 1',
     args: [code],
   });
@@ -237,7 +252,7 @@ export async function getHouseholdByCode(code: string): Promise<Household | null
 
 export async function getHouseholdByEmail(email: string): Promise<Household | null> {
   await ensureSchema();
-  const { rows } = await db().execute({
+  const { rows } = await (await getClient()).execute({
     sql: 'SELECT * FROM households WHERE lower(email) = lower(?) LIMIT 1',
     args: [email],
   });
@@ -248,7 +263,7 @@ export async function getHouseholdByEmail(email: string): Promise<Household | nu
 export async function insertHousehold(h: NewHousehold): Promise<string> {
   await ensureSchema();
   const code = await generateUniqueCode();
-  await db().execute({
+  await (await getClient()).execute({
     sql: `INSERT INTO households (code, label, invited_names, invited_guests, plus_ones, email, max_seats, locale)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
@@ -268,7 +283,7 @@ export async function insertHousehold(h: NewHousehold): Promise<string> {
 /** Update an existing household's details on re-import (code/status untouched). */
 export async function updateHouseholdDetails(id: number, h: NewHousehold): Promise<void> {
   await ensureSchema();
-  await db().execute({
+  await (await getClient()).execute({
     sql: `UPDATE households
           SET label = ?, invited_names = ?, invited_guests = ?, plus_ones = ?, email = ?, max_seats = ?, locale = ?
           WHERE id = ?`,
@@ -345,12 +360,12 @@ export async function importHouseholds(
           },
     ),
   ];
-  await db().batch(stmts, 'write');
+  await (await getClient()).batch(stmts, 'write');
 }
 
 export async function listHouseholdsWithResponses(): Promise<HouseholdWithResponse[]> {
   await ensureSchema();
-  const { rows } = await db().execute(
+  const { rows } = await (await getClient()).execute(
     `SELECT h.*,
             r.attending, r.party_size, r.roster, r.email AS r_email,
             r.dietary, r.message, r.updated_at AS r_updated
@@ -374,7 +389,7 @@ export async function upsertRsvpForHousehold(
   },
 ): Promise<void> {
   await ensureSchema();
-  await db().execute({
+  await (await getClient()).execute({
     sql: `INSERT INTO rsvps (household_id, attending, party_size, roster, email, dietary, message)
           VALUES (?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(household_id) DO UPDATE SET
@@ -399,7 +414,7 @@ export async function upsertRsvpForHousehold(
 
 export async function getResponseForHousehold(householdId: number): Promise<RsvpResponse | null> {
   await ensureSchema();
-  const { rows } = await db().execute({
+  const { rows } = await (await getClient()).execute({
     sql: `SELECT attending, party_size, roster, email AS r_email,
                  dietary, message, updated_at AS r_updated
           FROM rsvps WHERE household_id = ? LIMIT 1`,
@@ -415,7 +430,7 @@ export async function getResponseForHousehold(householdId: number): Promise<Rsvp
     has already RSVP'd we must NOT send them a fresh invitation. */
 export async function householdsPendingInvite(): Promise<Household[]> {
   await ensureSchema();
-  const { rows } = await db().execute(
+  const { rows } = await (await getClient()).execute(
     `SELECT h.* FROM households h
      LEFT JOIN rsvps r ON r.household_id = h.id
      WHERE h.invite_status != 'sent' AND h.email IS NOT NULL AND trim(h.email) != ''
@@ -431,7 +446,7 @@ export async function householdsPendingInvite(): Promise<Household[]> {
     if some guests reply between sends. A deliberate later wave still works. */
 export async function invitedNonResponders(): Promise<Household[]> {
   await ensureSchema();
-  const { rows } = await db().execute(
+  const { rows } = await (await getClient()).execute(
     `SELECT h.* FROM households h
      LEFT JOIN rsvps r ON r.household_id = h.id
      WHERE h.invite_status = 'sent' AND r.id IS NULL
@@ -447,7 +462,7 @@ export async function markInvited(
 ): Promise<void> {
   if (!results.length) return;
   await ensureSchema();
-  await db().batch(
+  await (await getClient()).batch(
     results.map((r) => ({
       sql: `UPDATE households
             SET invite_status = ?,
@@ -463,7 +478,7 @@ export async function markInvited(
 export async function markReminded(ids: number[]): Promise<void> {
   if (!ids.length) return;
   await ensureSchema();
-  await db().batch(
+  await (await getClient()).batch(
     ids.map((id) => ({
       sql: `UPDATE households SET reminded_at = datetime('now') WHERE id = ?`,
       args: [id],
@@ -482,7 +497,7 @@ export async function recordDelivery(
   detail?: string,
 ): Promise<number> {
   await ensureSchema();
-  const res = await db().execute({
+  const res = await (await getClient()).execute({
     sql: `UPDATE households SET delivery_status = ?, delivery_detail = ?, delivery_at = datetime('now')
           WHERE lower(email) = lower(?)`,
     args: [status, detail ?? null, email],

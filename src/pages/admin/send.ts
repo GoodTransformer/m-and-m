@@ -65,6 +65,9 @@ function sampleHousehold(email: string): Household {
     invitedAt: null,
     remindedAt: null,
     inviteError: null,
+    deliveryStatus: null,
+    deliveryDetail: null,
+    deliveryAt: null,
     createdAt: '',
   };
 }

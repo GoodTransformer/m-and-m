@@ -5,7 +5,7 @@ import vercel from '@astrojs/vercel';
 // Base path is environment-driven so local dev runs at "/" while a sub-path
 // deploy can build under "/<repo>/". On Vercel the base is "/".
 const base = process.env.BASE_PATH ?? '/';
-const site = process.env.SITE_URL ?? 'https://example.github.io';
+const site = process.env.SITE_URL ?? 'https://m-and-m-amber.vercel.app';
 
 // https://astro.build/config
 export default defineConfig({

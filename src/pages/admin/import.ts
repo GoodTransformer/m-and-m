@@ -85,7 +85,24 @@ export const POST: APIRoute = async ({ request }) => {
     }
   }
 
-  await importHouseholds(inserts, updates);
+  try {
+    await importHouseholds(inserts, updates);
+  } catch (err) {
+    // The households table has a UNIQUE index on lower(email). A row that reuses
+    // an address already held by a *different* household trips it, and because the
+    // write is one atomic batch the whole import rolls back. Surface that clearly
+    // instead of a blank 500.
+    const msg = String((err as { message?: string })?.message || err);
+    const duplicate = /unique|constraint/i.test(msg);
+    return json(
+      {
+        error: duplicate
+          ? 'Import failed: an email address is used by more than one household. Give each household its own email (or leave it blank) and try again — nothing was changed.'
+          : 'Import failed while saving — nothing was changed. Please try again.',
+      },
+      duplicate ? 409 : 500,
+    );
+  }
   const skipped = parsed.rows
     .filter((r) => !r.valid)
     .map((r) => ({ line: r.line, label: r.label, issue: r.issue }));
