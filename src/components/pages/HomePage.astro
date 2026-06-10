@@ -6,7 +6,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Hero from '../Hero.astro';
 import Chapter from '../Chapter.astro';
 import QuickActions from '../QuickActions.astro';
-import Card from '../Card.astro';
 import Button from '../Button.astro';
 import Rule from '../Rule.astro';
 import Frame from '../Frame.astro';
@@ -52,6 +51,9 @@ const venueRoles: Record<string, string> = {
       <div class="welcome__text reveal">
         <h2 class="welcome__title">{t.home.welcome.title}</h2>
         {t.home.welcome.body.map((p) => <p class="welcome__p">{p}</p>)}
+        <Button href={localePath('/our-story', locale)} variant="quiet" class="welcome__cta">
+          {t.home.welcome.cta}
+        </Button>
       </div>
       <div class="welcome__media reveal">
         <Frame src={magdalenWide} alt="Magdalen College, Oxford" width={1120} ratio="3/2" />
@@ -84,12 +86,12 @@ const venueRoles: Record<string, string> = {
     <div class="venue-cards">
       {
         VENUES.map((v) => (
-          <Card href={localePath('/venues', locale)} class="venue-card reveal">
+          <a href={localePath('/venues', locale)} class="venue-card reveal">
             <p class="chapter-label">{venueRoles[v.role]}</p>
             <p class="venue-card__name">{v.name}</p>
             <p class="venue-card__place muted">{v.postcode}</p>
             <span class="venue-card__arrow" aria-hidden="true"><Arrow dir="right" /></span>
-          </Card>
+          </a>
         ))
       }
     </div>
@@ -162,6 +164,12 @@ const venueRoles: Record<string, string> = {
   .welcome__p {
     max-width: 46ch;
   }
+  /* The quiet link anchors the short text column against the taller photograph
+     (and mirrors how the Travel split signs off). :global because the class
+     lands on Button's root, which carries Button's scope attribute, not ours. */
+  .welcome__text :global(.welcome__cta) {
+    margin-top: 1.75rem;
+  }
   .welcome__media {
     max-width: none;
     margin-inline: auto;
@@ -204,8 +212,25 @@ const venueRoles: Record<string, string> = {
     display: grid;
     gap: clamp(0.85rem, 2vw, 1.25rem);
   }
+  /* Mobile/tablet: a tappable filled panel (the same language as the quick-action
+     tiles). Desktop trades the box for hairline rules below. */
   .venue-card {
     position: relative;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: var(--bg-card);
+    border: 1px solid var(--bg-card-edge);
+    border-radius: var(--radius-lg);
+    padding: clamp(1.25rem, 4vw, 2rem);
+    box-shadow: var(--shadow-rest);
+    transition:
+      border-color 0.3s var(--ease-soft),
+      box-shadow 0.4s var(--ease-soft);
+  }
+  .venue-card:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
   }
   .venue-card__name {
     font-family: var(--font-display);
@@ -239,19 +264,31 @@ const venueRoles: Record<string, string> = {
     }
   }
   @media (min-width: 48rem) {
-    /* Give the venue name more presence so the wide card doesn't read as mostly
-       empty — the name carries the card. */
+    /* Desktop: the boxes give way to a two-column programme listing — a hairline
+       rule above each entry, the name carrying the line — speaking the same
+       engraved-index language as the quick-action row. */
+    .venue-cards {
+      column-gap: clamp(2rem, 4vw, 3rem);
+    }
+    .venue-card {
+      background: transparent;
+      border: 0;
+      border-top: 1px solid var(--rule);
+      border-radius: 0;
+      box-shadow: none;
+      padding: 1.6rem 0 0.25rem;
+      transition: border-color 0.3s var(--ease-soft);
+    }
+    .venue-card:hover {
+      border-top-color: color-mix(in srgb, var(--oxidised-bronze) 55%, transparent);
+    }
     .venue-card__name {
       font-size: clamp(2rem, 3.2vw, 2.4rem);
     }
-    .venue-card {
-      min-height: 9.5rem;
-    }
-    /* With more height, anchor the arrow to the lower corner so the card reads
-       top-to-bottom rather than top-heavy. */
+    /* Arrow sits on the role-label line, right-aligned — a contents entry. */
     .venue-card__arrow {
-      top: auto;
-      bottom: clamp(1.5rem, 3vw, 2rem);
+      top: 1.7rem;
+      right: 0;
     }
   }
 

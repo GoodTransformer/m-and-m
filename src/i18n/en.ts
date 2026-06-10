@@ -126,6 +126,7 @@ export const en: Strings = {
         'We are gathering the people we love in Oxford for the afternoon, then north to Weston Manor for an evening of candlelight, dinner and dancing.',
         'Everything you need is here: when to arrive, where to go, and how to find us. Read it at your leisure; the day will keep.',
       ],
+      cta: 'Our story',
     },
     weekend: {
       label: 'The Day',

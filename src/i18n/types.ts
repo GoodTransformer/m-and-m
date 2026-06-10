@@ -131,7 +131,7 @@ export interface Strings {
 
   // Homepage chapter previews. The four `intro` strings are length-matched.
   home: {
-    welcome: { label: string; title: string; body: string[] };
+    welcome: { label: string; title: string; body: string[]; cta: string };
     weekend: { label: string; title: string; intro: string; cta: string };
     venues: { label: string; title: string; intro: string; cta: string };
     travel: { label: string; title: string; intro: string; cta: string };

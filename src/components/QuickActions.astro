@@ -106,38 +106,65 @@ const { items, ariaLabel, class: cls = '' } = Astro.props;
   }
 
   /* Desktop: an engraved index, not a button grid. The filled tiles give way to
-     an open row framed by hairlines — top and bottom rules, thin dividers
-     between — so the wayfinding reads like a printed contents page. (Mobile
-     keeps the tappable filled tiles.) */
+     rows framed by hairlines, each entry a single line — label left, arrow
+     right — like a line in a printed contents page. Two ruled rows of three
+     from tablet up; one row of six once every label fits unwrapped. (Mobile
+     keeps the tappable tiles; the row maths assume the homepage's six items.) */
   @media (min-width: 48rem) {
     .quick__list {
-      grid-template-columns: repeat(var(--quick-cols, 5), 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 0;
       border-block: 1px solid var(--rule);
     }
     .quick__item + .quick__item {
       border-left: 1px solid var(--rule);
     }
+    .quick__item:nth-child(3n + 1) {
+      border-left: 0;
+    }
+    .quick__item:nth-child(-n + 3) {
+      border-bottom: 1px solid var(--rule);
+    }
     .quick__link {
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 1.6rem;
-      min-height: 8rem;
-      padding: 1.85rem 1.5rem;
+      gap: 1rem;
+      min-height: 0;
+      padding: 1.2rem 1.35rem;
       background: transparent;
       border: 0;
       border-radius: 0;
       box-shadow: none;
-    }
-    .quick__arrow {
-      align-self: flex-start;
     }
     /* Quiet hover: a breath of parchment fills the cell — no lift, no shadow. */
     .quick__link:hover {
       background: color-mix(in srgb, var(--old-parchment) 28%, transparent);
       box-shadow: none;
       transform: none;
+    }
+  }
+  @media (min-width: 73rem) {
+    .quick__list {
+      /* minmax(max-content, 1fr): every entry is guaranteed its single line
+         (Spanish runs longer — "Nuestra historia"), then spare width is shared
+         out, so the columns sit near-equal like a contents page. */
+      grid-template-columns: repeat(var(--quick-cols, 6), minmax(max-content, 1fr));
+    }
+    .quick__item:nth-child(3n + 1) {
+      border-left: 1px solid var(--rule);
+    }
+    .quick__item:first-child {
+      border-left: 0;
+    }
+    .quick__item:nth-child(-n + 3) {
+      border-bottom: 0;
+    }
+    /* Six labels share one line: trim the cell padding and the type a touch so
+       the longest entry ("Travel & Stay") holds a single line at 73rem. */
+    .quick__link {
+      gap: 0.6rem;
+      padding-inline: 0.9rem;
+    }
+    .quick__label {
+      font-size: 1.05rem;
     }
   }
 </style>
