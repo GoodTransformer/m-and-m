@@ -8,6 +8,7 @@
 // they can check it. With no RESEND_API_KEY (dev) sends are logged, not made.
 // ============================================================
 import { Resend } from 'resend';
+import { useLiveServices } from './services';
 import type { Household, RsvpResponse } from './db';
 import { householdLink, adminUrl, calendarUrl, assetUrl } from './links';
 import { SITE, RSVP, rosterLines, notComingNames } from '../data/site';
@@ -16,7 +17,10 @@ const API_KEY = import.meta.env.RESEND_API_KEY || '';
 const FROM = import.meta.env.RSVP_FROM_EMAIL || 'Mari & Michael <onboarding@resend.dev>';
 const COUPLE = import.meta.env.COUPLE_NOTIFY_EMAIL || '';
 
-const resend = API_KEY ? new Resend(API_KEY) : null;
+// No client outside live mode: the dev .env legitimately carries the real key
+// (for ops scripts), and a local test reply must never email real guests or
+// the couple. Every send path checks `resend` and logs instead when null.
+const resend = useLiveServices && API_KEY ? new Resend(API_KEY) : null;
 
 /** True if RSVP_FROM_EMAIL is unset or still Resend's shared sandbox
     (`onboarding@resend.dev`). Real mail must go from a *verified* domain, or it
@@ -200,7 +204,7 @@ export function buildReminder(h: Household): EmailPayload | null {
 export async function sendBatch(payloads: EmailPayload[], idempotencyKey: string): Promise<BatchResult> {
   if (!payloads.length) return { ok: true, sent: 0, failures: new Map() };
   if (!resend) {
-    payloads.forEach((p) => console.log(`[email skipped — no RESEND_API_KEY] → ${p.to}: ${p.subject}`));
+    payloads.forEach((p) => console.log(`[email skipped — dev, or no RESEND_API_KEY] → ${p.to}: ${p.subject}`));
     return { ok: true, sent: payloads.length, failures: new Map() };
   }
   try {

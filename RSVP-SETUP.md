@@ -122,6 +122,13 @@ and `/admin` (+ its endpoints) render on demand.
 email **off** (sends are logged to the console), Turnstile **off** (honeypot +
 time-trap still run), and a dev admin passcode.
 
+These defaults hold **even after you provision production**: once `.env` also
+carries the live `TURSO_DATABASE_URL` / `RESEND_API_KEY` (which `npm run backup`
+needs), `npm run dev` still ignores them — it stays on `local.db` with email and
+captcha off, so a local test reply can never write to the live guest list or
+email anyone. To point a dev server at the real services deliberately, set
+`DEV_USE_LIVE_SERVICES=true` (see `src/lib/services.ts`).
+
 ```bash
 npm run dev
 # Admin:  http://localhost:4321/admin/   (login: mari / dev-passcode-change-me)

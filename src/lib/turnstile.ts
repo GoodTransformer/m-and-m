@@ -2,9 +2,12 @@
 // Cloudflare Turnstile server-side verification. SERVER-ONLY.
 // If no secret is configured (local dev, or not yet provisioned) verification
 // is skipped — the honeypot + time-trap still guard the form. In production,
-// set TURNSTILE_SECRET_KEY and it is enforced.
+// set TURNSTILE_SECRET_KEY and it is enforced. Dev ignores any secret in .env
+// unless DEV_USE_LIVE_SERVICES=true (see lib/services.ts).
 // ============================================================
-const SECRET = import.meta.env.TURNSTILE_SECRET_KEY || '';
+import { useLiveServices } from './services';
+
+const SECRET = useLiveServices ? import.meta.env.TURNSTILE_SECRET_KEY || '' : '';
 const VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
 export interface TurnstileResult {
