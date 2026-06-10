@@ -93,6 +93,8 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
   data-succ-notcoming={t.successNotComing}
   data-succ-nomeal={t.successNoMeal}
   data-succ-decline={t.successDecline}
+  data-succ-body={t.successBody}
+  data-succ-body-decline={t.successBodyDecline}
 >
   <div class="rsvp__summary" role="alert" data-error-summary hidden={!summary}>{summary}</div>
 
@@ -275,6 +277,8 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
       succNotComing: d.succNotcoming || '',
       succNoMeal: d.succNomeal || '',
       succDecline: d.succDecline || '',
+      succBody: d.succBody || '',
+      succBodyDecline: d.succBodyDecline || '',
       fields: {
         email: d.errEmail || '',
         attending: d.errAttending || '',
@@ -398,6 +402,7 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
     const leadEl = document.querySelector<HTMLElement>('[data-rsvp-lead]');
     const reviewEl = successEl?.querySelector<HTMLElement>('[data-success-review]');
     const calEl = successEl?.querySelector<HTMLElement>('[data-success-cal]');
+    const bodyEl = successEl?.querySelector<HTMLElement>('[data-success-body]');
     const esc = (s: unknown) =>
       String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] || c));
     const renderReview = (data: {
@@ -406,8 +411,10 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
       notComing?: string[];
     }) => {
       if (!reviewEl) return;
-      // "Add to calendar" only makes sense for guests who are coming.
+      // "Add to calendar" only makes sense for guests who are coming, and the
+      // closing line mustn't promise to celebrate with a household that declined.
       if (calEl) calEl.hidden = data.attending !== 'yes';
+      if (bodyEl) bodyEl.textContent = data.attending === 'yes' ? labels.succBody : labels.succBodyDecline;
       if (data.attending !== 'yes') {
         reviewEl.innerHTML = `<p class="rsvp__decline">${esc(labels.succDecline)}</p>`;
         return;
@@ -474,6 +481,9 @@ const plusSlots = Array.from({ length: Math.max(plusOnes, 0) }, (_, j) => j);
       const { data, error } = result;
 
       if (!error && data?.ok) {
+        // Recover the button before hiding the form: "Change my answer" re-shows
+        // it, and a still-disabled "Sending…" would leave the guest stuck.
+        setBusy(false);
         renderReview(
           data as {
             attending?: string;

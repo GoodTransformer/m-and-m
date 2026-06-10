@@ -56,6 +56,7 @@ export interface RsvpStrings {
 
   successTitle: string;
   successBody: string;
+  successBodyDecline: string; // closing line when the household declined — no "can't wait to celebrate"
   successReview: string; // "Here's what you sent — check it over:" intro
   successNotComing: string; // label before the not-coming names
   successNoMeal: string; // shown next to a coming guest with no meal chosen

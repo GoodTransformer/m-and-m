@@ -59,7 +59,7 @@ export const en: Strings = {
     deadlineNote: 'Kindly send your reply by {date}.',
 
     emailLabel: 'Email',
-    emailHint: 'So we can send your confirmation.',
+    emailHint: 'So we can reach you about your reply.',
     attendingLegend: 'Will you be able to join us?',
     attendingYes: 'Joyfully, yes',
     attendingNo: 'Sadly, no',
@@ -87,7 +87,8 @@ export const en: Strings = {
 
     successTitle: 'Thank you — your reply is in.',
     successBody:
-      'A confirmation is on its way to your inbox. We can’t wait to celebrate with you.',
+      'A confirmation is on its way by email. We can’t wait to celebrate with you.',
+    successBodyDecline: 'A confirmation is on its way by email. Thank you for letting us know.',
     successReview: 'Here’s what you sent us — please check it over:',
     successNotComing: 'Can’t come:',
     successNoMeal: 'no meal chosen yet',
@@ -106,7 +107,7 @@ export const en: Strings = {
 
     thanksTitle: 'Thank you — your reply is in.',
     thanksBody:
-      'We’ve received it, and a confirmation is on its way to your inbox. We can’t wait to celebrate with you.',
+      'We’ve received it, and a confirmation is on its way by email. Thank you for letting us know.',
     thanksBackHome: 'Back to the invitation',
 
     editNote: 'You’ve already replied — update your answer below and resend.',

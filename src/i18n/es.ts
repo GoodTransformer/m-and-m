@@ -60,7 +60,7 @@ export const es: Strings = {
     deadlineNote: 'Por favor, envíen su respuesta antes del {date}.',
 
     emailLabel: 'Correo electrónico',
-    emailHint: 'Para enviarles la confirmación.',
+    emailHint: 'Para poder escribirles sobre su respuesta.',
     attendingLegend: '¿Podrán acompañarnos?',
     attendingYes: 'Sí, con alegría',
     attendingNo: 'No podremos, lo sentimos',
@@ -89,6 +89,7 @@ export const es: Strings = {
     successTitle: 'Gracias — su respuesta quedó registrada.',
     successBody:
       'Les enviamos una confirmación por correo. Tenemos muchas ganas de celebrar con ustedes.',
+    successBodyDecline: 'Les enviamos una confirmación por correo. Gracias por avisarnos.',
     successReview: 'Esto es lo que nos enviaron — por favor, revísenlo:',
     successNotComing: 'No podrán venir:',
     successNoMeal: 'sin plato elegido',
@@ -107,7 +108,7 @@ export const es: Strings = {
 
     thanksTitle: 'Gracias — su respuesta quedó registrada.',
     thanksBody:
-      'La recibimos, y les enviamos una confirmación por correo. Tenemos muchas ganas de celebrar con ustedes.',
+      'La recibimos, y les enviamos una confirmación por correo. Gracias por avisarnos.',
     thanksBackHome: 'Volver a la invitación',
 
     editNote: 'Ya respondieron — actualicen su respuesta abajo y vuelvan a enviarla.',
