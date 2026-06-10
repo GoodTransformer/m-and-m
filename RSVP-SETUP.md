@@ -38,6 +38,11 @@ service below.
 - **Send reminders** — same guarded flow, automatically targeting only the invited
   households that haven't replied.
 
+The login itself resists guessing: passcodes are compared in constant time, and
+after 10 wrong attempts from one IP the endpoint answers `429 Too Many Requests`
+for 15 minutes (in-memory, per serverless instance — see
+`src/lib/admin-throttle.ts`).
+
 ### The guest-list CSV
 
 A header row plus one row per household. Only `household` is required.
