@@ -37,7 +37,9 @@ export const en: Strings = {
     eyebrow: 'An invitation',
     invitation: 'Please join us in Oxford and Bicester for a candlelit September wedding.',
     venueLine: 'Magdalen College, Oxford · Weston Manor, Bicester',
-    scrollHint: 'The day',
+    // The hero's scroll cue lands on the wayfinding band (#find), so it names
+    // the act of continuing, not a section it doesn't go to.
+    scrollHint: 'Read on',
   },
 
   quick: {

@@ -93,12 +93,19 @@ export const POST: APIRoute = async ({ request }) => {
     // write is one atomic batch the whole import rolls back. Surface that clearly
     // instead of a blank 500.
     const msg = String((err as { message?: string })?.message || err);
-    const duplicate = /unique|constraint/i.test(msg);
+    // Two UNIQUE constraints can trip: idx_households_email (lower(email)) and
+    // households.code. Only blame emails when it actually was the email index —
+    // a (rare) code collision from a concurrent import needs a retry, not an
+    // email hunt.
+    const duplicateEmail = /idx_households_email|households\.email/i.test(msg);
+    const duplicate = duplicateEmail || /unique|constraint/i.test(msg);
     return json(
       {
-        error: duplicate
+        error: duplicateEmail
           ? 'Import failed: an email address is used by more than one household. Give each household its own email (or leave it blank) and try again — nothing was changed.'
-          : 'Import failed while saving — nothing was changed. Please try again.',
+          : duplicate
+            ? 'Import failed: a household code collided with an existing one — nothing was changed. Try the import again.'
+            : 'Import failed while saving — nothing was changed. Please try again.',
       },
       duplicate ? 409 : 500,
     );

@@ -38,7 +38,7 @@ export const es: Strings = {
     invitation:
       'Acompáñennos en Oxford y Bicester para una boda de septiembre a la luz de las velas.',
     venueLine: 'Magdalen College, Oxford · Weston Manor, Bicester',
-    scrollHint: 'El día',
+    scrollHint: 'Sigan leyendo',
   },
 
   quick: {

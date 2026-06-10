@@ -1,7 +1,7 @@
 ---
 import { type Locale } from '../lib/i18n';
 import { getStrings } from '../i18n';
-import { footerNav } from '../lib/nav';
+import { footerNav, isCurrent } from '../lib/nav';
 import { SITE } from '../data/site';
 import { formatDateLong, capitalise } from '../lib/format';
 import LanguageToggle from './LanguageToggle.astro';
@@ -31,7 +31,7 @@ const dateLine = capitalise(formatDateLong(SITE.date, locale));
         {
           nav.map((item) => (
             <li>
-              <a href={item.href} aria-current={path === item.path ? 'page' : undefined}>
+              <a href={item.href} aria-current={isCurrent(path, item.path) ? 'page' : undefined}>
                 <Amp text={item.label} />
               </a>
             </li>

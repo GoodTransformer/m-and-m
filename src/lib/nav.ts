@@ -7,6 +7,13 @@ export interface NavItem {
   label: string;
 }
 
+/** Mark a nav item current for its own page and any sub-page (e.g. /rsvp/CODE
+    keeps "RSVP" active). Home matches only itself, so it isn't always on.
+    Shared by the masthead and footer so the two never disagree. */
+export function isCurrent(path: string, itemPath: string): boolean {
+  return itemPath === '/' ? path === '/' : path === itemPath || path.startsWith(`${itemPath}/`);
+}
+
 /** Primary navigation (masthead) — compact labels, kept to one elegant line.
     Questions intentionally omitted; it lives in the footer. RSVP sits last, as
     the culminating call to action. */

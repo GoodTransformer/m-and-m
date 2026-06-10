@@ -1,7 +1,7 @@
 ---
 import { localePath, type Locale } from '../lib/i18n';
 import { getStrings } from '../i18n';
-import { mainNav } from '../lib/nav';
+import { mainNav, isCurrent } from '../lib/nav';
 import LanguageToggle from './LanguageToggle.astro';
 import Amp from './Amp.astro';
 
@@ -13,11 +13,6 @@ const { locale, path } = Astro.props;
 const t = getStrings(locale);
 const nav = mainNav(locale);
 const homeHref = localePath('/', locale);
-
-// Mark a nav item current for its own page and any sub-page (e.g. /rsvp/CODE
-// keeps "RSVP" active). Home matches only itself, so it isn't always on.
-const isCurrent = (p: string) =>
-  p === '/' ? path === '/' : path === p || path.startsWith(`${p}/`);
 ---
 
 <header class="masthead">
@@ -35,7 +30,7 @@ const isCurrent = (p: string) =>
                 <a
                   class="site-nav__link"
                   href={item.href}
-                  aria-current={isCurrent(item.path) ? 'page' : undefined}
+                  aria-current={isCurrent(path, item.path) ? 'page' : undefined}
                 >
                   <Amp text={item.label} />
                 </a>
