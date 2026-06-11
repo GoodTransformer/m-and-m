@@ -42,7 +42,9 @@ const other = otherLocale(locale);
   }
   .lang__item {
     text-decoration: none;
-    color: color-mix(in srgb, var(--text) 52%, var(--bg));
+    /* 66% keeps the idle language quieter than the active one while clearing
+       WCAG AA contrast (~5.3:1 on the ivory ground) — 52% sat at ~3.4:1. */
+    color: color-mix(in srgb, var(--text) 66%, var(--bg));
     padding: 0.25em 0;
     transition: color 0.25s var(--ease-soft);
   }
