@@ -1,9 +1,10 @@
 name: Deploy to GitHub Pages
 
-# The app now needs server rendering (Astro + Vercel adapter); a static GitHub
-# Pages build would publish a BROKEN copy (no /admin, no RSVP action). The
-# automatic push trigger is disabled — run manually only if you need the old
-# static export. Remove this workflow once the Vercel cutover is complete.
+# The site moved to Vercel (https://m-and-m-amber.vercel.app). This workflow
+# publishes one final Pages artifact: a stub that redirects every old
+# goodtransformer.github.io/m-and-m/ URL to the same path on the live site
+# (404.html catches all paths on Pages). Run it manually once, verify the
+# redirect, then delete this file — the deployed stub keeps serving without it.
 on:
   workflow_dispatch:
 
@@ -18,27 +19,40 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Build with Astro
-        uses: withastro/action@v3
-        env:
-          # Project pages serve under /<repo>/ — make the base path match the repo
-          # name, and point `site` at the github.io origin. Both are read by
-          # astro.config.mjs.
-          BASE_PATH: /${{ github.event.repository.name }}/
-          SITE_URL: https://${{ github.repository_owner }}.github.io
-
   deploy:
-    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Generate redirect stub
+        run: |
+          mkdir -p dist
+          cat > dist/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <title>Mari &amp; Michael — the site has moved</title>
+          <meta name="robots" content="noindex">
+          <script>
+          // Preserve the path: /m-and-m/venues/ -> m-and-m-amber.vercel.app/venues/
+          var path = location.pathname.replace(/^\/m-and-m\/?/, "/");
+          location.replace("https://m-and-m-amber.vercel.app" + path + location.search + location.hash);
+          </script>
+          <meta http-equiv="refresh" content="0; url=https://m-and-m-amber.vercel.app/">
+          </head>
+          <body>
+          <p>This site has moved to
+          <a href="https://m-and-m-amber.vercel.app/">m-and-m-amber.vercel.app</a>.</p>
+          </body>
+          </html>
+          HTML
+          cp dist/index.html dist/404.html
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
