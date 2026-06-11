@@ -1,0 +1,61 @@
+# Every push and PR runs the full gate: types, unit + integration tests, a
+# production build with the internal-link check, a production-dependency
+# audit, a secret scan (this repo is public — guest data must never land in
+# it), and the Playwright end-to-end suite against a scratch database.
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  unit:
+    name: Types, unit tests, build, links, audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+      - run: npm run check:links
+      # At `critical` until the known Astro/Vercel-adapter advisories are
+      # resolved by the Astro 6 upgrade (tracked in LAUNCH-CHECKLIST.md) —
+      # restore `--audit-level=high` with that upgrade.
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=critical
+
+  e2e:
+    name: End-to-end (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  secrets:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

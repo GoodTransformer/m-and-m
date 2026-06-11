@@ -17,11 +17,17 @@ translated from the Wedding Brand Identity Guide. See
 npm install
 npm run dev      # http://localhost:4321  (everything, incl. RSVP, runs here)
 npm run build    # content prerendered; the RSVP routes bundle for Vercel
+
+npm test             # unit + integration tests (vitest; includes a scratch-DB tier)
+npm run test:e2e     # Playwright end-to-end + axe accessibility (own server + scratch DB)
+npm run check:links  # after a build: every internal link/anchor in dist resolves
 ```
 
 Requires Node 18+ locally; Vercel runs the deployed site on Node 22. RSVP has
 safe local defaults (a `local.db` file, email off, captcha off) — see
-[`RSVP-SETUP.md`](RSVP-SETUP.md).
+[`RSVP-SETUP.md`](RSVP-SETUP.md). CI (`.github/workflows/tests.yml`) runs all
+of the above plus `astro check`, a production-dependency audit, and a gitleaks
+secret scan on every push.
 
 ## How it's organised
 
