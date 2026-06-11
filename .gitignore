@@ -12,6 +12,13 @@ local.db-*
 backups/
 _restore_test.db
 
+# test scratch space (integration + e2e databases)
+tests/.tmp/
+e2e.db
+e2e.db-*
+test-results/
+playwright-report/
+
 # dependencies
 node_modules/
 
