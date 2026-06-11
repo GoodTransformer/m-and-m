@@ -98,8 +98,8 @@ Regenerate the social-share card after changing the date/photos:
 ## Privacy
 
 The site ships with `noindex, nofollow` so it stays out of search results. On
-GitHub Pages that meta tag is the control (Pages can't send the stronger
-`X-Robots-Tag` header — that's added on Vercel later).
+Vercel you can optionally add the stronger `X-Robots-Tag` response header on
+top (see Deployment below).
 
 ## Deployment
 
@@ -118,10 +118,12 @@ GitHub Pages can't run — so Vercel is now the home of the site.
 
 Internal links are base-aware, so nothing in the site itself needs changing.
 
-### Note on the old GitHub Pages workflow
+### Note on the old GitHub Pages URL
 
-`.github/workflows/deploy.yml` predates RSVP and deploys a **static** build to the
-GoodTransformer Pages account. It can no longer serve the whole site (no server →
-no RSVP), and the Vercel adapter changes the build output it expects. **Disable it
-on cutover** (delete the file, or Settings → Pages → Source: None) so it doesn't
-publish a broken copy on push to `main`.
+The site used to live at `goodtransformer.github.io/m-and-m/`. Since the Vercel
+cutover that URL serves a small **redirect stub** (`index.html` + `404.html`)
+that forwards every old path to the matching page on the Vercel site, so stale
+links keep working. The stub was published by a one-off run of the former
+`deploy.yml` workflow (deleted afterwards — the deployed artifact keeps serving
+without it). To retire the URL entirely, disable Pages in the repo settings
+(Settings → Pages → Source: None); the redirect then stops resolving.

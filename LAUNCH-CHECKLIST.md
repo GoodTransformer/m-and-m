@@ -13,6 +13,16 @@ page shows runtime warnings (placeholder meal names, unset contact email).
 
 ## 1 · Before go-live (blocks sharing the site widely)
 
+- [x] **Old GitHub Pages URL redirects to Vercel** — the stale May-30 static
+      snapshot at `goodtransformer.github.io/m-and-m/` is gone; every old path
+      now forwards to the matching page on the live site (done 2026-06-11; see
+      [README → Deployment](README.md#deployment)).
+- [ ] **Upgrade Astro past the open security advisories** — `npm audit` flags
+      the deployed stack: GHSA-mr6q-rp88-fx84 (high — unauthenticated path
+      override via `x-astro-path` in the Vercel adapter) plus two moderates;
+      fixes land in Astro 6 / `@astrojs/vercel` 10 (a major upgrade). The new
+      unit + e2e suites exist to make that upgrade safe. Afterwards, restore
+      `--audit-level=high` in `.github/workflows/tests.yml`.
 - [ ] **Content placeholders resolved** — 1/13 done. Tracked in
       [README → Details to confirm](README.md#details-to-confirm) (RSVP deadline,
       ceremony/reception times, running order, dress code, what3words, on-the-day
