@@ -13,12 +13,18 @@ import { useLiveServices } from './services';
 // Local dev defaults to a SQLite file — even when .env carries the production
 // TURSO_DATABASE_URL (it lives there for `npm run backup`). A dev server must
 // never read or write the live guest list by accident; opt in explicitly with
-// DEV_USE_LIVE_SERVICES=true. Production (Vercel) has no writable local
-// filesystem, so it must be given a remote Turso URL — never silently fall back
-// to a file: path there (opening it throws and crashes the whole function).
+// DEV_USE_LIVE_SERVICES=true. A `file:` URL is honoured even without the flag —
+// it's local by construction (the e2e suite points the dev server at its own
+// scratch file this way without un-gating email/captcha). Production (Vercel)
+// has no writable local filesystem, so it must be given a remote Turso URL —
+// never silently fall back to a file: path there (opening it throws and
+// crashes the whole function).
+const envUrl = import.meta.env.TURSO_DATABASE_URL || '';
 const url = useLiveServices
-  ? import.meta.env.TURSO_DATABASE_URL || (import.meta.env.PROD ? '' : 'file:local.db')
-  : 'file:local.db';
+  ? envUrl || (import.meta.env.PROD ? '' : 'file:local.db')
+  : envUrl.startsWith('file:')
+    ? envUrl
+    : 'file:local.db';
 const authToken = import.meta.env.TURSO_AUTH_TOKEN || undefined;
 
 // Choose the driver by URL scheme. The default '@libsql/client' entry EAGERLY

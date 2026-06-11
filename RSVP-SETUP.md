@@ -132,7 +132,10 @@ carries the live `TURSO_DATABASE_URL` / `RESEND_API_KEY` (which `npm run backup`
 needs), `npm run dev` still ignores them — it stays on `local.db` with email and
 captcha off, so a local test reply can never write to the live guest list or
 email anyone. To point a dev server at the real services deliberately, set
-`DEV_USE_LIVE_SERVICES=true` (see `src/lib/services.ts`).
+`DEV_USE_LIVE_SERVICES=true` (see `src/lib/services.ts`). One carve-out: a
+local `file:` TURSO_DATABASE_URL is honoured even without the flag — it's
+local by construction (the e2e suite runs the dev server against its own
+scratch `file:e2e.db` this way).
 
 ```bash
 npm run dev
