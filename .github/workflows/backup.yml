@@ -20,9 +20,9 @@ jobs:
   backup:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22 # matches package.json "engines"
           cache: npm
@@ -57,7 +57,7 @@ jobs:
           echo "file=$out" >> "$GITHUB_OUTPUT"
 
       - name: Upload encrypted backup
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rsvp-backup-${{ github.run_id }}
           path: ${{ steps.encrypt.outputs.file }}
