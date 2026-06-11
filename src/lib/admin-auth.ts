@@ -5,7 +5,7 @@
 // request; the login page + /admin/auth issue it. This replaces the browser's
 // unstyleable Basic-auth dialog with a branded login page.
 // ============================================================
-const PASS = import.meta.env.ADMIN_PASSCODE || '';
+const PASS = (process.env.ADMIN_PASSCODE ?? import.meta.env.ADMIN_PASSCODE) || '';
 export const ADMIN_COOKIE = 'mm_admin';
 const SALT = 'm&m-rsvp-admin-v1'; // domain separation only — not a secret
 

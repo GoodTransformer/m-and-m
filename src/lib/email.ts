@@ -13,9 +13,11 @@ import type { Household, RsvpResponse } from './db';
 import { householdLink, adminUrl, calendarUrl, assetUrl } from './links';
 import { SITE, RSVP, rosterLines, notComingNames } from '../data/site';
 
-const API_KEY = import.meta.env.RESEND_API_KEY || '';
-const FROM = import.meta.env.RSVP_FROM_EMAIL || 'Mari & Michael <onboarding@resend.dev>';
-const COUPLE = import.meta.env.COUPLE_NOTIFY_EMAIL || '';
+const API_KEY = (process.env.RESEND_API_KEY ?? import.meta.env.RESEND_API_KEY) || '';
+const FROM =
+  (process.env.RSVP_FROM_EMAIL ?? import.meta.env.RSVP_FROM_EMAIL) ||
+  'Mari & Michael <onboarding@resend.dev>';
+const COUPLE = (process.env.COUPLE_NOTIFY_EMAIL ?? import.meta.env.COUPLE_NOTIFY_EMAIL) || '';
 
 // No client outside live mode: the dev .env legitimately carries the real key
 // (for ops scripts), and a local test reply must never email real guests or
@@ -27,7 +29,7 @@ const resend = useLiveServices && API_KEY ? new Resend(API_KEY) : null;
     lands in spam (or is blocked) — so /admin warns and a live send refuses while
     this is the case. The biggest single deliverability factor. */
 export function fromLooksUnset(): boolean {
-  const raw = import.meta.env.RSVP_FROM_EMAIL || '';
+  const raw = (process.env.RSVP_FROM_EMAIL ?? import.meta.env.RSVP_FROM_EMAIL) || '';
   return !raw.trim() || /resend\.dev/i.test(raw);
 }
 

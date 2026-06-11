@@ -30,4 +30,13 @@ export default defineConfig({
   devToolbar: {
     enabled: false,
   },
+  vite: {
+    // Dev-only: pre-bundle the astro:actions client (loaded by the RSVP form's
+    // script) at server start. Otherwise Vite discovers it on the first browser
+    // visit and pushes a full-page reload mid-run, which tears down whichever
+    // cold-cache e2e test (CI) happens to be on the page at that moment.
+    optimizeDeps: {
+      include: ['astro/actions/runtime/entrypoints/client.js'],
+    },
+  },
 });

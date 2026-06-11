@@ -9,7 +9,7 @@ import type { APIRoute } from 'astro';
 import crypto from 'node:crypto';
 import { recordDelivery } from '../../lib/db';
 
-const SECRET = import.meta.env.RESEND_WEBHOOK_SECRET || '';
+const SECRET = (process.env.RESEND_WEBHOOK_SECRET ?? import.meta.env.RESEND_WEBHOOK_SECRET) || '';
 
 function timingSafeEq(a: string, b: string): boolean {
   const ab = Buffer.from(a);

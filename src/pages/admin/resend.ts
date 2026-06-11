@@ -28,7 +28,7 @@ export const POST: APIRoute = async ({ request }) => {
   // Same production guardrails as a real send: don't "succeed" into the void or
   // send from the spam-bound sandbox.
   if (import.meta.env.PROD) {
-    if (!import.meta.env.RESEND_API_KEY)
+    if (!(process.env.RESEND_API_KEY ?? import.meta.env.RESEND_API_KEY))
       return json({ error: 'Email isn’t configured yet (RESEND_API_KEY).' }, 503);
     if (fromLooksUnset())
       return json(

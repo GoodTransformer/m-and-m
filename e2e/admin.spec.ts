@@ -1,6 +1,6 @@
 // The admin surface: auth gating, the login flow, and the brute-force throttle.
 import { expect, test } from './fixtures';
-import { E2E_PASSCODE } from '../playwright.config';
+import { E2E_ORIGIN, E2E_PASSCODE } from '../playwright.config';
 
 test('every admin route is gated without a session', async ({ request }) => {
   const page = await request.get('/admin/', { maxRedirects: 0 });
@@ -26,7 +26,7 @@ test('the login page signs the couple in', async ({ page }) => {
 test('a wrong passcode redirects back with the error flag', async ({ request }) => {
   const res = await request.post('/admin/auth/', {
     form: { passcode: 'not-the-passcode' },
-    headers: { 'x-forwarded-for': '203.0.113.50' },
+    headers: { origin: E2E_ORIGIN, 'x-forwarded-for': '203.0.113.50' },
     maxRedirects: 0,
   });
   expect(res.status()).toBe(303);
@@ -39,7 +39,7 @@ test('ten failures from one IP trip the throttle; other IPs are unaffected', asy
   const attempt = (ip: string) =>
     request.post('/admin/auth/', {
       form: { passcode: 'not-the-passcode' },
-      headers: { 'x-forwarded-for': ip },
+      headers: { origin: E2E_ORIGIN, 'x-forwarded-for': ip },
       maxRedirects: 0,
     });
 
@@ -57,7 +57,7 @@ test('ten failures from one IP trip the throttle; other IPs are unaffected', asy
   // the correct passcode while blocked (no comparison happens at all).
   const rightButBlocked = await request.post('/admin/auth/', {
     form: { passcode: E2E_PASSCODE },
-    headers: { 'x-forwarded-for': '203.0.113.99' },
+    headers: { origin: E2E_ORIGIN, 'x-forwarded-for': '203.0.113.99' },
     maxRedirects: 0,
   });
   expect(rightButBlocked.status()).toBe(429);

@@ -7,7 +7,9 @@
 // ============================================================
 import { useLiveServices } from './services';
 
-const SECRET = useLiveServices ? import.meta.env.TURNSTILE_SECRET_KEY || '' : '';
+const SECRET = useLiveServices
+  ? (process.env.TURNSTILE_SECRET_KEY ?? import.meta.env.TURNSTILE_SECRET_KEY) || ''
+  : '';
 const VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
 export interface TurnstileResult {

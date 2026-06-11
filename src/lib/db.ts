@@ -19,13 +19,14 @@ import { useLiveServices } from './services';
 // has no writable local filesystem, so it must be given a remote Turso URL —
 // never silently fall back to a file: path there (opening it throws and
 // crashes the whole function).
-const envUrl = import.meta.env.TURSO_DATABASE_URL || '';
+const envUrl = process.env.TURSO_DATABASE_URL ?? import.meta.env.TURSO_DATABASE_URL ?? '';
 const url = useLiveServices
   ? envUrl || (import.meta.env.PROD ? '' : 'file:local.db')
   : envUrl.startsWith('file:')
     ? envUrl
     : 'file:local.db';
-const authToken = import.meta.env.TURSO_AUTH_TOKEN || undefined;
+const authToken =
+  (process.env.TURSO_AUTH_TOKEN ?? import.meta.env.TURSO_AUTH_TOKEN) || undefined;
 
 // Choose the driver by URL scheme. The default '@libsql/client' entry EAGERLY
 // loads a platform-specific *native* binding (the `libsql` package) the moment

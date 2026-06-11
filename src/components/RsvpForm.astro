@@ -35,7 +35,9 @@ const t = getStrings(locale).rsvp;
 
 // Captcha renders only when live services are on (prod, or dev explicitly
 // opted in) — the dev .env may carry the real sitekey for other tooling.
-const sitekey = useLiveServices ? import.meta.env.PUBLIC_TURNSTILE_SITEKEY || '' : '';
+const sitekey = useLiveServices
+  ? (process.env.PUBLIC_TURNSTILE_SITEKEY ?? import.meta.env.PUBLIC_TURNSTILE_SITEKEY) || ''
+  : '';
 const dby = (id: string, hasErr: boolean) => (hasErr ? `${id}-hint ${id}-error` : `${id}-hint`);
 
 // Pre-fill order: what the guest just typed (no-JS error re-render) > a prior

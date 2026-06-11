@@ -1,7 +1,7 @@
 // Absolute URLs for emails and the admin dashboard. Uses the deploy origin
 // (SITE_URL) + base path so personal links resolve on the live site. In local
 // dev set SITE_URL=http://localhost:4321 so the links are clickable.
-const ORIGIN = (import.meta.env.SITE_URL || '').replace(/\/+$/, '');
+const ORIGIN = ((process.env.SITE_URL ?? import.meta.env.SITE_URL) || '').replace(/\/+$/, '');
 const BASE = import.meta.env.BASE_URL || '/';
 
 /** A household's personal RSVP link, e.g. https://site/es/rsvp/K7P2QX/

@@ -10,6 +10,10 @@ import { defineConfig, devices } from '@playwright/test';
 const PORT = 4399;
 export const E2E_PASSCODE = 'e2e-passcode-only';
 export const SEED_FILE = 'tests/.tmp/e2e-seed.json';
+// Astro's built-in CSRF protection (security.checkOrigin) refuses a form POST
+// without an Origin header. Browsers always send one; the API request context
+// doesn't — so specs that POST forms directly must state it explicitly.
+export const E2E_ORIGIN = `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: 'e2e',
@@ -20,7 +24,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
-    baseURL: `http://localhost:${PORT}`,
+    baseURL: E2E_ORIGIN,
     trace: 'retain-on-failure',
     // Reduced-motion emulation (instant scroll, reveals visible — required for
     // stable clicks and honest axe contrast sampling) is applied per-page in

@@ -8,7 +8,7 @@
 // best-effort confirmation + (slim) notification emails.
 // ============================================================
 import { defineAction, ActionError } from 'astro:actions';
-import { z } from 'astro:schema';
+import { z } from 'astro/zod';
 import { getHouseholdByCode, upsertRsvpForHousehold, getResponseForHousehold } from '../lib/db';
 import { buildRoster } from '../lib/roster';
 import { verifyTurnstile } from '../lib/turnstile';

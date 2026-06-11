@@ -89,7 +89,7 @@ export const POST: APIRoute = async ({ request }) => {
   // link origin isn't configured — better to fail loudly than to "succeed" into the
   // void (no key → mail is only logged, not sent) or to mail broken personal links.
   if (mode !== 'dryRun' && import.meta.env.PROD) {
-    if (!import.meta.env.RESEND_API_KEY)
+    if (!(process.env.RESEND_API_KEY ?? import.meta.env.RESEND_API_KEY))
       return json({ error: 'Email isn’t configured yet (RESEND_API_KEY) — no mail was sent.' }, 503);
     if (siteOriginLooksUnset())
       return json({ error: 'SITE_URL isn’t set — personal links would be broken. Set it and redeploy.' }, 503);
@@ -110,7 +110,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   // --- test: one sample to the couple ---------------------------------------
   if (mode === 'test') {
-    const couple = import.meta.env.COUPLE_NOTIFY_EMAIL || '';
+    const couple = (process.env.COUPLE_NOTIFY_EMAIL ?? import.meta.env.COUPLE_NOTIFY_EMAIL) || '';
     if (!couple) return json({ error: 'Set COUPLE_NOTIFY_EMAIL to receive a test send.' }, 400);
     // Always a synthetic sample — never a real household. Its link carries the
     // fake SAMPLE00 code, so clicking through lands on the invalid-code page and

@@ -47,12 +47,15 @@ const missingMeals = attending.filter((h) =>
 const linkWarning = import.meta.env.PROD && siteOriginLooksUnset();
 // Warn (in production) if email sending isn't configured — guests would get no
 // confirmation and invitations/reminders can't go out.
-const emailWarning = import.meta.env.PROD && !import.meta.env.RESEND_API_KEY;
+const emailWarning =
+  import.meta.env.PROD && !(process.env.RESEND_API_KEY ?? import.meta.env.RESEND_API_KEY);
 // Once the key IS set, the next (and biggest) deliverability mistake is sending
 // from Resend's shared sandbox instead of a verified domain — that lands in spam.
 // A live send refuses while this is true; surface it here so it's fixed first.
 const fromWarning =
-  import.meta.env.PROD && Boolean(import.meta.env.RESEND_API_KEY) && fromLooksUnset();
+  import.meta.env.PROD &&
+  Boolean(process.env.RESEND_API_KEY ?? import.meta.env.RESEND_API_KEY) &&
+  fromLooksUnset();
 // Content that's still placeholder on the LIVE site (guests would see it). A
 // gentle pre-launch checklist, shown only in production.
 const contentTodos: string[] = [];

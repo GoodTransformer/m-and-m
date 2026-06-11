@@ -17,12 +17,14 @@ page shows runtime warnings (placeholder meal names, unset contact email).
       snapshot at `goodtransformer.github.io/m-and-m/` is gone; every old path
       now forwards to the matching page on the live site (done 2026-06-11; see
       [README → Deployment](README.md#deployment)).
-- [ ] **Upgrade Astro past the open security advisories** — `npm audit` flags
-      the deployed stack: GHSA-mr6q-rp88-fx84 (high — unauthenticated path
-      override via `x-astro-path` in the Vercel adapter) plus two moderates;
-      fixes land in Astro 6 / `@astrojs/vercel` 10 (a major upgrade). The new
-      unit + e2e suites exist to make that upgrade safe. Afterwards, restore
-      `--audit-level=high` in `.github/workflows/tests.yml`.
+- [x] **Upgrade Astro past the open security advisories** — done 2026-06-11:
+      `astro@6.4.6` + `@astrojs/vercel@10.0.8` clear GHSA-mr6q-rp88-fx84 and
+      both moderates; npm `overrides` (package.json) patch the adapter's pinned
+      `path-to-regexp`/`ws` for GHSA-9wv6-86v2-598j and GHSA-58qx-3vcg-4xpx.
+      `npm audit --omit=dev` is clean, `--audit-level=high` is restored in
+      `.github/workflows/tests.yml`, and the full gate (82 unit + 16 e2e)
+      passed. Server secrets are now read `process.env`-first (Astro 6 inlines
+      `import.meta.env` at build — see `src/lib/services.ts`).
 - [ ] **Content placeholders resolved** — 1/13 done. Tracked in
       [README → Details to confirm](README.md#details-to-confirm) (RSVP deadline,
       ceremony/reception times, running order, dress code, what3words, on-the-day

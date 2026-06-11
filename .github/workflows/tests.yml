@@ -24,11 +24,8 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run check:links
-      # At `critical` until the known Astro/Vercel-adapter advisories are
-      # resolved by the Astro 6 upgrade (tracked in LAUNCH-CHECKLIST.md) —
-      # restore `--audit-level=high` with that upgrade.
       - name: Audit production dependencies
-        run: npm audit --omit=dev --audit-level=critical
+        run: npm audit --omit=dev --audit-level=high
 
   e2e:
     name: End-to-end (Playwright)

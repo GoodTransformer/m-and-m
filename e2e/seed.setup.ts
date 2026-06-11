@@ -3,7 +3,7 @@
 import { expect, test as setup } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import { E2E_PASSCODE, SEED_FILE } from '../playwright.config';
+import { E2E_ORIGIN, E2E_PASSCODE, SEED_FILE } from '../playwright.config';
 
 const CSV = `household,guests,email,plus,language
 The Berrys,Alice Berry; Tom Berry,berrys@e2e.invalid,1,en
@@ -13,6 +13,7 @@ Familia Sol,Marisol Sol,sol@e2e.invalid,0,es
 setup('log in and import the guest list', async ({ request }) => {
   const login = await request.post('/admin/auth/', {
     form: { passcode: E2E_PASSCODE },
+    headers: { origin: E2E_ORIGIN },
     maxRedirects: 0,
   });
   expect(login.status()).toBe(303);
